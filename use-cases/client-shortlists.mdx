@@ -1,0 +1,24 @@
+---
+title: "Shortlist delivery to clients"
+description: "Keep a project's shortlist current from your own systems and deliver it as a CSV or through the app."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Every project has one shortlist: everyone a search put at or above the cut-off, plus anyone you added. Your
+systems can read and edit it; delivering it is up to you.
+
+| Task | How |
+| --- | --- |
+| Read the current list | `GET /v1/projects/{id}/shortlist` or `revcenter shortlist <project_id>` |
+| Export it with full profiles | `GET /v1/projects/{id}/shortlist.csv` or `revcenter shortlist <project_id> --csv` |
+| Add someone a search found | `POST /v1/projects/{id}/shortlist/members` or `revcenter add` |
+| Take someone off, with a reason | `DELETE /v1/projects/{id}/shortlist/members/{candidateId}` or `revcenter remove` |
+
+None of these uses shortlist credits. Exports have no contact details.
+
+Client portals and share links, where clients view a shortlist themselves, are in the Revcenter app only; the
+API and CLI don't create or change them.
+
+**Recipe:** [Run a search and export the shortlist](/recipes/run-a-search), step 4, and the
+[backend job](/recipes/backend-job), which saves the CSV on a schedule.

@@ -1,0 +1,67 @@
+---
+title: "Criteria"
+description: "What a search looks for: which fields filter LinkedIn before anything is read, and which score after."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+A search runs exactly the criteria you send. Each field either:
+
+- **Filters**: applied to the LinkedIn search before any profile is read, or
+- **Scores**: checked on each profile after it is read.
+
+Put hard requirements in filter fields. `GET /v1/reference/criteria` (or `revcenter reference`) lists every
+field and its allowed values.
+
+## Minimum
+
+`title_variants` (the role and its common synonyms) and a place: `metro`, `allowed_metros`, or `remote_ok: true`.
+
+## Filters
+
+| Field | Example | Notes |
+| --- | --- | --- |
+| `title_variants` | `["Controller", "Financial Controller"]` | Current job titles. Up to 10 are searched together. |
+| `metro`, `allowed_metros` | `"Lancaster, PA"`, `["Harrisburg, PA"]` | A city, a state, or a country. |
+| `seniority`, `allowed_seniority` | `"director"` | `c_suite`, `vp`, `director`, `manager`, `ic`. Searched with one level either side. |
+| `years_experience` | `{ "min": 8, "enforcement": "hard" }` | Hard ranges filter; `"preferred"` only ranks. |
+| `years_at_current_company` | `{ "min": 3 }` | Time at the current employer. |
+| `past_titles` | `["CFO"]` | Titles held before the current one. |
+| `current_industries` | `["Food and Beverage Manufacturing"]` | The current employer's LinkedIn industry, and its sub-industries. See `GET /v1/reference/industries`. |
+| `exclude_industries` | `["Staffing and Recruiting"]` | Current employers in these industries are left out. |
+| `functions`, `exclude_functions` | `["Finance"]` | LinkedIn job functions. |
+| `company_headcount` | `["E", "F", "G"]` | Current employer size: `A` self-employed, `B` 1–10, `C` 11–50, `D` 51–200, `E` 201–500, `F` 501–1,000, `G` 1,001–5,000, `H` 5,001–10,000, `I` 10,001+. |
+| `employers` | `[{ "name": "Deloitte", "temporal": "either", "flag": "must" }]` | `temporal`: `current`, `past` or `either`. `flag`: `must` filters, `exclude` leaves out, `prefer` only ranks. |
+| `exclude_companies` | `["Acme Staffing"]` | Current employers to leave out. |
+| `schools`, `exclude_schools` | `["University of Michigan"]` | Schools attended. |
+| `exclude_titles` | `["Intern"]` | Current titles to leave out. |
+| `exclude_locations` | `["New York, NY"]` | Places to leave out. |
+| `recently_changed_jobs` | `true` | Changed jobs in the last 90 days. |
+| `profile_languages` | `["es"]` | The language the profile is written in, not a language spoken. |
+
+## Scoring
+
+| Field | Example | Notes |
+| --- | --- | --- |
+| `must_have` | `["CPA", "PE license"]` | Each must be evidenced on the profile. Keep each to a short term; a sentence rarely matches anyone. |
+| `skills`, `skills_required` | `["NetSuite"]`, `["CPA or Enrolled Agent"]` | `"A or B"` matches either. |
+| `keywords` | `["SAP S/4HANA"]` | Words anywhere on the profile. |
+| `languages_required` | `["Spanish"]` | Spoken languages. |
+| `preferred_employers` | `["Big 4"]` | Ranks people there now or before higher; never excludes. |
+| `geo_radius_mi` | `50` | Distance from `metro` for the location score. |
+| `rubric_weights` | `{ "skills": 0.15 }` | How much each part counts: `title`, `geo`, `years`, `seniority`, `skills`, `industry`, each 0.02–0.5. |
+| `shortlist_min_score` | `75` | The shortlist cut-off, 50–85. The default is 80. |
+
+## Example
+
+```json
+{
+  "title_variants": ["Tax Manager", "Senior Tax Manager"],
+  "metro": "Dallas, TX",
+  "seniority": "manager",
+  "years_experience": { "min": 7, "enforcement": "hard" },
+  "employers": [{ "name": "Big 4", "temporal": "past", "flag": "must" }],
+  "exclude_industries": ["Staffing and Recruiting"],
+  "must_have": ["CPA"]
+}
+```

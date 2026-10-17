@@ -1,0 +1,75 @@
+# Revcenter API
+
+> Run candidate searches, read scored profiles and build shortlists from your own systems and AI tools.
+
+Every page is also available as Markdown: add `.md` to its address. All pages in one file: https://docs.revcenter.ai/llms-full.txt
+
+## Get started
+
+- [Overview](https://docs.revcenter.ai/introduction.md): Run candidate searches, read scored profiles and build shortlists from your agent, terminal or apps.
+- [Quickstart](https://docs.revcenter.ai/quickstart.md): From login to a scored shortlist with the revcenter CLI, or with curl.
+- [Authentication](https://docs.revcenter.ai/authentication.md): API keys, the CLI's browser login, and how to give an agent access safely.
+
+## Concepts
+
+- [Execution model](https://docs.revcenter.ai/concepts/execution-model.md): The primitives Revcenter runs on, what each does, and which tools expose it.
+- [CLI basics](https://docs.revcenter.ai/concepts/cli-basics.md): How the revcenter CLI logs in, where it keeps the key, what it prints, and how it exits.
+
+## Tools
+
+- [CLI reference](https://docs.revcenter.ai/tools/cli.md): Every revcenter command, its options, and whether it uses shortlist credits.
+- [MCP](https://docs.revcenter.ai/tools/mcp.md): Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI and other MCP clients.
+- [Agents](https://docs.revcenter.ai/tools/agents.md): Hand a search to an AI agent: setup, the workflow, and a prompt to start from.
+
+## Guides
+
+- [Criteria](https://docs.revcenter.ai/guides/criteria.md): What a search looks for: which fields filter LinkedIn before anything is read, and which score after.
+- [Searches and shortlists](https://docs.revcenter.ai/guides/searches.md): How a search runs, what its outcome means, and how to get more people without starting over.
+- [Rate limits](https://docs.revcenter.ai/guides/rate-limits.md): Request and search limits, the 429 response, and how to retry.
+- [Errors](https://docs.revcenter.ai/guides/errors.md): The error shape, every code the API returns, and which requests are safe to retry.
+- [Pagination](https://docs.revcenter.ai/guides/pagination.md): Cursor pagination on list endpoints, page sizes, and the deprecated offset.
+- [Async jobs](https://docs.revcenter.ai/guides/async-jobs.md): Searches and expansions run in the background: how to wait and which statuses mean done.
+- [Billing](https://docs.revcenter.ai/guides/billing.md): What uses a shortlist credit, and what is free.
+
+## Recipes
+
+- [Run a search and export the shortlist](https://docs.revcenter.ai/recipes/run-a-search.md): From criteria to a CSV shortlist with the revcenter CLI, with the output to expect at each step. Uses 1 shortlist credit.
+- [Run a search from a coding agent](https://docs.revcenter.ai/recipes/coding-agent.md): Connect Claude Code or Codex, give the agent a brief, and check what it runs. Uses 1 shortlist credit.
+- [Run a search from a backend job](https://docs.revcenter.ai/recipes/backend-job.md): A Node.js job that launches a search safely, waits for it, pages through the people and saves the shortlist CSV. Uses 1 shortlist credit.
+
+## Use cases
+
+- [Executive search sourcing](https://docs.revcenter.ai/use-cases/executive-search.md): Turn a mandate into criteria, run one search, and refine the slate without spending again.
+- [Shortlist delivery to clients](https://docs.revcenter.ai/use-cases/client-shortlists.md): Keep a project's shortlist current from your own systems and deliver it as a CSV or through the app.
+- [Agent-driven research](https://docs.revcenter.ai/use-cases/agent-research.md): Let an AI agent draft criteria, run a search and explain the results, with you approving each spend.
+
+## API reference
+
+- [API reference](https://docs.revcenter.ai/api-reference/introduction.md): The Revcenter HTTP API: base URL, request and response shape.
+- GET https://api.revcenter.ai/v1/health: Health. Whether the API is up. No key needed. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/auth/device: Start a device login. Start a device login, for a machine with no browser. Show the person verification_uri_complete and user_code, then poll POST /auth/token every interval seconds. No key needed. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/auth/token: Finish a login. Trade a sign-in for a key, returned once. A browser sign-in sends grant_type authorization_code with the code from the loopback redirect, its PKCE code_verifier and the same redirect_uri. A device login polls with device_code: authorization_pending (or slow_down) until someone authorizes it at /oauth/device. Errors: access_denied, expired_token, invalid_grant. No key needed. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/me: Who am I. The key's workspace, name, scopes and expiry, the workspace's plan and limits, and today's usage. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/me/usage: Today's usage. Today's requests and searches, and shortlist credits remaining. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/actions: List actions. Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/actions/preview: Preview an action. What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. Works for every action marked proposable in GET /actions. Previewing a requirement change re-scores nothing until it is applied, except that its before/after is computed on the people already read. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/proposals/apply: Apply a proposal. Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. The key needs the scope of the action the proposal runs, too. Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else.
+- GET https://api.revcenter.ai/v1/reference/criteria: Criteria reference. Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/reference/industries: Find industries. LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/projects: List projects. The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/projects: Create a project. Make a project: one role, one shortlist. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/projects/{projectId}: Get a project. One project, with its search and shortlist counts. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/projects/{projectId}/searches: List a project's searches. The searches a project has run, oldest first. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/projects/{projectId}/searches: Launch a search. Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credit. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. Uses 1 shortlist credit.
+- GET https://api.revcenter.ai/v1/searches/{searchId}: Get a search. A search's status, stage, outcome (Shortlist ready, Poor yield, No results) and how many profiles it read; poll until status is no longer queued or running. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/searches/{searchId}/cancel: Cancel a search. Stop a running search: it buys nothing more, scores what it already read, and keeps them. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/searches/{searchId}/people: List scored people. Everyone a search scored, best first: score, fit readings, signals, whether they are on the shortlist, and the whole read profile. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/projects/{projectId}/expand: Expand a search. A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Uses 1 shortlist credit.
+- POST https://api.revcenter.ai/v1/searches/{searchId}/scoring/preview: Preview a scoring change. What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. Re-scores the people already found. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/searches/{searchId}/scoring/apply: Apply a scoring change. Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. Re-scores the people already found. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/searches/{searchId}/database-pass: Search your database again. Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. Re-scores the people already found. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/projects/{projectId}/shortlist: Get the shortlist. Everyone on the project's live shortlist, best first, with full profiles. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/projects/{projectId}/shortlist.csv: Download the shortlist CSV. The shortlist as CSV: every profile field, and the profile as JSON in the last column. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/projects/{projectId}/shortlist/members: Add to the shortlist. Put people the project's searches found on its shortlist, by candidate id (from list_people). Does not use shortlist credits.
+- DELETE https://api.revcenter.ai/v1/projects/{projectId}/shortlist/members/{candidateId}: Remove from the shortlist. Take someone off the shortlist, with an optional reason. Does not use shortlist credits.
+- [OpenAPI document](https://docs.revcenter.ai/openapi.json): the whole API, machine-readable

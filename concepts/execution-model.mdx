@@ -1,0 +1,30 @@
+---
+title: "Execution model"
+description: "The primitives Revcenter runs on, what each does, and which tools expose it."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+| Primitive | What it is | CLI | MCP | API |
+| --- | --- | --- | --- | --- |
+| **Workspace** | Your organization in Revcenter. A key acts for one workspace, the one it was made in. | implicit | implicit | implicit |
+| **Project** | One role and its shortlist. | `projects`, `project` | `list_projects`, `create_project`, `get_project` | `/projects` |
+| **Criteria** | What a search looks for: [filters](/guides/criteria) applied before profiles are read, and scoring after. | `reference`, `industries` | `get_criteria_reference`, `search_industries` | `/reference/*` |
+| **Search** | One run of criteria in a project. Reads LinkedIn and your workspace's candidates, scores people, fills the shortlist. | `search`, `status`, `cancel`, `database`, `expand` | `launch_search`, `get_search`, `wait_for_search`, `cancel_search`, `run_database_pass`, `expand_search`, `list_searches` | `/projects/{id}/searches`, `/searches/{id}`, `/projects/{id}/expand` |
+| **Scored people** | Everyone a search read, with a score, how they fit each criterion, and their full profile. | `people` | `list_people` | `/searches/{id}/people` |
+| **Scoring change** | A new cut-off, weights or requirements for people already read. | `rescore` | `preview_scoring`, `apply_scoring` | `/searches/{id}/scoring/*` |
+| **Shortlist** | A project's list of people who fit: those at or above the cut-off, plus anyone added by hand. | `shortlist`, `add`, `remove` | `get_shortlist`, `export_shortlist`, `add_shortlist_members`, `remove_shortlist_member` | `/projects/{id}/shortlist*` |
+| **Shortlist credit** | The billing unit, shared with the app. One per new search and per expansion. | shown per command | shown per tool | shown per endpoint |
+| **Client portal** | Where your clients see and share shortlists. | not available | not available | not available |
+
+Client portals, sharing, contact lookups and team management are in the app only.
+
+## How the pieces fit
+
+1. Make a **project**, write **criteria**, launch a **search** (1 credit).
+2. It finishes with an outcome (*Shortlist ready*, *Poor yield* or *No results*) and fills the **shortlist**.
+3. Read the **scored people**, try **scoring changes** (free), edit the **shortlist**.
+4. For more people, run a database pass (free) or **expand** (1 credit).
+
+A search sent with criteria runs exactly those criteria; no model decides what to search. Only a `jd_text`
+search has criteria read by Revcenter, and says so (`compiled_by: "revcenter_model"`).

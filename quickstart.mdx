@@ -1,0 +1,77 @@
+---
+title: "Quickstart"
+description: "From login to a scored shortlist with the revcenter CLI, or with curl."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+<Tabs>
+  <Tab title="CLI">
+    <Steps>
+      <Step title="Install and log in">
+        ```bash
+        curl -fsSL https://revcenter.ai/install.sh | sh
+        revcenter auth login
+        ```
+        The installer checks Node.js 20+, installs the CLI (no sudo) and offers to sign you in. Sign-in opens
+        your browser: pick a workspace and authorize. The key is saved on this machine. (Or install with
+        `npm install -g revcenter`.)
+      </Step>
+      <Step title="Make a project and search">
+        ```bash
+        PROJECT=$(revcenter project create "Plant Maintenance Manager, Lancaster PA" | jq -r .id)
+        echo '{"title_variants":["Plant Maintenance Manager","Maintenance Manager"],"metro":"Lancaster, PA"}' > criteria.json
+        revcenter search "$PROJECT" --criteria criteria.json --wait
+        ```
+        This uses 1 shortlist credit and waits until the search finishes (usually a few minutes).
+      </Step>
+      <Step title="Read the results">
+        ```bash
+        revcenter people <search_id> --min-score 80 --pretty
+        revcenter shortlist "$PROJECT" --csv shortlist.csv
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="curl">
+    <Steps>
+      <Step title="Get a key">
+        In Revcenter, **Settings → Usage → API → Create key**. Copy it; it is shown once.
+        ```bash
+        export REVCENTER_API_KEY="rvc_live_..."
+        curl -s https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
+        ```
+      </Step>
+      <Step title="Make a project">
+        ```bash
+        curl -s -X POST https://api.revcenter.ai/v1/projects \
+          -H "Authorization: Bearer $REVCENTER_API_KEY" -H "Content-Type: application/json" \
+          -d '{"name": "Plant Maintenance Manager, Lancaster PA"}'
+        ```
+      </Step>
+      <Step title="Launch a search">
+        ```bash
+        curl -s -X POST https://api.revcenter.ai/v1/projects/<project_id>/searches \
+          -H "Authorization: Bearer $REVCENTER_API_KEY" -H "Content-Type: application/json" \
+          -H "Idempotency-Key: lancaster-maint-0001" \
+          -d '{"criteria": {"title_variants": ["Plant Maintenance Manager"], "metro": "Lancaster, PA"}}'
+        ```
+        Uses 1 shortlist credit and returns `202` with a `search_id`. Repeating it with the same key returns the
+        same search.
+      </Step>
+      <Step title="Wait, then read">
+        ```bash
+        curl -s https://api.revcenter.ai/v1/searches/<search_id> -H "Authorization: Bearer $REVCENTER_API_KEY"
+        curl -s "https://api.revcenter.ai/v1/searches/<search_id>/people?min_score=80" -H "Authorization: Bearer $REVCENTER_API_KEY"
+        ```
+        Poll every 10 to 30 seconds until `status` is `complete`. See [async jobs](/guides/async-jobs).
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Next
+
+- Connect an agent with [MCP](/tools/mcp).
+- Learn which [criteria](/guides/criteria) filter and which score.
+- Every endpoint: [API reference](/api-reference/introduction).

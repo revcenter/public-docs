@@ -1,0 +1,25 @@
+---
+title: "Billing"
+description: "What uses a shortlist credit, and what is free."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+The API uses your workspace's **shortlist credits**: the same plan and top-ups as the Revcenter app. There is no
+separate API balance.
+
+| Action | Uses |
+| --- | --- |
+| Launching a search | 1 credit |
+| Expanding a search | 1 credit |
+| Database-only search | nothing |
+| Rescoring (cut-off, weights, requirements), database pass | nothing |
+| Reading, editing and exporting | nothing |
+
+A search that fails to start gives its credit back. A retry with the same `Idempotency-Key` never uses a second.
+
+Out of credits, a launch returns `402 shortlist_allocation_exhausted`; add credits under
+**Settings → Plan & billing**. Without an active plan, requests return `402 plan_required`.
+
+Credits left: **Settings → Usage** or `GET /v1/me/usage`. Each action's cost is in `GET /v1/actions` and on its
+[API reference](/api-reference/introduction) page.

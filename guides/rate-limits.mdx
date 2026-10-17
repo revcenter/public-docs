@@ -1,0 +1,39 @@
+---
+title: "Rate limits"
+description: "Request and search limits, the 429 response, and how to retry."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+| Limit | Default |
+| --- | --- |
+| Requests per key | 60 a minute |
+| Requests per workspace | 120 a minute |
+| Searches running at once | 2 |
+| Active keys | 5 |
+
+There is no daily cap: how many searches you run is set by your [shortlist credits](/guides/billing). Your
+limits and today's use are in **Settings → Usage → API** and `GET /v1/me`.
+
+## Headers
+
+Every authenticated response carries:
+
+| Header | Meaning |
+| --- | --- |
+| `x-ratelimit-limit` | Requests allowed this minute |
+| `x-ratelimit-remaining` | Requests left this minute |
+| `x-ratelimit-reset` | When the minute resets (Unix seconds) |
+
+## 429
+
+A `429` has a `Retry-After` header and the same number in `error.details.retry_after_seconds`.
+
+| Code | Means | `Retry-After` |
+| --- | --- | --- |
+| `rate_limited` | Too many requests this minute | Until the minute resets |
+| `concurrent_search_limit` | The workspace already has its searches running | 60 |
+| `network_busy` | Revcenter is busy with other searches | 60 |
+
+Search limits apply to live searches and expansions, not database-only searches. A refused launch uses no
+credit. Retry after `Retry-After`, with the same `Idempotency-Key`.

@@ -1,0 +1,21 @@
+---
+title: "Agent-driven research"
+description: "Let an AI agent draft criteria, run a search and explain the results, with you approving each spend."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+An agent is good at the parts around a search: reading a brief, drafting criteria, explaining who fits and why,
+and trying scoring changes. Revcenter does the searching and scoring, deterministically: the agent's criteria
+are run exactly as sent (`compiled_by: "caller"`).
+
+- **Spending is explicit.** Only launching a search (not `database_only`) and expanding use credits, 1 each,
+  and every tool says so in its description. Tell the agent to ask before either.
+- **Exploring is free.** Reading the criteria reference, people, previews of scoring changes and searches of your
+  own candidates use no credits, so the agent can iterate. Cut-off and weight changes reuse the scores already
+  computed; a change to must-haves, exclusions or industries re-scores everyone the search already read.
+- **Retries are safe** with an idempotency key; see [errors](/guides/errors#idempotency-keys).
+- **The docs are built for agents**: [/llms.txt](https://docs.revcenter.ai/llms.txt) lists every page.
+
+**Recipe:** [Run a search from a coding agent](/recipes/coding-agent). The full workflow is on
+[Agents](/tools/agents).

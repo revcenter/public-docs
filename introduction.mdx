@@ -1,0 +1,42 @@
+---
+title: "Overview"
+description: "Run candidate searches, read scored profiles and build shortlists from your agent, terminal or apps."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Revcenter finds candidates on LinkedIn, scores each against your role, and keeps those who fit on a project's
+shortlist. Use it three ways:
+
+<CardGroup cols={3}>
+  <Card title="MCP" icon="robot" href="/tools/mcp">
+    Tools for Claude Code, Codex, Cursor and other agents.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/tools/cli">
+    `revcenter` in your terminal and scripts.
+  </Card>
+  <Card title="API" icon="code" href="/api-reference/introduction">
+    `https://api.revcenter.ai/v1` from any language.
+  </Card>
+</CardGroup>
+
+All three use the same key and data. Start with the [quickstart](/quickstart).
+
+## What you can do
+
+| | |
+| --- | --- |
+| **Projects** | One role, one shortlist. |
+| **Searches** | Run your [criteria](/guides/criteria), or a job description Revcenter reads. |
+| **People** | Everyone a search scored, best first, with full profiles. |
+| **Scoring** | Change the cut-off, weights or requirements and preview the effect. |
+| **Shortlists** | Read, edit and export as JSON or CSV. |
+
+## What you need
+
+1. A Revcenter workspace with an active plan.
+2. API access for the workspace (ask your Revcenter contact).
+3. A key: `revcenter auth login`, or **Settings → Usage → API**.
+
+Each new search or expansion uses one shortlist credit from your plan. Everything else is free. See
+[billing](/guides/billing).

@@ -1,0 +1,82 @@
+---
+title: "Authentication"
+description: "API keys, the CLI's browser login, and how to give an agent access safely."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Every request sends an API key as a bearer token:
+
+```bash
+curl https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
+```
+
+Keys look like `rvc_live_…`. A key acts for one workspace and can read and edit its projects, searches and
+shortlists.
+
+## Getting a key
+
+| Way | How |
+| --- | --- |
+| **Browser login** (CLI, MCP) | Run `revcenter auth login`, pick a workspace and authorize in your browser. The key is saved on that machine. |
+| **Settings** | A workspace admin creates one under **Settings → Usage → API**. It is shown once; copy it or download it as `revcenter.env`. |
+
+Either way, the workspace needs API access (ask your Revcenter contact) and an active plan or credits, and an
+admin makes or approves the key. Keys expire after 30, 90 or 365 days. A workspace can have 5 active keys.
+
+## Giving an agent access
+
+Keep the key out of prompts, transcripts and config files:
+
+1. **Browser login.** The agent runs `revcenter auth login --start`, you open the link and approve, then it runs
+   `revcenter auth login --finish`. The key goes straight to the credentials file; the agent never sees it.
+2. **MCP.** The [MCP server](/tools/mcp) reads the saved key, so your client config holds no key.
+3. **Servers and CI.** Put the key in a secret manager and expose it as `REVCENTER_API_KEY`.
+
+Give each machine or system its own key, so you can revoke one without touching the others.
+
+## Revoking
+
+Revoke a key under **Settings → Usage → API**; it stops working immediately. To rotate, create a new key,
+deploy it, then revoke the old one. Revcenter stores only a hash and can't show a key again.
+
+## Browser login API
+
+How `revcenter auth login` gets a key. Neither endpoint needs one.
+
+**With a browser** ([OAuth authorization code with PKCE](https://www.rfc-editor.org/rfc/rfc7636)), as Claude Code
+and other CLIs sign in:
+
+1. Listen on `http://127.0.0.1:<port>/callback` and open
+   `https://app.revcenter.ai/oauth/authorize?client_id=revcenter-cli&response_type=code&redirect_uri=…&code_challenge=…&code_challenge_method=S256&state=…`.
+2. The person signs in, picks a workspace and authorizes. The browser returns to your callback with `code` and
+   `state` (or `error=access_denied`).
+3. `POST /v1/auth/token` with `grant_type: "authorization_code"`, the `code`, your `code_verifier` and the same
+   `redirect_uri`. The answer is `api_key` (shown once), `key` and `workspace`. A code works once, for two minutes.
+
+**Without a browser** ([device flow](https://www.rfc-editor.org/rfc/rfc8628)), for SSH and agents' shells:
+
+1. `POST /v1/auth/device` returns `device_code` (secret), `user_code` (e.g. `BCDF-GHJK`),
+   `verification_uri_complete`, `expires_in` (600) and `interval` (5).
+2. Show the person the link and code. They authorize at `https://app.revcenter.ai/oauth/device/<code>`.
+3. Poll `POST /v1/auth/token` with `{"device_code": "…"}` every `interval` seconds:
+
+| Answer | Meaning |
+| --- | --- |
+| `400 authorization_pending` | Not approved yet. Keep polling. |
+| `400 slow_down` | Polling too fast. Add 5 seconds. |
+| `200` | Approved: `api_key` (shown once), `key` and `workspace`. |
+| `403 access_denied` | Declined. |
+| `400 expired_token` | Not approved within 10 minutes. Start again. |
+| `400 invalid_grant` | Unknown, or already used. A login yields one key. |
+
+## Errors
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `401` | `missing_api_key` · `invalid_api_key` | No key, or it is wrong, expired or revoked |
+| `402` | `plan_required` | No active plan |
+| `403` | `api_access_disabled` | API access isn't on for this workspace |
+| `403` | `insufficient_scope` | The key can't make this call |
+
+Another workspace's ids answer `404`.

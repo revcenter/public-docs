@@ -1,0 +1,132 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Revcenter API",
+  "description": "Run candidate searches, read scored profiles and build shortlists from your own systems and AI tools.",
+  "colors": {
+    "primary": "#1A1A1A",
+    "light": "#E5E5E5",
+    "dark": "#000000"
+  },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ]
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": [
+          "introduction",
+          "quickstart",
+          "authentication"
+        ]
+      },
+      {
+        "group": "Concepts",
+        "pages": [
+          "concepts/execution-model",
+          "concepts/cli-basics"
+        ]
+      },
+      {
+        "group": "Tools",
+        "pages": [
+          "tools/cli",
+          "tools/mcp",
+          "tools/agents"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/criteria",
+          "guides/searches",
+          "guides/rate-limits",
+          "guides/errors",
+          "guides/pagination",
+          "guides/async-jobs",
+          "guides/billing"
+        ]
+      },
+      {
+        "group": "Recipes",
+        "pages": [
+          "recipes/run-a-search",
+          "recipes/coding-agent",
+          "recipes/backend-job"
+        ]
+      },
+      {
+        "group": "Use cases",
+        "pages": [
+          "use-cases/executive-search",
+          "use-cases/client-shortlists",
+          "use-cases/agent-research"
+        ]
+      },
+      {
+        "group": "API reference",
+        "openapi": "openapi.json",
+        "pages": [
+          "api-reference/introduction",
+          "GET /health",
+          "POST /auth/device",
+          "POST /auth/token",
+          "GET /me",
+          "GET /me/usage",
+          "GET /actions",
+          "POST /actions/preview",
+          "POST /proposals/apply",
+          "GET /reference/criteria",
+          "GET /reference/industries",
+          "GET /projects",
+          "POST /projects",
+          "GET /projects/{projectId}",
+          "GET /projects/{projectId}/searches",
+          "POST /projects/{projectId}/searches",
+          "GET /searches/{searchId}",
+          "POST /searches/{searchId}/cancel",
+          "GET /searches/{searchId}/people",
+          "POST /projects/{projectId}/expand",
+          "POST /searches/{searchId}/scoring/preview",
+          "POST /searches/{searchId}/scoring/apply",
+          "POST /searches/{searchId}/database-pass",
+          "GET /projects/{projectId}/shortlist",
+          "GET /projects/{projectId}/shortlist.csv",
+          "POST /projects/{projectId}/shortlist/members",
+          "DELETE /projects/{projectId}/shortlist/members/{candidateId}"
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "App",
+        "href": "https://app.revcenter.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get an API key",
+      "href": "https://app.revcenter.ai/portal/settings/usage"
+    }
+  },
+  "footer": {
+    "socials": {}
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg"
+}

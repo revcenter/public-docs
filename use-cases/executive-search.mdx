@@ -1,0 +1,23 @@
+---
+title: "Executive search sourcing"
+description: "Turn a mandate into criteria, run one search, and refine the slate without spending again."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+A mandate names a role, a place and what the person must have done. Revcenter turns that into one search and a
+scored slate.
+
+1. **Write criteria that filter.** Titles and their synonyms in `title_variants`, the place in `metro` (or
+   `allowed_metros`), seniority, years and current industries. These narrow who is read before anything is
+   spent. See [criteria](/guides/criteria).
+2. **Name what must be evidenced.** Certifications and licenses go in `must_have`, each one short.
+3. **Run one search** in a project for the mandate. It uses 1 shortlist credit and finishes as *Shortlist
+   ready*, *Poor yield* or *No results*.
+4. **Refine for free.** Preview a lower cut-off or new weights, and search your workspace's own candidates
+   again, before spending on an [expansion](/guides/searches#getting-more-people).
+5. **Hand the slate over** as a CSV with every person's full profile.
+
+Each person comes with `fit`, the readings behind their score, so you can say why someone is on the slate.
+
+**Recipe:** [Run a search and export the shortlist](/recipes/run-a-search).

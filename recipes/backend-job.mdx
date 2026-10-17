@@ -1,0 +1,96 @@
+---
+title: "Run a search from a backend job"
+description: "A Node.js job that launches a search safely, waits for it, pages through the people and saves the shortlist CSV. Uses 1 shortlist credit."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+This job is what a scheduled task or a queue worker would run: it is safe to retry, honors rate limits, and
+pages through results. It uses **1 shortlist credit**, for the search, and none on a retry. It needs Node.js 20
+or later and no packages.
+
+{/* run: file job.mjs */}
+```js job.mjs
+import { writeFile } from "node:fs/promises";
+
+const API = `${process.env.REVCENTER_API_URL ?? "https://api.revcenter.ai"}/v1`;
+const KEY = process.env.REVCENTER_API_KEY; // from your secret manager; never logged
+
+async function call(method, path, { body, headers = {}, raw = false, envelope = false } = {}) {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch(`${API}${path}`, {
+      method,
+      headers: { authorization: `Bearer ${KEY}`, "content-type": "application/json", ...headers },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    // 429: wait as long as Retry-After says. 5xx: back off. Both are safe to retry for the calls below.
+    if ((res.status === 429 || res.status >= 500) && attempt < 5) {
+      const wait = Number(res.headers.get("retry-after")) || 2 ** attempt;
+      await new Promise((r) => setTimeout(r, wait * 1000));
+      continue;
+    }
+    if (raw && res.ok) return res.text();
+    const json = await res.json();
+    if (!res.ok) throw new Error(`${json.error.code}: ${json.error.message} (request ${json.error.request_id})`);
+    return envelope ? json : json.data;
+  }
+}
+
+const project = await call("POST", "/projects", { body: { name: "Plant Maintenance Manager, Lancaster PA" } });
+
+// The idempotency key names this job's work: a rerun gets the same search and is not charged again.
+const launch = await call("POST", `/projects/${project.id}/searches`, {
+  headers: { "idempotency-key": `nightly-${project.id}` },
+  body: { criteria: { title_variants: ["Plant Maintenance Manager", "Maintenance Manager"], metro: "Lancaster, PA" } },
+});
+
+// Wait until the status is no longer queued or running.
+let search;
+for (;;) {
+  search = await call("GET", `/searches/${launch.search_id}`);
+  if (!["queued", "running"].includes(search.status)) break;
+  await new Promise((r) => setTimeout(r, Number(process.env.POLL_SECONDS ?? 15) * 1000));
+}
+
+// Page through everyone scoring 80 or more, 100 at a time, following the cursor to the last page.
+const people = [];
+let cursor = null;
+do {
+  const page = await call("GET", `/searches/${search.id}/people?min_score=80&limit=100&profile=false${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`, { envelope: true });
+  people.push(...page.data);
+  cursor = page.cursor;
+} while (cursor);
+
+await writeFile("shortlist.csv", await call("GET", `/projects/${project.id}/shortlist.csv`, { raw: true }));
+console.log(JSON.stringify({ search_id: search.id, status: search.status, outcome: search.outcome, people: people.map((p) => ({ name: p.name, score: p.score })), csv: "shortlist.csv" }, null, 2));
+```
+
+Run it:
+
+{/* run */}
+```bash
+POLL_SECONDS=1 node job.mjs
+```
+
+{/* expect */}
+```json
+{
+  "search_id": "0b7d4a9c-…",
+  "status": "complete",
+  "outcome": "Poor yield",
+  "people": [{ "name": "Dana Whitfield", "score": 91 }],
+  "csv": "shortlist.csv"
+}
+```
+
+`POLL_SECONDS=1` is for trying it out; leave it unset in production to poll every 15 seconds.
+
+## What makes it safe
+
+- **Retries never charge twice.** The launch carries an `Idempotency-Key`, so a rerun after a crash or timeout
+  returns the same search. Choose a key that names the work, such as the requisition id. See
+  [errors](/guides/errors#safe-to-retry).
+- **It honors limits.** A `429` waits for `Retry-After`. See [rate limits](/guides/rate-limits).
+- **It stops on any finished status**, not only `complete`. See [async jobs](/guides/async-jobs).
+- **It pages until an empty page.** See [pagination](/guides/pagination).
+- **The key stays out of logs**: errors print the code, message and `request_id`, never the request.

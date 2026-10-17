@@ -1,0 +1,85 @@
+---
+title: "CLI basics"
+description: "How the revcenter CLI logs in, where it keeps the key, what it prints, and how it exits."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+## Logging in
+
+```bash
+revcenter auth login
+```
+
+The CLI prints a link and a code, opens your browser, and waits. A workspace admin approves it in Revcenter
+(the code must match). The new key is saved on the machine and never printed.
+
+| Option | Use when |
+| --- | --- |
+| `--no-browser` | The machine has no browser: open the printed link anywhere. |
+| `--start`, then `--finish` | An agent runs the login: `--start` prints the link and exits, `--finish` waits for approval. |
+| `--key <key>` or `--key -` | You already have a key (from **Settings → Usage → API**), passed or piped on standard input. |
+
+`revcenter auth status` shows the key in use (masked). `revcenter auth logout` deletes it.
+
+## Which key it uses
+
+1. `REVCENTER_API_KEY` in the environment, if set.
+2. Otherwise the saved key.
+
+| Variable | Meaning | Default |
+| --- | --- | --- |
+| `REVCENTER_API_KEY` | The API key | the saved key |
+| `REVCENTER_API_URL` | The API's address | `https://api.revcenter.ai` |
+| `REVCENTER_CONFIG_DIR` | Where the key is saved | `~/.config/revcenter` (or `$XDG_CONFIG_HOME/revcenter`) |
+
+The key is saved as `credentials.json`, readable by you only (mode `600`). It is checked against the API before
+it is saved.
+
+## Output
+
+- Results are **JSON on standard output**. Lists are `{ "data": [...], "cursor": ... }`.
+- `--pretty` prints tables for people instead. Use JSON in scripts.
+- Progress and warnings go to **standard error**.
+- When the API needs a newer CLI, standard error says so once and the command still runs.
+
+`revcenter --help` lists commands; `revcenter help <command>` shows examples.
+
+## Shell completions
+
+```bash
+revcenter completion zsh > "${fpath[1]}/_revcenter"   # or bash, fish
+```
+
+## Exit codes
+
+| Exit | Name | When |
+| --- | --- | --- |
+| `0` | `ok` | Succeeded. |
+| `1` | `server` | The API failed or couldn't be reached. Retry with backoff. |
+| `2` | `usage` | Bad command, flag or argument. Nothing was sent. |
+| `3` | `auth` | No key, a bad key, or no access (`401`, `403`). |
+| `4` | `not_found` | No such project, search or candidate (`404`). |
+| `5` | `refused` | The API refused the request (`400`, `409`, other `4xx`). Fix it before retrying. |
+| `6` | `rate_limited` | A rate or capacity limit (`429`). Wait, then retry. |
+| `7` | `payment` | No plan or no shortlist credits left (`402`). |
+
+## Errors
+
+Errors go to standard error with the code, a one-line fix and the `request_id`:
+
+```text
+revcenter: project_not_found: No project with that id in this workspace.
+  fix: Check the id with list_projects; ids belong to one workspace.
+  request_id: 6f1c2b7e-9a3d-4c5f-8e21-0b7d4a9c1e33
+```
+
+Codes are the [API's error codes](/guides/errors), plus the CLI's own:
+
+| Code | When | Exit |
+| --- | --- | --- |
+| `missing_api_key` | No key in the environment or saved | `3` |
+| `invalid_key` | `auth login --key` got something that isn't a Revcenter key | `3` |
+| `invalid_argument` | A missing or malformed argument, or an unreadable file | `2` |
+| `unknown_command` | No such command | `2` |
+| `network_error` | The API couldn't be reached | `1` |

@@ -1,0 +1,134 @@
+---
+title: "Run a search from a coding agent"
+description: "Connect Claude Code or Codex, give the agent a brief, and check what it runs. Uses 1 shortlist credit."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+A coding agent drives Revcenter through the [MCP server](/tools/mcp) or the [CLI](/tools/cli). It does the
+reasoning; Revcenter searches, scores and keeps the shortlist. This recipe uses **1 shortlist credit**.
+
+## 1. Connect the agent
+
+```bash
+npx -y revcenter auth login          # approve in your browser; the key is saved, never shown
+claude mcp add revcenter -- npx -y revcenter mcp
+```
+
+For Codex, Gemini CLI or Cursor, see [MCP](/tools/mcp#connect). No key goes in the prompt or the config.
+
+## 2. Give it the brief
+
+```text
+First read https://docs.revcenter.ai/llms.txt. Use the Revcenter tools.
+Before launch_search or expand_search, tell me and wait for my OK: each uses 1 shortlist credit.
+Role: Plant Maintenance Manager in Lancaster, PA.
+1. Read the criteria reference and draft criteria. Show them to me.
+2. After I approve, create a project, launch one search with an idempotency key, and wait for it.
+3. Show me everyone scoring 80 or more, and why each fits.
+4. Preview lowering the cut-off to 75 and tell me who it would add. Apply nothing without asking.
+```
+
+## 3. What the agent runs
+
+The same steps as CLI commands, as an agent without MCP runs them:
+
+{/* run */}
+```bash
+revcenter reference | jq '{fields: (.fields | length), example: (.example | keys)}'
+```
+
+{/* expect */}
+```json
+{ "fields": 32, "example": ["current_industries", "geo_radius_mi", "metro", "must_have", "title_variants", "years_experience"] }
+```
+
+{/* run */}
+```bash
+PROJECT=$(revcenter project create "Plant Maintenance Manager, Lancaster PA" | jq -r .id)
+echo '{"title_variants":["Plant Maintenance Manager","Maintenance Manager"],"metro":"Lancaster, PA"}' > criteria.json
+revcenter search "$PROJECT" --criteria criteria.json --key "agent-$PROJECT"
+```
+
+{/* expect */}
+```json
+{
+  "search_id": "0b7d4a9c-…",
+  "reused": false,
+  "compiled_by": "caller",
+  "criteria": { "metro": "Lancaster, PA", "title_variants": ["Plant Maintenance Manager", "Maintenance Manager"] },
+  "database_only": false
+}
+```
+
+`compiled_by: "caller"` means the search runs exactly the agent's criteria. If the agent retries with the same
+`--key`, it gets `"reused": true` and the same `search_id`, and no second credit is used:
+
+{/* run */}
+```bash
+SEARCH=$(revcenter search "$PROJECT" --criteria criteria.json --key "agent-$PROJECT" | jq -r .search_id)
+revcenter search "$PROJECT" --criteria criteria.json --key "agent-$PROJECT" | jq '{reused}'
+```
+
+{/* expect */}
+```json
+{ "reused": true }
+```
+
+The same key on a different request is refused, so an agent can't relaunch with new criteria by accident:
+
+{/* run */}
+```bash
+curl -s -X POST "${REVCENTER_API_URL:-https://api.revcenter.ai}/v1/projects/$PROJECT/searches" \
+  -H "Authorization: Bearer $REVCENTER_API_KEY" -H "Idempotency-Key: agent-$PROJECT" -H "Content-Type: application/json" \
+  -d '{"criteria":{"title_variants":["Maintenance Supervisor"],"metro":"Lancaster, PA"}}' | jq .error
+```
+
+{/* expect */}
+```json
+{
+  "code": "idempotency_key_reused",
+  "message": "This Idempotency-Key was already used for a different request. Use a new key for a new search.",
+  "details": null,
+  "request_id": "6f1c2b7e-…"
+}
+```
+
+Nothing is launched or charged. A new search needs a new key.
+
+{/* run */}
+```bash
+revcenter status "$SEARCH" --wait | jq '{status, outcome, delivered}'
+revcenter people "$SEARCH" --min-score 80 --no-profile | jq '[.data[] | {name, score, fit}]'
+```
+
+{/* expect */}
+```json
+[{ "name": "Dana Whitfield", "score": 91, "fit": { "title_match": 1, "geo_fit": 1, "tier": "A" } }]
+```
+
+{/* run */}
+```bash
+revcenter rescore "$SEARCH" --cutoff 75 --preview
+```
+
+{/* expect */}
+```json
+{
+  "shortlistBefore": 1,
+  "shortlistAfter": 2,
+  "added": 1,
+  "removed": 0,
+  "addedExamples": [],
+  "removedExamples": [],
+  "before": {},
+  "after": {}
+}
+```
+
+A preview changes nothing and uses no credits. The numbers above are from a small example search.
+
+## Next
+
+- [Agents](/tools/agents) has the full workflow and good practice.
+- [Errors](/guides/errors) lists the codes an agent should handle, and which calls are safe to retry.

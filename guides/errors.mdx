@@ -1,0 +1,89 @@
+---
+title: "Errors"
+description: "The error shape, every code the API returns, and which requests are safe to retry."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Every error has one shape. Branch on `error.code`; the message can change.
+
+```json
+{
+  "error": {
+    "code": "invalid_criteria",
+    "message": "title_variants: Required",
+    "details": { "issues": [{ "field": "title_variants", "message": "Required" }] },
+    "request_id": "6f1c2b7e-9a3d-4c5f-8e21-0b7d4a9c1e33"
+  },
+  "meta": { "request_id": "6f1c2b7e-9a3d-4c5f-8e21-0b7d4a9c1e33" }
+}
+```
+
+`details` is often `null`. Quote `request_id` when you contact support.
+
+## Codes
+
+| Status | Code | Meaning | What to do |
+| --- | --- | --- | --- |
+| `400` | `invalid_criteria` | Criteria failed validation | Fix the fields named; see `GET /v1/reference/criteria` |
+| `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters | Send one |
+| `400` | `idempotency_key_required` | A launch without an `Idempotency-Key` (8 to 160 characters) | Add the header |
+| `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search |
+| `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
+| `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |
+| `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |
+| `400` | `not_proposable` | This action can't be previewed | Call it directly |
+| `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
+| `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
+| `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
+| `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
+| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No shortlist credit left | Add credits; see [billing](/guides/billing) |
+| `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
+| `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
+| `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
+| `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new key |
+| `409` | `search_running` | A search on the project is still running | Wait for it |
+| `409` | `search_not_finished` · `no_search_to_expand` · `expansion_limit` | The project can't be expanded now (2 per project) | Wait, or launch a new search |
+| `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
+| `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
+| `429` | `rate_limited` · `concurrent_search_limit` · `network_busy` | A limit was reached | Wait for `Retry-After`; see [rate limits](/guides/rate-limits) |
+| `500` | `internal_error` | Something failed on our side | Retry with backoff |
+| `503` | `access_check_unavailable` · `plan_check_unavailable` | Access or plan couldn't be checked; nothing ran | Retry after `Retry-After` |
+
+The browser login has its own codes (`authorization_pending`, `slow_down`, `access_denied`, `expired_token`,
+`invalid_grant`); see [authentication](/authentication#browser-login-api).
+
+## CLI and MCP
+
+The CLI prints the code, a one-line fix and the `request_id` on standard error, and exits with a
+[code](/concepts/cli-basics#exit-codes) by kind. The MCP server returns the same lines as an error result.
+
+```text
+revcenter: project_not_found: No project with that id in this workspace.
+  fix: Check the id with list_projects; ids belong to one workspace.
+  request_id: 6f1c2b7e-9a3d-4c5f-8e21-0b7d4a9c1e33
+```
+
+## Safe to retry
+
+| Request | Retry? |
+| --- | --- |
+| Any `GET`, previews, `POST /actions/preview` | Yes |
+| `POST /projects/{id}/searches` | Yes, with the **same `Idempotency-Key`**: same search, never charged twice |
+| Scoring apply, database pass, shortlist add and remove, cancel | Yes |
+| `POST /proposals/apply` | Yes for a search launch; otherwise as the action itself |
+| `POST /projects` | No: each call makes a project |
+| `POST /projects/{id}/expand` | No: each success uses a credit. Check `GET /projects/{id}/searches` first |
+
+Retry `429` after `Retry-After` and `5xx` with backoff. Fix other `4xx` before retrying.
+
+### Idempotency keys
+
+An `Idempotency-Key` (8 to 160 printable characters) belongs to the workspace and is kept for good. A later launch
+with the same key:
+
+| Same project and body | Different project or body |
+| --- | --- |
+| `200` with the first search and `"reused": true`; no second credit | `409 idempotency_key_reused`; nothing runs |
+
+Name the key after one piece of work, such as `nightly-<requisition id>`.

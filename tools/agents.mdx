@@ -1,0 +1,46 @@
+---
+title: "Agents"
+description: "Hand a search to an AI agent: setup, the workflow, and a prompt to start from."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Every Revcenter action is a deterministic call with JSON output, and only two calls use credits. That makes it
+safe to hand to an agent.
+
+## Setup
+
+1. Connect the [MCP server](/tools/mcp), or let the agent run the [CLI](/tools/cli).
+2. Log in without exposing the key: the agent runs `revcenter auth login --start`, you approve the link, it runs
+   `revcenter auth login --finish`. See [authentication](/authentication#giving-an-agent-access).
+3. Point the agent at `https://docs.revcenter.ai/llms.txt`.
+
+## The workflow
+
+1. Read the criteria reference (`get_criteria_reference`).
+2. Draft criteria from the role. Hard requirements go in filter fields; things a profile must show (a
+   certification, a license) go in `must_have`, each short.
+3. Create a project and launch one search (`launch_search`). It asks you first: 1 credit.
+4. Wait (`wait_for_search`), then read people scoring 80+ (`list_people`).
+5. Refine for free: preview and apply scoring changes, or run a database pass.
+6. Expand only if needed (`expand_search`): 1 more credit.
+7. Export the shortlist (`export_shortlist`).
+
+## A prompt to start from
+
+```text
+Use Revcenter for this role. First read https://docs.revcenter.ai/llms.txt.
+Before anything that uses a shortlist credit (launch_search, expand_search), show me the criteria and wait for my OK.
+Role: <paste the brief>.
+1. Read the criteria reference and draft criteria. 2. After I approve, create a project, launch one search and
+wait for it. 3. Show the people scoring 80+ and why each fits. 4. Preview scoring changes; apply only what I
+approve. 5. Save the shortlist CSV.
+```
+
+## Good practice
+
+- Approve before spending. Only launching (unless `database_only`) and expanding use credits.
+- Retry with the same idempotency key, and honor `Retry-After` on `429`.
+- Never put the key in a prompt or a file the agent writes.
+
+Recipes: [coding agent](/recipes/coding-agent) · [backend job](/recipes/backend-job).

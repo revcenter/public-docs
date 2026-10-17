@@ -1,0 +1,31 @@
+---
+title: "API reference"
+description: "The Revcenter HTTP API: base URL, request and response shape."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+**Base URL:** `https://api.revcenter.ai/v1`
+
+Send `Authorization: Bearer <your key>` ([authentication](/authentication)). Bodies are JSON. Results are wrapped
+in `data`, and every response has a `request_id`:
+
+```json
+{ "data": { "id": "6a1e…", "name": "Controller, Camden NJ" }, "meta": { "request_id": "6f1c2b7e-…" } }
+```
+
+- Lists add a `cursor` ([pagination](/guides/pagination)).
+- Errors have one shape ([errors](/guides/errors)).
+- Rate-limit headers are on every response ([rate limits](/guides/rate-limits)).
+- Each endpoint page states its cost: free or 1 shortlist credit.
+- Any write can be previewed with `POST /actions/preview` and run with `POST /proposals/apply`.
+
+A typical flow:
+
+1. `POST /projects` → a project.
+2. `POST /projects/{projectId}/searches` with `criteria` and an `Idempotency-Key` → a `search_id`.
+3. `GET /searches/{searchId}` until `status` is `complete`.
+4. `GET /searches/{searchId}/people?min_score=80` → scored people.
+5. `GET /projects/{projectId}/shortlist.csv` → the shortlist.
+
+`GET /health`, `POST /auth/device` and `POST /auth/token` need no key.

@@ -1,0 +1,122 @@
+---
+title: "Run a search and export the shortlist"
+description: "From criteria to a CSV shortlist with the revcenter CLI, with the output to expect at each step. Uses 1 shortlist credit."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Run `revcenter auth login` first (or set `REVCENTER_API_KEY`). The recipe uses [jq](https://jqlang.org) and
+**1 shortlist credit**, for the search in step 2.
+
+## 1. Make a project
+
+{/* run */}
+```bash
+PROJECT=$(revcenter project create "Plant Maintenance Manager, Lancaster PA" | jq -r .id)
+revcenter project "$PROJECT"
+```
+
+{/* expect */}
+```json
+{
+  "id": "6a1e0c52-…",
+  "name": "Plant Maintenance Manager, Lancaster PA",
+  "created_at": "2026-10-16T14:02:11.000Z",
+  "archived": false,
+  "searches": 0,
+  "shortlisted": 0
+}
+```
+
+## 2. Launch the search and wait
+
+{/* run */}
+```bash
+cat > criteria.json <<'JSON'
+{
+  "title_variants": ["Plant Maintenance Manager", "Maintenance Manager"],
+  "metro": "Lancaster, PA"
+}
+JSON
+SEARCH=$(revcenter search "$PROJECT" --criteria criteria.json --key "maint-$PROJECT" | jq -r .search_id)
+revcenter status "$SEARCH" --wait
+```
+
+This uses 1 shortlist credit. Running the same `revcenter search` with the same `--key` again returns the same
+search and uses nothing. `--wait` prints progress to standard error and the finished search to standard output:
+
+{/* expect */}
+```json
+{
+  "id": "0b7d4a9c-…",
+  "project_id": "6a1e0c52-…",
+  "status": "complete",
+  "stage": null,
+  "stop_reason": "target_reached",
+  "outcome": "Poor yield",
+  "profiles_read": 2,
+  "delivered": 1,
+  "database_only": false,
+  "expansion": false,
+  "criteria": { "metro": "Lancaster, PA", "title_variants": ["Plant Maintenance Manager", "Maintenance Manager"] },
+  "created_at": "2026-10-16T14:02:12.000Z",
+  "closed_at": "2026-10-16T14:05:40.000Z"
+}
+```
+
+A real search reads far more profiles; the numbers here are from a small example.
+
+## 3. Read who it found
+
+{/* run */}
+```bash
+revcenter people "$SEARCH" --min-score 80 --no-profile
+```
+
+{/* expect */}
+```json
+{
+  "data": [
+    {
+      "id": "c41f…",
+      "name": "Dana Whitfield",
+      "first_name": "Dana",
+      "last_name": "Whitfield",
+      "title": "Maintenance Manager",
+      "company": "Keystone Foods",
+      "location": "Lancaster, PA",
+      "headline": "Maintenance Manager at Keystone Foods",
+      "linkedin_url": "https://www.linkedin.com/in/…",
+      "score": 91,
+      "fit": { "title_match": 1, "geo_fit": 1, "tier": "A" },
+      "signals": [],
+      "on_shortlist": true,
+      "profile": null
+    }
+  ],
+  "cursor": null,
+  "total": 1
+}
+```
+
+Leave out `--no-profile` to get each person's full profile. Free.
+
+## 4. Export the shortlist
+
+{/* run */}
+```bash
+revcenter shortlist "$PROJECT" --csv shortlist.csv
+```
+
+{/* expect */}
+```json
+{ "path": "shortlist.csv" }
+```
+
+`shortlist.csv` has one row per person on the shortlist, best first, with their full profile in the last
+column. Free.
+
+## Next
+
+- Not enough people? See [getting more people](/guides/searches#getting-more-people).
+- The same flow from an AI agent: [coding agent recipe](/recipes/coding-agent).

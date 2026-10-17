@@ -1,0 +1,66 @@
+---
+title: "CLI reference"
+description: "Every revcenter command, its options, and whether it uses shortlist credits."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+```bash
+curl -fsSL https://revcenter.ai/install.sh | sh   # or: npm install -g revcenter
+revcenter auth login                              # authorize in your browser
+revcenter projects --pretty
+```
+
+Needs Node 20 or later. The installer uses your global npm folder when it can write to it, and `~/.revcenter`
+(added to your PATH) when it can't, so it never needs sudo. Set `REVCENTER_VERSION` to pin a version and
+`REVCENTER_NO_LOGIN=1` to skip the sign-in prompt. `rvc` is a short alias. Keys, output and exit codes are in [CLI basics](/concepts/cli-basics).
+
+## Commands
+
+| Command | Does | Cost |
+| --- | --- | --- |
+| `revcenter auth login [--no-browser]` | Opens your browser: pick a workspace and authorize, and the new key is saved. Over SSH or with `--no-browser` it shows a link and a code to authorize from any device instead. | Does not use shortlist credits. |
+| `revcenter auth login --start` · `revcenter auth login --finish` | The same login in two steps, for agents: `--start` prints the link and exits; `--finish` waits for approval and saves the key. | Does not use shortlist credits. |
+| `revcenter auth login --key <key>` | Saves a key you already have. `--key -` reads it from standard input. `--api-url <url>` sets another API. | Does not use shortlist credits. |
+| `revcenter auth status` | The key in use (masked), where it came from, the workspace and the expiry. | Does not use shortlist credits. |
+| `revcenter auth logout` | Deletes the saved key. | Does not use shortlist credits. |
+| `revcenter mcp` | Runs the [MCP server](/tools/mcp) over standard input and output. | Does not use shortlist credits. |
+| `revcenter completion <bash\|zsh\|fish>` | Prints shell completions. | Does not use shortlist credits. |
+| `revcenter whoami` | The key, workspace, plan, limits and today's use. | Does not use shortlist credits. |
+| `revcenter usage` | Today's requests and searches, and credits left. | Does not use shortlist credits. |
+| `revcenter actions` | Every API action and its cost. | Does not use shortlist credits. |
+| `revcenter reference` | Every criteria field and its allowed values. | Does not use shortlist credits. |
+| `revcenter industries <word>` | LinkedIn industries matching a word. | Does not use shortlist credits. |
+| `revcenter projects [--limit <n>] [--cursor <c>]` | Projects, newest first. | Does not use shortlist credits. |
+| `revcenter project create <name>` | Makes a project. | Does not use shortlist credits. |
+| `revcenter project <project_id>` | One project. | Does not use shortlist credits. |
+| `revcenter searches <project_id> [--limit <n>] [--cursor <c>]` | A project's searches, oldest first. | Does not use shortlist credits. |
+| `revcenter search <project_id> --criteria <file.json>` | Launches a search on your criteria. `--jd <file.txt>` uses a job description instead. | Uses 1 shortlist credit. None with `--database-only`. |
+| `revcenter status <search_id> [--wait]` | Status, stage and outcome. `--wait` polls every 10 seconds, up to 15 minutes. | Does not use shortlist credits. |
+| `revcenter cancel <search_id>` | Stops a running search and keeps who it read. | Does not use shortlist credits. |
+| `revcenter people <search_id> [--min-score <n>] [--limit <n>] [--cursor <c>] [--no-profile]` | Everyone scored, best first. | Does not use shortlist credits. |
+| `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use shortlist credits. |
+| `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use shortlist credits. |
+| `revcenter expand <project_id>` | A new live pass for more people on the same role. | Uses 1 shortlist credit. |
+| `revcenter shortlist <project_id> [--csv [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV. | Does not use shortlist credits. |
+| `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use shortlist credits. |
+| `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use shortlist credits. |
+| `revcenter preview <action> --input <file.json>` | What an action would do and cost, with a `proposal_id`. Changes nothing. | Does not use shortlist credits. |
+| `revcenter apply <proposal_id>` | Runs a previewed action exactly as previewed. | Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else. |
+| `revcenter --version` · `revcenter --help` | Version, or the command list. `help <command>` shows examples. | Does not use shortlist credits. |
+
+`search` also takes `--target <n>` (people to aim for, 1 to 100) and `--key <key>`, an idempotency key. The
+same `--key` returns the same search and never uses a second credit. Without `--key`, one is derived from the
+project and request, so repeating an identical command is safe. See [idempotency keys](/guides/errors#idempotency-keys).
+
+Add `--pretty` to any command for tables instead of JSON.
+
+## Example
+
+```bash
+revcenter industries pharma
+```
+
+```json
+[{ "id": 15, "label": "Pharmaceutical Manufacturing", "hierarchy": "Manufacturing > Chemical Manufacturing > Pharmaceutical Manufacturing" }]
+```

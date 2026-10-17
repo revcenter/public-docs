@@ -1,0 +1,47 @@
+---
+title: "Pagination"
+description: "Cursor pagination on list endpoints, page sizes, and the deprecated offset."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+| List | Order | Default page | Max |
+| --- | --- | --- | --- |
+| `GET /v1/projects` | Newest first | 50 | 500 |
+| `GET /v1/projects/{id}/searches` | Oldest first | 100 | 500 |
+| `GET /v1/searches/{id}/people` | Best score first | 100 | 500 |
+
+A page has `data` and `cursor`. Pass `cursor` back for the next page; it is `null` on the last.
+
+```json
+{
+  "data": [{ "id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99", "name": "Dana Whitfield", "score": 91 }],
+  "cursor": "eyJrIjoiOTEiLCJpZCI6IjNjMmIxYTA5LTh…",
+  "meta": { "request_id": "…", "total": 212 }
+}
+```
+
+```bash
+curl -s "https://api.revcenter.ai/v1/searches/<search_id>/people?min_score=80&limit=100&cursor=<cursor>" \
+  -H "Authorization: Bearer $REVCENTER_API_KEY"
+```
+
+| Parameter | Meaning |
+| --- | --- |
+| `limit` | Items per page, 1 to 500 |
+| `cursor` | From the previous page; opaque. A cursor the API didn't return gives `400 invalid_cursor` |
+| `min_score` | People only: at least this score |
+| `profile` | People only: `false` omits full profiles |
+
+On people, `meta.total` counts everyone matching from that position on. The CLI and MCP take `--cursor` /
+`cursor`.
+
+## Offset (deprecated)
+
+`offset` still works but responses carry `Deprecation: true` and `Sunset: Fri, 01 May 2027 00:00:00 GMT`.
+Switch to `cursor` before then.
+
+## Lists that don't page
+
+The shortlist (`/shortlist`, `/shortlist.csv`), `GET /v1/reference/industries` (up to 200) and
+`GET /v1/actions` return everything. `POST …/shortlist/members` takes up to 200 `candidate_ids`.

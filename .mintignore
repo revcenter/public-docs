@@ -1,0 +1,11 @@
+# Only the pages in docs.json are published. Everything else in this folder is internal engineering
+# material and must never reach docs.revcenter.ai (scripts/docs/docs.test.mjs checks this).
+internal/
+architecture/
+behavioral-reconstruction/
+findings/
+implementation/
+search-performance/
+ui-migration/
+*.md
+.DS_Store

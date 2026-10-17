@@ -1,0 +1,96 @@
+---
+title: "MCP"
+description: "Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI and other MCP clients."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+`revcenter mcp` runs a local MCP server. Your agent does the reasoning; Revcenter searches, scores and keeps the
+shortlist.
+
+## Connect
+
+Log in once on the machine. The server uses the saved key, so no key goes in a config file.
+
+```bash
+npx -y revcenter auth login
+```
+
+Then add the server to your client:
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add revcenter -- npx -y revcenter mcp
+    ```
+  </Tab>
+  <Tab title="Codex">
+    ```bash
+    codex mcp add revcenter -- npx -y revcenter mcp
+    ```
+  </Tab>
+  <Tab title="Gemini CLI">
+    ```bash
+    gemini mcp add revcenter npx -y revcenter mcp
+    ```
+  </Tab>
+  <Tab title="Cursor, Claude Desktop, others">
+    ```json
+    { "mcpServers": { "revcenter": { "command": "npx", "args": ["-y", "revcenter", "mcp"] } } }
+    ```
+  </Tab>
+</Tabs>
+
+On a server or in CI, set `REVCENTER_API_KEY` in the client's environment instead of logging in. Restart the
+client, then ask it to "list my Revcenter projects".
+
+## Tools
+
+| Tool | What it does | Cost |
+| --- | --- | --- |
+| `get_me` | The key's workspace, name, scopes and expiry, the workspace's plan and limits, and today's usage. | Does not use shortlist credits. |
+| `get_usage` | Today's requests and searches, and shortlist credits remaining. | Does not use shortlist credits. |
+| `list_actions` | Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. | Does not use shortlist credits. |
+| `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use shortlist credits. |
+| `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else. |
+| `get_criteria_reference` | Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. | Does not use shortlist credits. |
+| `search_industries` | LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. | Does not use shortlist credits. |
+| `list_projects` | The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. | Does not use shortlist credits. |
+| `create_project` | Make a project: one role, one shortlist. | Does not use shortlist credits. |
+| `get_project` | One project, with its search and shortlist counts. | Does not use shortlist credits. |
+| `list_searches` | The searches a project has run, oldest first. | Does not use shortlist credits. |
+| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credit. | Uses 1 shortlist credit. |
+| `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results) and how many profiles it read; poll until status is no longer queued or running. | Does not use shortlist credits. |
+| `cancel_search` | Stop a running search: it buys nothing more, scores what it already read, and keeps them. | Does not use shortlist credits. |
+| `list_people` | Everyone a search scored, best first: score, fit readings, signals, whether they are on the shortlist, and the whole read profile. | Does not use shortlist credits. |
+| `preview_scoring` | What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. | Re-scores the people already found. Does not use shortlist credits. |
+| `apply_scoring` | Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. | Re-scores the people already found. Does not use shortlist credits. |
+| `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use shortlist credits. |
+| `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. | Uses 1 shortlist credit. |
+| `export_shortlist` | The shortlist as CSV: every profile field, and the profile as JSON in the last column. | Does not use shortlist credits. |
+| `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles. | Does not use shortlist credits. |
+| `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use shortlist credits. |
+| `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use shortlist credits. |
+| `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds, and return its final status. | Does not use shortlist credits. |
+
+Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `data`, and on lists `cursor` and
+`total`. Errors return the [error code](/guides/errors), a one-line fix and the `request_id`.
+
+## Approval before using a credit
+
+`launch_search` (unless `database_only`) and `expand_search` ask first:
+
+1. The server previews the action: what it does, its cost, and credits left.
+2. If the client supports MCP elicitation, it asks you. Yes runs exactly what was previewed.
+3. Otherwise the tool returns `status: "pending_approval"` with a `proposal`. Nothing has run. The agent shows
+   it to you and calls `apply_proposal` after you agree. A proposal lasts 30 minutes.
+
+## Resources and prompts
+
+| Kind | Name | What it is |
+| --- | --- | --- |
+| Resource | `revcenter://reference/criteria` | The criteria reference |
+| Resource | `revcenter://actions` | Every action, its route, scope and cost |
+| Prompt | `run_role_search` | Draft criteria, confirm with you, run one search, summarize everyone scoring 80+ |
+
+Hosted (remote URL) connectors are not available yet; use a local client.
