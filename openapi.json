@@ -1824,7 +1824,8 @@
                       ]
                     },
                     "created_at": "2026-10-17T14:03:02.000Z",
-                    "closed_at": "2026-10-17T14:19:40.000Z"
+                    "closed_at": "2026-10-17T14:19:40.000Z",
+                    "queue": null
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -4024,6 +4025,24 @@
               "string",
               "null"
             ]
+          },
+          "queue": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "While the search waits its turn (status queued): its place in line and about how many seconds until it starts. Null otherwise.",
+            "properties": {
+              "position": {
+                "type": "integer"
+              },
+              "ahead": {
+                "type": "integer"
+              },
+              "eta_seconds": {
+                "type": "integer"
+              }
+            }
           }
         }
       },
