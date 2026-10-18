@@ -10,28 +10,45 @@ shortlist.
 
 ## Connect
 
-Log in once on the machine. The server uses the saved key, so no key goes in a config file.
+The quickest way: paste this into Claude Code, Codex, Cursor or any coding agent.
 
-```bash
-npx -y revcenter auth login
+```text
+Set up the Revcenter plugin by following the steps in https://github.com/revcenter/agent-plugins
 ```
 
-Then add the server to your client:
+The agent installs the CLI, signs you in (you click **Authorize** once in your browser), connects itself and
+tells you how many credits you have. In Claude Code you can also install the plugin directly:
+
+```text
+/plugin marketplace add revcenter/agent-plugins
+/plugin install revcenter@revcenter-plugins
+```
+
+Or do it yourself: install, sign in, and let the CLI add the server to every AI tool on the machine:
+
+```bash
+curl -fsSL https://revcenter.ai/install.sh | sh
+revcenter login
+revcenter setup        # Claude Code, Codex, Gemini CLI, Cursor, Claude Desktop: whichever are installed
+```
+
+`revcenter login` offers to run `revcenter setup` for you. The server uses the key the login saved, so no key
+goes in a config file. To add it by hand instead:
 
 <Tabs>
   <Tab title="Claude Code">
     ```bash
-    claude mcp add revcenter -- npx -y revcenter mcp
+    claude mcp add -s user revcenter -- revcenter mcp
     ```
   </Tab>
   <Tab title="Codex">
     ```bash
-    codex mcp add revcenter -- npx -y revcenter mcp
+    codex mcp add revcenter -- revcenter mcp
     ```
   </Tab>
   <Tab title="Gemini CLI">
     ```bash
-    gemini mcp add revcenter npx -y revcenter mcp
+    gemini mcp add -s user revcenter revcenter mcp
     ```
   </Tab>
   <Tab title="Cursor, Claude Desktop, others">
@@ -43,6 +60,14 @@ Then add the server to your client:
 
 On a server or in CI, set `REVCENTER_API_KEY` in the client's environment instead of logging in. Restart the
 client, then ask it to "list my Revcenter projects".
+
+## Several searches at once
+
+There's no cap on searches running at once: only your credits. Ask the agent to run one sub-agent per role, and
+each launches its own search; a burst that finds Revcenter briefly busy is retried for you. When they finish,
+`export_shortlist` and `export_candidates` save CSVs (every profile field, plus the profile as JSON) under
+`./revcenter-exports/`, ready for the agent to merge, filter or send on. Out of credits, `create_top_up` opens
+Stripe checkout in your browser.
 
 ## Tools
 
@@ -67,11 +92,14 @@ client, then ask it to "list my Revcenter projects".
 | `apply_scoring` | Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. | Re-scores the people already found. Does not use shortlist credits. |
 | `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use shortlist credits. |
 | `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. | Uses 1 shortlist credit. |
-| `export_shortlist` | The shortlist as CSV: every profile field, and the profile as JSON in the last column. | Does not use shortlist credits. |
+| `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): every profile field, the profile as JSON last. | Does not use shortlist credits. |
 | `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles. | Does not use shortlist credits. |
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use shortlist credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use shortlist credits. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds, and return its final status. | Does not use shortlist credits. |
+| `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use shortlist credits. |
+| `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. | Does not use shortlist credits. |
+| `create_top_up` | A Stripe checkout link to add shortlist credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use shortlist credits. |
 
 Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `data`, and on lists `cursor` and
 `total`. Errors return the [error code](/guides/errors), a one-line fix and the `request_id`.

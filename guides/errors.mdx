@@ -34,10 +34,11 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
+| `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount in range |
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
 | `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
 | `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
-| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No shortlist credit left | Add credits; see [billing](/guides/billing) |
+| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No shortlist credit left. `details` has `billing_url` and `top_up` | `revcenter topup`, or see [billing](/guides/billing) |
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
 | `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
@@ -46,9 +47,13 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `409` | `search_not_finished` · `no_search_to_expand` · `expansion_limit` | The project can't be expanded now (2 per project) | Wait, or launch a new search |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
-| `429` | `rate_limited` · `concurrent_search_limit` · `network_busy` | A limit was reached | Wait for `Retry-After`; see [rate limits](/guides/rate-limits) |
+| `429` | `rate_limited` · `network_busy` | Too many requests, or the network is briefly full; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |
 | `503` | `access_check_unavailable` · `plan_check_unavailable` | Access or plan couldn't be checked; nothing ran | Retry after `Retry-After` |
+| `503` | `top_up_unavailable` | Top-ups can't be started here | Use **Settings → Plan & billing** |
+
+A top-up can also answer `409 top_up_needs_plan` (top-ups use a plan's rate; choose a plan first), with
+`details.billing_url`.
 
 The browser login has its own codes (`authorization_pending`, `slow_down`, `access_denied`, `expired_token`,
 `invalid_grant`); see [authentication](/authentication#browser-login-api).

@@ -24,10 +24,13 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter auth login --key <key>` | Saves a key you already have. `--key -` reads it from standard input. `--api-url <url>` sets another API. | Does not use shortlist credits. |
 | `revcenter auth status` | The key in use (masked), where it came from, the workspace and the expiry. | Does not use shortlist credits. |
 | `revcenter auth logout` | Deletes the saved key. | Does not use shortlist credits. |
+| `revcenter login` · `revcenter logout` | Shortcuts for `auth login` and `auth logout`. Logout also revokes the key on the server. | Does not use shortlist credits. |
+| `revcenter setup [claude-code\|codex\|gemini\|cursor\|claude-desktop]` | Adds the MCP server to your AI tools: every one it finds, or the one you name. No key goes in any config. | Does not use shortlist credits. |
 | `revcenter mcp` | Runs the [MCP server](/tools/mcp) over standard input and output. | Does not use shortlist credits. |
 | `revcenter completion <bash\|zsh\|fish>` | Prints shell completions. | Does not use shortlist credits. |
 | `revcenter whoami` | The key, workspace, plan, limits and today's use. | Does not use shortlist credits. |
 | `revcenter usage` | Today's requests and searches, and credits left. | Does not use shortlist credits. |
+| `revcenter topup [--amount <usd>]` | Opens Stripe checkout to buy shortlist credits at your plan's rate ($1,500 to $30,000; default $1,500). | Does not use shortlist credits. |
 | `revcenter actions` | Every API action and its cost. | Does not use shortlist credits. |
 | `revcenter reference` | Every criteria field and its allowed values. | Does not use shortlist credits. |
 | `revcenter industries <word>` | LinkedIn industries matching a word. | Does not use shortlist credits. |
@@ -42,7 +45,8 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use shortlist credits. |
 | `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use shortlist credits. |
 | `revcenter expand <project_id>` | A new live pass for more people on the same role. | Uses 1 shortlist credit. |
-| `revcenter shortlist <project_id> [--csv [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV. | Does not use shortlist credits. |
+| `revcenter shortlist <project_id> [--csv [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV with every profile field. | Does not use shortlist credits. |
+| `revcenter candidates [--q <text>] [--project <id>] [--title ..] [--company ..] [--location ..] [--limit <n>] [--cursor <c>] [--csv [<file>]]` | The workspace's candidate database (the Candidates tab), or all of it as CSV with every profile field. | Does not use shortlist credits. |
 | `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use shortlist credits. |
 | `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use shortlist credits. |
 | `revcenter preview <action> --input <file.json>` | What an action would do and cost, with a `proposal_id`. Changes nothing. | Does not use shortlist credits. |

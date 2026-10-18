@@ -81,8 +81,10 @@
           "GET /health",
           "POST /auth/device",
           "POST /auth/token",
+          "POST /auth/revoke",
           "GET /me",
           "GET /me/usage",
+          "POST /billing/top-up",
           "GET /actions",
           "POST /actions/preview",
           "POST /proposals/apply",
@@ -103,7 +105,9 @@
           "GET /projects/{projectId}/shortlist",
           "GET /projects/{projectId}/shortlist.csv",
           "POST /projects/{projectId}/shortlist/members",
-          "DELETE /projects/{projectId}/shortlist/members/{candidateId}"
+          "DELETE /projects/{projectId}/shortlist/members/{candidateId}",
+          "GET /candidates",
+          "GET /candidates.csv"
         ]
       }
     ]

@@ -11,8 +11,9 @@ reasoning; Revcenter searches, scores and keeps the shortlist. This recipe uses 
 ## 1. Connect the agent
 
 ```bash
-npx -y revcenter auth login          # approve in your browser; the key is saved, never shown
-claude mcp add revcenter -- npx -y revcenter mcp
+curl -fsSL https://revcenter.ai/install.sh | sh
+revcenter login      # authorize in your browser; the key is saved, never shown
+revcenter setup      # adds Revcenter to Claude Code, Codex, Cursor…
 ```
 
 For Codex, Gemini CLI or Cursor, see [MCP](/tools/mcp#connect). No key goes in the prompt or the config.
