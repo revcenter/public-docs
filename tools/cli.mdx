@@ -26,6 +26,8 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter auth logout` | Deletes the saved key. | Does not use shortlist credits. |
 | `revcenter login` · `revcenter logout` | Shortcuts for `auth login` and `auth logout`. Logout also revokes the key on the server. | Does not use shortlist credits. |
 | `revcenter setup [claude-code\|codex\|gemini\|cursor\|claude-desktop]` | Adds the MCP server to your AI tools: every one it finds, or the one you name. No key goes in any config. | Does not use shortlist credits. |
+| `revcenter code [claude options]` | Opens your own Claude Code, signed in to your own plan, with Revcenter loaded: its skills, its MCP server and a Revcenter status line. Every option after `code` goes to `claude`. `REVCENTER_NO_BANNER=1` hides the banner; `REVCENTER_CLAUDE_PATH` picks the `claude` to run. | Does not use shortlist credits. |
+| `revcenter statusline` | The one line `revcenter code` shows in Claude Code: workspace, credits, searches running and waiting. | Does not use shortlist credits. |
 | `revcenter mcp` | Runs the [MCP server](/tools/mcp) over standard input and output. | Does not use shortlist credits. |
 | `revcenter completion <bash\|zsh\|fish>` | Prints shell completions. | Does not use shortlist credits. |
 | `revcenter whoami` | The key, workspace, plan, limits and today's use. | Does not use shortlist credits. |
