@@ -106,9 +106,11 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use credits. |
 | `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Takes `max_credits` like a launch. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): fit readings and why, every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
+| `get_share_link` | The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. | Does not use credits. |
 | `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles. | Does not use credits. |
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use credits. |
+| `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
 | `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
@@ -136,6 +138,13 @@ Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `
 3. Otherwise, or if you don't answer within 10 minutes, the tool returns `status: "pending_approval"` with a
    `proposal`. Nothing has run. The agent shows it to you and calls `apply_proposal` after you agree. A
    proposal lasts 30 minutes.
+
+Approvals that arrive together are asked once. When an agent launches several searches in parallel, or
+several subagents launch at the same moment, you get one prompt that lists every search and the total it
+reserves; one Accept launches them all side by side, one Decline runs none. Anything that arrives while that
+prompt is open is asked next, together. For a batch the agent has already drafted, `launch_searches` takes up
+to 25 launches in one call and returns each one's outcome: `launched` (with its search), `declined`,
+`pending_approval` (with its `proposal_id`) or `failed` (with the error; the others still run).
 
 A launch without its own `idempotency_key` gets one derived from the project and the request, so an agent that
 repeats an identical launch (after its tool call timed out, say) gets the first search back. It isn't asked

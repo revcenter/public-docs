@@ -3525,6 +3525,115 @@
         }
       }
     },
+    "/projects/{projectId}/share-link": {
+      "get": {
+        "operationId": "get_share_link",
+        "summary": "Get the share link",
+        "description": "The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. Every project has exactly one link, made with the project, so this returns the same URL every time and never mints a second one. Anyone with the link can open the list, and it shows the shortlist as it stands: remove anyone who shouldn't be seen before sending it, and after a change send the same link again. `shortlisted` is how many people it shows now; don't send a link with 0. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "shortlisted": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "url": "https://app.revcenter.ai/share/rvs_3f9a1c7e2b",
+                    "shortlisted": 14
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/projects/{projectId}/shortlist/members": {
       "post": {
         "operationId": "add_shortlist_members",

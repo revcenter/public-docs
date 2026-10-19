@@ -110,6 +110,7 @@
           "POST /searches/{searchId}/database-pass",
           "GET /projects/{projectId}/shortlist",
           "GET /projects/{projectId}/shortlist.csv",
+          "GET /projects/{projectId}/share-link",
           "POST /projects/{projectId}/shortlist/members",
           "DELETE /projects/{projectId}/shortlist/members/{candidateId}",
           "GET /candidates",
