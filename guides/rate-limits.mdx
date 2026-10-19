@@ -7,9 +7,10 @@ description: "Request and search limits, the 429 response, and how to retry."
 
 | Limit | Default |
 | --- | --- |
-| Requests per key | 60 a minute |
-| Requests per workspace | 120 a minute |
-| Searches running at once | 2 |
+| Requests per key | 600 a minute |
+| Requests per workspace | 3,000 a minute |
+| Launching a search or an expansion | Not counted |
+| Searches running at once | No limit per workspace; past the platform's, they wait their turn |
 | Active keys | 5 |
 
 There is no daily cap: how many searches you run is set by your [shortlist credits](/guides/billing). Your
@@ -32,11 +33,16 @@ A `429` has a `Retry-After` header and the same number in `error.details.retry_a
 | Code | Means | `Retry-After` |
 | --- | --- | --- |
 | `rate_limited` | Too many requests this minute | Until the minute resets |
-| `network_busy` | Revcenter is briefly full across all workspaces | 60 |
+| `launch_in_progress` | The same `Idempotency-Key` is still being started by another request | 5 |
 
-There is no limit on searches per day or at once: a workspace can run as many as it has shortlist credits for,
-in parallel. A `429` means nothing ran and no credit was used. The CLI and MCP server wait out `Retry-After` and
-retry for you, with the same `Idempotency-Key`, for up to three minutes (`REVCENTER_RETRY_SECONDS` changes it).
+A launch is never refused for being busy. A paid launch (`launch_search`, `expand_search`) is not counted
+against the request limits: each one uses a shortlist credit, and a search past the platform's limit waits its
+turn with `status: queued` and a `queue.eta_seconds`. Workspaces take turns, so many searches waiting in one
+workspace don't hold up another workspace's first one. `GET /v1/capacity` says how busy it is and when a search
+launched now would start. A database-only launch uses no credit and is counted like any request.
 
-Behind the API, every search's LinkedIn reads share one pool, with a share per workspace, so many searches
-from one workspace run side by side and slow only that workspace.
+A `429` means nothing ran and no credit was used. The CLI and MCP server wait out `Retry-After` and retry for
+you, with the same `Idempotency-Key`, for up to three minutes (`REVCENTER_RETRY_SECONDS` changes it).
+
+Behind the API, every running search's LinkedIn reads share one pool fairly: the search holding the fewest
+reads goes next, so a workspace alone can use all of it and a busy one never starves another.

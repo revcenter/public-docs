@@ -75,6 +75,7 @@ Stripe checkout in your browser.
 | --- | --- | --- |
 | `get_me` | The key's workspace, name, scopes and expiry, the workspace's plan and limits, and today's usage. | Does not use shortlist credits. |
 | `get_usage` | Today's requests and searches, and shortlist credits remaining. | Does not use shortlist credits. |
+| `get_capacity` | How busy Revcenter is right now: searches running and waiting across the platform and in this workspace, and about when a search launched now would start. | Does not use shortlist credits. |
 | `list_actions` | Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. | Does not use shortlist credits. |
 | `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use shortlist credits. |
 | `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else. |
@@ -96,7 +97,7 @@ Stripe checkout in your browser.
 | `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles. | Does not use shortlist credits. |
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use shortlist credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use shortlist credits. |
-| `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds, and return its final status. | Does not use shortlist credits. |
+| `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use shortlist credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use shortlist credits. |
 | `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. | Does not use shortlist credits. |
 | `create_top_up` | A Stripe checkout link to add shortlist credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use shortlist credits. |

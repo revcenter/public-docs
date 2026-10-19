@@ -380,8 +380,8 @@
                       "credits_remaining": 37
                     },
                     "limits": {
-                      "requests_per_minute_per_key": 60,
-                      "requests_per_minute_per_workspace": 120,
+                      "requests_per_minute_per_key": 600,
+                      "requests_per_minute_per_workspace": 3000,
                       "max_keys": 5
                     },
                     "usage_today": {
@@ -479,6 +479,107 @@
                       "running": 1
                     },
                     "credits_remaining": 37
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/capacity": {
+      "get": {
+        "operationId": "get_capacity",
+        "summary": "Live capacity",
+        "description": "How busy Revcenter is right now: searches running and waiting across the platform and in this workspace, and about when a search launched now would start. Launches are never refused for being busy: a search past the platform's limit waits its turn (status queued) and starts as one finishes. Workspaces take turns, so a workspace with many searches waiting does not hold up another's first one. Use this to tell the person what to expect before launching many searches at once. Does not use shortlist credits.\n\nNeeds scope `searches:read`.",
+        "tags": [
+          "Searches"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Capacity"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "queue_enabled": true,
+                    "platform": {
+                      "search_slots": 20,
+                      "running": 20,
+                      "waiting": 14,
+                      "typical_search_seconds": 300,
+                      "searches_per_hour": 240
+                    },
+                    "workspace": {
+                      "running": 6,
+                      "waiting": 9
+                    },
+                    "new_search": {
+                      "position": 15,
+                      "ahead": 14,
+                      "starts_in_seconds": 420
+                    }
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -3894,6 +3995,63 @@
               "integer",
               "null"
             ]
+          }
+        }
+      },
+      "Capacity": {
+        "type": "object",
+        "properties": {
+          "queue_enabled": {
+            "type": "boolean"
+          },
+          "platform": {
+            "type": "object",
+            "properties": {
+              "search_slots": {
+                "type": "integer",
+                "description": "Searches that run at once across the platform."
+              },
+              "running": {
+                "type": "integer"
+              },
+              "waiting": {
+                "type": "integer"
+              },
+              "typical_search_seconds": {
+                "type": "integer",
+                "description": "Median time from start to finish of a recent search."
+              },
+              "searches_per_hour": {
+                "type": "integer",
+                "description": "About how many searches the platform finishes an hour at that pace."
+              }
+            }
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "running": {
+                "type": "integer"
+              },
+              "waiting": {
+                "type": "integer"
+              }
+            }
+          },
+          "new_search": {
+            "type": "object",
+            "description": "Where a search launched now would stand: 0 seconds when it would start at once.",
+            "properties": {
+              "position": {
+                "type": "integer"
+              },
+              "ahead": {
+                "type": "integer"
+              },
+              "starts_in_seconds": {
+                "type": "integer"
+              }
+            }
           }
         }
       },

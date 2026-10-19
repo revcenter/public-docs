@@ -9,7 +9,16 @@ Launching a search and expanding return `202` with a `search_id` right away. The
 usually for a few minutes.
 
 Poll `GET /v1/searches/{search_id}` every 10 to 30 seconds until `status` is no longer `queued` or `running`.
-The CLI (`revcenter status <id> --wait`) and MCP (`wait_for_search`) poll for you.
+The CLI (`revcenter status <id> --wait`) and MCP (`wait_for_search`) poll for you. While a search is `queued`,
+`queue` has its place in line and `eta_seconds`, about when it starts; the CLI and MCP check less often the
+further back it waits.
+
+## Many searches at once
+
+Launch as many as you have credits for, from as many agents as you like: none is refused for being busy. Past the
+platform's limit a search waits its turn and starts as one finishes, and workspaces take turns. Before a big batch,
+`GET /v1/capacity` (MCP `get_capacity`, CLI `revcenter capacity`) gives searches running and waiting, the platform's
+pace, and `new_search.starts_in_seconds`, so you can tell the person when to expect results.
 
 | `status` | Meaning | Done? |
 | --- | --- | --- |

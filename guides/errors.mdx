@@ -47,7 +47,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `409` | `search_not_finished` · `no_search_to_expand` · `expansion_limit` | The project can't be expanded now (2 per project) | Wait, or launch a new search |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
-| `429` | `rate_limited` · `network_busy` | Too many requests, or the network is briefly full; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
+| `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |
 | `503` | `access_check_unavailable` · `plan_check_unavailable` | Access or plan couldn't be checked; nothing ran | Retry after `Retry-After` |
 | `503` | `top_up_unavailable` | Top-ups can't be started here | Use **Settings → Plan & billing** |

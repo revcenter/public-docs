@@ -84,6 +84,7 @@
           "POST /auth/revoke",
           "GET /me",
           "GET /me/usage",
+          "GET /capacity",
           "POST /billing/top-up",
           "GET /actions",
           "POST /actions/preview",
