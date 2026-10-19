@@ -613,7 +613,7 @@
       "post": {
         "operationId": "preview_action",
         "summary": "Preview an action",
-        "description": "What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. Works for every action marked proposable in GET /actions. Previewing a requirement change re-scores nothing until it is applied, except that its before/after is computed on the people already read. Does not use shortlist credits.\n\nNeeds scope `searches:read`.",
+        "description": "What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. Works for every action marked proposable in GET /actions. Previewing a requirement change re-scores nothing until it is applied, except that its before/after is computed on the people already read. Previewing launch_search with criteria returns compiled_query: the exact titles, keyword terms, locations, level, years and employers the search will send. page_one_estimate is null in a preview (reading page 1 is paid); the search records it once it runs. Does not use shortlist credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Actions"
         ],
@@ -725,6 +725,34 @@
                           "CPA"
                         ]
                       },
+                      "compiled_query": {
+                        "policyVersion": "lead-query-policy.v1",
+                        "titles": [
+                          "Plant Controller",
+                          "Controller"
+                        ],
+                        "titleMode": "core",
+                        "keywords": {
+                          "terms": [],
+                          "sent": false
+                        },
+                        "locations": [
+                          "Camden, New Jersey, United States"
+                        ],
+                        "seniority": {
+                          "levels": [],
+                          "corrected": null,
+                          "sent": false
+                        },
+                        "years": "8+",
+                        "companies": {
+                          "current": [],
+                          "past": [],
+                          "excluded": []
+                        },
+                        "notes": []
+                      },
+                      "page_one_estimate": null,
                       "credits_remaining": 37,
                       "running": 1
                     }
@@ -935,11 +963,11 @@
                 },
                 "example": {
                   "data": {
-                    "version": "revcenter-criteria.v2.2026-10-16",
+                    "version": "revcenter-criteria.v2.2026-10-18",
                     "fields": {
                       "title_variants": {
                         "use": "filter",
-                        "what": "Current job titles, literal, OR'd (max 10 sent). The first is the role."
+                        "what": "Current job titles, literal, OR'd. The first is the role; it and its closest synonyms are sent (5 at most). Longer, desk-specific phrases go to keywords. Optional when an employer is a current must (the search then broadens titles at that employer)."
                       }
                     },
                     "example": {
