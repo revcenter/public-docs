@@ -112,7 +112,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use credits. |
 | `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
-| `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
+| `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
 | `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `create_top_up` | A Stripe checkout link to add credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use credits. |

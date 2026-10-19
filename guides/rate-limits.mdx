@@ -10,10 +10,13 @@ description: "Request and search limits, the 429 response, and how to retry."
 | Requests per key | 600 a minute |
 | Requests per workspace | 3,000 a minute |
 | Launching a search or an expansion | Not counted |
-| Searches running at once | No limit per workspace; past the platform's, they wait their turn |
+| Searches running at once | 3 per workspace; the rest wait their turn (`queued`, with `queue.eta_seconds`) and start as one finishes |
 | Active keys | 5 |
 
-There is no daily cap: how many searches you run is set by your [credits](/guides/billing). Your
+There is no daily cap: how many searches you run is set by your [credits](/guides/billing). Launch as
+many as you like at once; a waiting search is never refused or charged twice, and `GET /v1/capacity`
+says when a new one would start. `GET /v1/me` and `GET /v1/capacity` answer from a copy up to 5
+seconds old, so checking them more often than that tells you nothing new. Your
 limits and today's use are in **Settings → Usage → API** and `GET /v1/me`.
 
 ## Headers

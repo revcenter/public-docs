@@ -8,7 +8,7 @@ description: "Searches and expansions run in the background: how to wait and whi
 Launching a search and expanding return `202` with a `search_id` right away. The work runs in the background,
 usually for a few minutes.
 
-Poll `GET /v1/searches/{search_id}` every 10 to 30 seconds until `status` is no longer `queued` or `running`.
+Poll `GET /v1/searches/{search_id}` every 30 seconds (a search takes minutes) until `status` is no longer `queued` or `running`.
 The CLI (`revcenter status <id> --wait`) and MCP (`wait_for_search`) poll for you. While a search is `queued`,
 `queue` has its place in line and `eta_seconds`, about when it starts; the CLI and MCP check less often the
 further back it waits.
