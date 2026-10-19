@@ -13,7 +13,7 @@ description: "Request and search limits, the 429 response, and how to retry."
 | Searches running at once | No limit per workspace; past the platform's, they wait their turn |
 | Active keys | 5 |
 
-There is no daily cap: how many searches you run is set by your [shortlist credits](/guides/billing). Your
+There is no daily cap: how many searches you run is set by your [credits](/guides/billing). Your
 limits and today's use are in **Settings → Usage → API** and `GET /v1/me`.
 
 ## Headers
@@ -36,12 +36,12 @@ A `429` has a `Retry-After` header and the same number in `error.details.retry_a
 | `launch_in_progress` | The same `Idempotency-Key` is still being started by another request | 5 |
 
 A launch is never refused for being busy. A paid launch (`launch_search`, `expand_search`) is not counted
-against the request limits: each one uses a shortlist credit, and a search past the platform's limit waits its
+against the request limits: each one reserves credits, and a search past the platform's limit waits its
 turn with `status: queued` and a `queue.eta_seconds`. Workspaces take turns, so many searches waiting in one
 workspace don't hold up another workspace's first one. `GET /v1/capacity` says how busy it is and when a search
-launched now would start. A database-only launch uses no credit and is counted like any request.
+launched now would start. A database-only launch uses no credits and is counted like any request.
 
-A `429` means nothing ran and no credit was used. The CLI and MCP server wait out `Retry-After` and retry for
+A `429` means nothing ran and no credits were reserved. The CLI and MCP server wait out `Retry-After` and retry for
 you, with the same `Idempotency-Key`, for up to three minutes (`REVCENTER_RETRY_SECONDS` changes it).
 
 Behind the API, every running search's LinkedIn reads share one pool fairly: the search holding the fewest

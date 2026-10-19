@@ -15,17 +15,17 @@ description: "The primitives Revcenter runs on, what each does, and which tools 
 | **Search records** | Everyone a search (or all of a project's searches) returned, read or not, with what became of each (`scored`, `known`, `not_read`). | `records`, `records --project` | `list_search_records`, `export_search_records`, `list_project_records`, `export_project_records` | `/searches/{id}/records*`, `/projects/{id}/records*` |
 | **Scoring change** | A new cut-off, weights or requirements for people already read. | `rescore` | `preview_scoring`, `apply_scoring` | `/searches/{id}/scoring/*` |
 | **Shortlist** | A project's list of people who fit: those at or above the cut-off, plus anyone added by hand. | `shortlist`, `add`, `remove` | `get_shortlist`, `export_shortlist`, `add_shortlist_members`, `remove_shortlist_member` | `/projects/{id}/shortlist*` |
-| **Shortlist credit** | The billing unit, shared with the app. One per new search and per expansion. | shown per command | shown per tool | shown per endpoint |
+| **Credit** | The billing unit, shared with the app. A new search or expansion reserves up to its `max_credits` (1,000 by default), is charged for the profiles it reads, and refunds the rest. | shown per command | shown per tool | shown per endpoint |
 | **Client portal** | Where your clients see and share shortlists. | not available | not available | not available |
 
 Client portals, sharing, contact lookups and team management are in the app only.
 
 ## How the pieces fit
 
-1. Make a **project**, write **criteria**, launch a **search** (1 credit).
+1. Make a **project**, write **criteria**, launch a **search** (up to 1,000 credits).
 2. It finishes with an outcome (*Shortlist ready*, *Poor yield* or *No results*) and fills the **shortlist**.
 3. Read the **scored people**, try **scoring changes** (free), edit the **shortlist**.
-4. For more people, run a database pass (free) or **expand** (1 credit).
+4. For more people, run a database pass (free) or **expand** (up to 1,000 credits).
 
 A search sent with criteria runs exactly those criteria; no model decides what to search. Only a `jd_text`
 search has criteria read by Revcenter, and says so (`compiled_by: "revcenter_model"`).

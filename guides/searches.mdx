@@ -26,10 +26,10 @@ The outcome is fixed when the search finishes. Later changes move the shortlist,
 
 | Option | What it does | Credits |
 | --- | --- | --- |
-| **Rescore** | New cut-off, weights or requirements for everyone already read. Preview first. | Does not use shortlist credits. |
-| **Database pass** | Score your workspace's candidates on file against the search. | Does not use shortlist credits. |
-| **Expand** | A new live pass, skipping everyone already found. Up to 2 per project. | Uses 1 shortlist credit per expansion. |
-| **Database-only search** | A new search of your own candidates only (`database_only: true`). | Does not use shortlist credits. |
+| **Rescore** | New cut-off, weights or requirements for everyone already read. Preview first. | Does not use credits. |
+| **Database pass** | Score your workspace's candidates on file against the search. | Does not use credits. |
+| **Expand** | A new live pass, skipping everyone already found. Up to 2 per project. | Reserves up to its `max_credits` (1,000 by default) per expansion; unused credits are refunded. |
+| **Database-only search** | A new search of your own candidates only (`database_only: true`). | Does not use credits. |
 
 Titles and places can't be rescored; changing them needs a new search.
 

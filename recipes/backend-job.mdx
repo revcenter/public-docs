@@ -1,12 +1,12 @@
 ---
 title: "Run a search from a backend job"
-description: "A Node.js job that launches a search safely, waits for it, pages through the people and saves the shortlist CSV. Uses 1 shortlist credit."
+description: "A Node.js job that launches a search safely, waits for it, pages through the people and saves the shortlist CSV. Reserves up to 1,000 credits."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
 This job is what a scheduled task or a queue worker would run: it is safe to retry, honors rate limits, and
-pages through results. It uses **1 shortlist credit**, for the search, and none on a retry. It needs Node.js 20
+pages through results. It reserves up to **1,000 credits** for the search (unused credits are refunded) and nothing more on a retry. It needs Node.js 20
 or later and no packages.
 
 {/* run: file job.mjs */}

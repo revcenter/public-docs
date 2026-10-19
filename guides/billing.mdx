@@ -1,25 +1,42 @@
 ---
 title: "Billing"
-description: "What uses a shortlist credit, and what is free."
+description: "Credits: what a search reserves, what it is charged, and what is free."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-The API uses your workspace's **shortlist credits**: the same plan and top-ups as the Revcenter app. There is no
-separate API balance.
+The API uses your workspace's **credits**: the same plan and top-ups as the Revcenter app. There is no separate API
+balance. A standard search uses about 1,000 credits, so 37,000 credits is roughly 37 standard searches.
 
 | Action | Uses |
 | --- | --- |
-| Launching a search | 1 credit |
-| Expanding a search | 1 credit |
+| Launching a search | Up to its `max_credits` (1,000 by default); unused credits are refunded |
+| Expanding a search | Up to its `max_credits` (1,000 by default); unused credits are refunded |
 | Database-only search | nothing |
 | Rescoring (cut-off, weights, requirements), database pass | nothing |
 | Reading, editing and exporting | nothing |
 
-A search that fails to start gives its credit back. A retry with the same `Idempotency-Key` never uses a second.
+## How a search is charged
 
-Out of credits, a launch returns `402 shortlist_allocation_exhausted`; add credits under
-**Settings → Plan & billing**. Without an active plan, requests return `402 plan_required`.
+1. **Cap.** `launch_search` and `expand_search` take `max_credits`: any whole number from 100 to 20,000, with
+   presets of 500, 1,000, 2,500 and 5,000. Leave it out for 1,000. The CLI flag is `--max-credits`.
+2. **Reserve.** The cap is held from your balance when the search starts and returned as `credits_reserved`. If
+   the balance can't cover it, the launch returns `402 shortlist_allocation_exhausted` and nothing runs.
+3. **Charge.** A search spends credits as it reads profiles, and stops at its cap. When it finishes it is charged
+   what it used, never more than the cap, and the rest comes back. `GET /v1/searches/{id}` shows
+   `credits_charged` once it has finished (`null` while it runs).
+4. **Refund.** A search that fails, or never starts, is refunded in full. A retry with the same `Idempotency-Key`
+   never reserves twice.
 
-Credits left: **Settings → Usage** or `GET /v1/me/usage`. Each action's cost is in `GET /v1/actions` and on its
+A bigger cap only lets a search read further; it never costs more than the profiles it reads. Use 500 for a quick
+look at a narrow role and 2,500 or 5,000 for a broad one or several places.
+
+## Balance
+
+Credits left: **Settings → Usage**, `GET /v1/me/usage` or `revcenter usage` (`credits_remaining`). Credits held by
+running searches come back into it as they finish. Plans and top-ups add 1,000 credits for every shortlist on the
+price sheet, at your plan's rate.
+
+Without an active plan, requests return `402 plan_required`. Add credits under **Settings → Plan & billing**, or
+with `revcenter topup`. Each action's cost is in `GET /v1/actions` and on its
 [API reference](/api-reference/introduction) page.

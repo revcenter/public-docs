@@ -1,12 +1,12 @@
 ---
 title: "Run a search and export the shortlist"
-description: "From criteria to a CSV shortlist with the revcenter CLI, with the output to expect at each step. Uses 1 shortlist credit."
+description: "From criteria to a CSV shortlist with the revcenter CLI, with the output to expect at each step. Reserves up to 1,000 credits."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
 Run `revcenter auth login` first (or set `REVCENTER_API_KEY`). The recipe uses [jq](https://jqlang.org) and
-**1 shortlist credit**, for the search in step 2.
+up to **1,000 credits**, for the search in step 2; unused credits are refunded.
 
 ## 1. Make a project
 
@@ -42,7 +42,7 @@ SEARCH=$(revcenter search "$PROJECT" --criteria criteria.json --key "maint-$PROJ
 revcenter status "$SEARCH" --wait
 ```
 
-This uses 1 shortlist credit. Running the same `revcenter search` with the same `--key` again returns the same
+This reserves up to 1,000 credits (`--max-credits` changes the cap). Running the same `revcenter search` with the same `--key` again returns the same
 search and uses nothing. `--wait` prints progress to standard error and the finished search to standard output:
 
 {/* expect */}

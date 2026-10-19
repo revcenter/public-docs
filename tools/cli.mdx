@@ -1,6 +1,6 @@
 ---
 title: "CLI reference"
-description: "Every revcenter command, its options, and whether it uses shortlist credits."
+description: "Every revcenter command, its options, and whether it uses credits."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
@@ -19,50 +19,50 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 
 | Command | Does | Cost |
 | --- | --- | --- |
-| `revcenter auth login [--no-browser]` | Opens your browser: pick a workspace and authorize, and the new key is saved. Over SSH or with `--no-browser` it shows a link and a code to authorize from any device instead. | Does not use shortlist credits. |
-| `revcenter auth login --start` · `revcenter auth login --finish` | The same login in two steps, for agents: `--start` prints the link and exits; `--finish` waits for approval and saves the key. | Does not use shortlist credits. |
-| `revcenter auth login --key <key>` | Saves a key you already have. `--key -` reads it from standard input. `--api-url <url>` sets another API. | Does not use shortlist credits. |
-| `revcenter auth status` | The key in use (masked), where it came from, the workspace and the expiry. | Does not use shortlist credits. |
-| `revcenter auth logout` | Deletes the saved key. | Does not use shortlist credits. |
-| `revcenter login` · `revcenter logout` | Shortcuts for `auth login` and `auth logout`. Logout also revokes the key on the server. | Does not use shortlist credits. |
-| `revcenter setup [claude-code\|codex\|gemini\|cursor\|claude-desktop]` | Adds the MCP server to your AI tools: every one it finds, or the one you name. No key goes in any config. | Does not use shortlist credits. |
-| `revcenter code [claude options]` | Opens your own Claude Code, signed in to your own plan, with Revcenter loaded: its skills, its MCP server and a Revcenter status line. Every option after `code` goes to `claude`. `REVCENTER_NO_BANNER=1` hides the banner; `REVCENTER_CLAUDE_PATH` picks the `claude` to run. | Does not use shortlist credits. |
-| `revcenter statusline` | The one line `revcenter code` shows in Claude Code: workspace, credits, searches running and waiting. | Does not use shortlist credits. |
-| `revcenter mcp` | Runs the [MCP server](/tools/mcp) over standard input and output. | Does not use shortlist credits. |
-| `revcenter completion <bash\|zsh\|fish>` | Prints shell completions. | Does not use shortlist credits. |
-| `revcenter whoami` | The key, workspace, plan, limits and today's use. | Does not use shortlist credits. |
-| `revcenter usage` | Today's requests and searches, and credits left. | Does not use shortlist credits. |
-| `revcenter capacity` | How busy Revcenter is, and when a search launched now would start. | Does not use shortlist credits. |
-| `revcenter topup [--amount <usd>]` | Opens Stripe checkout to buy shortlist credits at your plan's rate ($1,500 to $30,000; default $1,500). | Does not use shortlist credits. |
-| `revcenter actions` | Every API action and its cost. | Does not use shortlist credits. |
-| `revcenter reference` | Every criteria field and its allowed values. | Does not use shortlist credits. |
-| `revcenter industries <word>` | LinkedIn industries matching a word. | Does not use shortlist credits. |
-| `revcenter projects [--limit <n>] [--cursor <c>]` | Projects, newest first. | Does not use shortlist credits. |
-| `revcenter project create <name>` | Makes a project. | Does not use shortlist credits. |
-| `revcenter project <project_id>` | One project. | Does not use shortlist credits. |
-| `revcenter searches <project_id> [--limit <n>] [--cursor <c>]` | A project's searches, oldest first. | Does not use shortlist credits. |
-| `revcenter search <project_id> --criteria <file.json>` | Launches a search on your criteria. `--jd <file.txt>` uses a job description instead. | Uses 1 shortlist credit. None with `--database-only`. |
-| `revcenter status <search_id> [--wait]` | Status, stage and outcome. `--wait` polls every 10 seconds, up to 15 minutes. | Does not use shortlist credits. |
-| `revcenter cancel <search_id>` | Stops a running search and keeps who it read. | Does not use shortlist credits. |
-| `revcenter people <search_id> [--min-score <n>] [--limit <n>] [--cursor <c>] [--no-profile]` | Everyone scored, best first. | Does not use shortlist credits. |
-| `revcenter records <search_id> [--limit <n>] [--cursor <c>] [--no-profile] [--csv [<file>]]` | Every person a search returned, read or not, with their status (`scored`, `known`, `not_read`) and score, or all of them as CSV. With `--project <project_id>` instead of a search id, every search in the project at once, one record per person with the `search_ids` that returned them. | Does not use shortlist credits. |
-| `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use shortlist credits. |
-| `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use shortlist credits. |
-| `revcenter expand <project_id>` | A new live pass for more people on the same role. | Uses 1 shortlist credit. |
-| `revcenter shortlist <project_id> [--csv [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV with every profile field. | Does not use shortlist credits. |
-| `revcenter candidates [--q <text>] [--project <id>] [--title ..] [--company ..] [--location ..] [--limit <n>] [--cursor <c>] [--csv [<file>]]` | The workspace's candidate database (the Candidates tab), or all of it as CSV with every profile field. | Does not use shortlist credits. |
-| `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use shortlist credits. |
-| `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use shortlist credits. |
-| `revcenter webhooks list` | Your [webhook](/guides/webhooks) endpoints. | Does not use shortlist credits. |
-| `revcenter webhooks create <url> [--events <a,b>] [--description "<text>"]` | Adds an endpoint for search and shortlist events (all events unless `--events`) and prints its signing secret, once. | Does not use shortlist credits. |
-| `revcenter webhooks update <webhook_id> [--enable] [--disable] [--url <url>] [--events <a,b>] [--description "<text>"]` | Changes an endpoint, or turns it off and on. | Does not use shortlist credits. |
-| `revcenter webhooks delete <webhook_id>` | Removes an endpoint and its delivery history. | Does not use shortlist credits. |
-| `revcenter webhooks test <webhook_id>` | Sends a signed `webhook.test` event now and prints the status code your endpoint answered. | Does not use shortlist credits. |
-| `revcenter webhooks deliveries <webhook_id> [--limit <n>] [--cursor <c>]` | What was sent to an endpoint, newest first, with each status and response code. | Does not use shortlist credits. |
-| `revcenter webhooks redeliver <delivery_id>` | Sends a delivery's event again, with the same event id. | Does not use shortlist credits. |
-| `revcenter preview <action> --input <file.json>` | What an action would do and cost, with a `proposal_id`. Changes nothing. | Does not use shortlist credits. |
-| `revcenter apply <proposal_id>` | Runs a previewed action exactly as previewed. | Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else. |
-| `revcenter --version` · `revcenter --help` | Version, or the command list. `help <command>` shows examples. | Does not use shortlist credits. |
+| `revcenter auth login [--no-browser]` | Opens your browser: pick a workspace and authorize, and the new key is saved. Over SSH or with `--no-browser` it shows a link and a code to authorize from any device instead. | Does not use credits. |
+| `revcenter auth login --start` · `revcenter auth login --finish` | The same login in two steps, for agents: `--start` prints the link and exits; `--finish` waits for approval and saves the key. | Does not use credits. |
+| `revcenter auth login --key <key>` | Saves a key you already have. `--key -` reads it from standard input. `--api-url <url>` sets another API. | Does not use credits. |
+| `revcenter auth status` | The key in use (masked), where it came from, the workspace and the expiry. | Does not use credits. |
+| `revcenter auth logout` | Deletes the saved key. | Does not use credits. |
+| `revcenter login` · `revcenter logout` | Shortcuts for `auth login` and `auth logout`. Logout also revokes the key on the server. | Does not use credits. |
+| `revcenter setup [claude-code\|codex\|gemini\|cursor\|claude-desktop]` | Adds the MCP server to your AI tools: every one it finds, or the one you name. No key goes in any config. | Does not use credits. |
+| `revcenter code [claude options]` | Opens your own Claude Code, signed in to your own plan, with Revcenter loaded: its skills, its MCP server and a Revcenter status line. Every option after `code` goes to `claude`. `REVCENTER_NO_BANNER=1` hides the banner; `REVCENTER_CLAUDE_PATH` picks the `claude` to run. | Does not use credits. |
+| `revcenter statusline` | The one line `revcenter code` shows in Claude Code: workspace, credits, searches running and waiting. | Does not use credits. |
+| `revcenter mcp` | Runs the [MCP server](/tools/mcp) over standard input and output. | Does not use credits. |
+| `revcenter completion <bash\|zsh\|fish>` | Prints shell completions. | Does not use credits. |
+| `revcenter whoami` | The key, workspace, plan, limits and today's use. | Does not use credits. |
+| `revcenter usage` | Today's requests and searches, and credits left. | Does not use credits. |
+| `revcenter capacity` | How busy Revcenter is, and when a search launched now would start. | Does not use credits. |
+| `revcenter topup [--amount <usd>]` | Opens Stripe checkout to buy credits at your plan's rate ($1,500 to $30,000; default $1,500). | Does not use credits. |
+| `revcenter actions` | Every API action and its cost. | Does not use credits. |
+| `revcenter reference` | Every criteria field and its allowed values. | Does not use credits. |
+| `revcenter industries <word>` | LinkedIn industries matching a word. | Does not use credits. |
+| `revcenter projects [--limit <n>] [--cursor <c>]` | Projects, newest first. | Does not use credits. |
+| `revcenter project create <name>` | Makes a project. | Does not use credits. |
+| `revcenter project <project_id>` | One project. | Does not use credits. |
+| `revcenter searches <project_id> [--limit <n>] [--cursor <c>]` | A project's searches, oldest first. | Does not use credits. |
+| `revcenter search <project_id> --criteria <file.json> [--max-credits <n>]` | Launches a search on your criteria. `--jd <file.txt>` uses a job description instead. `--max-credits` caps it (500, 1000, 2500 or 5000; default 1000). | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. None with `--database-only`. |
+| `revcenter status <search_id> [--wait]` | Status, stage, outcome, and `credits_charged` once it finishes. `--wait` polls every 10 seconds, up to 15 minutes. | Does not use credits. |
+| `revcenter cancel <search_id>` | Stops a running search and keeps who it read. | Does not use credits. |
+| `revcenter people <search_id> [--min-score <n>] [--limit <n>] [--cursor <c>] [--no-profile]` | Everyone scored, best first. | Does not use credits. |
+| `revcenter records <search_id> [--limit <n>] [--cursor <c>] [--no-profile] [--csv [<file>]]` | Every person a search returned, read or not, with their status (`scored`, `known`, `not_read`) and score, or all of them as CSV. With `--project <project_id>` instead of a search id, every search in the project at once, one record per person with the `search_ids` that returned them. | Does not use credits. |
+| `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use credits. |
+| `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use credits. |
+| `revcenter expand <project_id> [--max-credits <n>]` | A new live pass for more people on the same role. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
+| `revcenter shortlist <project_id> [--csv [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV with every profile field. | Does not use credits. |
+| `revcenter candidates [--q <text>] [--project <id>] [--title ..] [--company ..] [--location ..] [--limit <n>] [--cursor <c>] [--csv [<file>]]` | The workspace's candidate database (the Candidates tab), or all of it as CSV with every profile field. | Does not use credits. |
+| `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use credits. |
+| `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use credits. |
+| `revcenter webhooks list` | Your [webhook](/guides/webhooks) endpoints. | Does not use credits. |
+| `revcenter webhooks create <url> [--events <a,b>] [--description "<text>"]` | Adds an endpoint for search and shortlist events (all events unless `--events`) and prints its signing secret, once. | Does not use credits. |
+| `revcenter webhooks update <webhook_id> [--enable] [--disable] [--url <url>] [--events <a,b>] [--description "<text>"]` | Changes an endpoint, or turns it off and on. | Does not use credits. |
+| `revcenter webhooks delete <webhook_id>` | Removes an endpoint and its delivery history. | Does not use credits. |
+| `revcenter webhooks test <webhook_id>` | Sends a signed `webhook.test` event now and prints the status code your endpoint answered. | Does not use credits. |
+| `revcenter webhooks deliveries <webhook_id> [--limit <n>] [--cursor <c>]` | What was sent to an endpoint, newest first, with each status and response code. | Does not use credits. |
+| `revcenter webhooks redeliver <delivery_id>` | Sends a delivery's event again, with the same event id. | Does not use credits. |
+| `revcenter preview <action> --input <file.json>` | What an action would do and cost, with a `proposal_id`. Changes nothing. | Does not use credits. |
+| `revcenter apply <proposal_id>` | Runs a previewed action exactly as previewed. | Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. |
+| `revcenter --version` · `revcenter --help` | Version, or the command list. `help <command>` shows examples. | Does not use credits. |
 
 `search` also takes `--target <n>` (people to aim for, 1 to 100) and `--key <key>`, an idempotency key. The
 same `--key` returns the same search and never uses a second credit. Without `--key`, one is derived from the

@@ -23,7 +23,7 @@ description: "From login to a scored shortlist with the revcenter CLI, or with c
         echo '{"title_variants":["Plant Maintenance Manager","Maintenance Manager"],"metro":"Lancaster, PA"}' > criteria.json
         revcenter search "$PROJECT" --criteria criteria.json --wait
         ```
-        This uses 1 shortlist credit and waits until the search finishes (usually a few minutes).
+        This reserves up to 1,000 credits (unused credits come back) and waits until the search finishes (usually a few minutes).
       </Step>
       <Step title="Read the results">
         ```bash
@@ -56,7 +56,8 @@ description: "From login to a scored shortlist with the revcenter CLI, or with c
           -H "Idempotency-Key: lancaster-maint-0001" \
           -d '{"criteria": {"title_variants": ["Plant Maintenance Manager"], "metro": "Lancaster, PA"}}'
         ```
-        Uses 1 shortlist credit and returns `202` with a `search_id`. Repeating it with the same key returns the
+        Reserves up to 1,000 credits (`max_credits` changes the cap; unused credits are refunded) and returns `202` with a
+        `search_id` and `credits_reserved`. Repeating it with the same key returns the
         same search.
       </Step>
       <Step title="Wait, then read">

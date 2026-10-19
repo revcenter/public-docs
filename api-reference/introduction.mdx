@@ -17,7 +17,8 @@ in `data`, and every response has a `request_id`:
 - Lists add a `cursor` ([pagination](/guides/pagination)).
 - Errors have one shape ([errors](/guides/errors)).
 - Rate-limit headers are on every response ([rate limits](/guides/rate-limits)).
-- Each endpoint page states its cost: free or 1 shortlist credit.
+- Each endpoint page states its cost: free, or a launch or expansion reserving up to `max_credits` credits (unused
+  credits are refunded).
 - Any write can be previewed with `POST /actions/preview` and run with `POST /proposals/apply`.
 
 A typical flow:

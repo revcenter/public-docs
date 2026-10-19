@@ -28,6 +28,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_criteria` | Criteria failed validation | Fix the fields named; see `GET /v1/reference/criteria` |
 | `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters | Send one |
 | `400` | `idempotency_key_required` | A launch without an `Idempotency-Key` (8 to 160 characters) | Add the header |
+| `400` | `invalid_max_credits` | `max_credits` is not a whole number from 100 to 20,000 | Use 500, 1000, 2500 or 5000, or leave it out for 1,000 |
 | `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search |
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |
@@ -39,7 +40,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
 | `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
 | `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
-| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No shortlist credit left. `details` has `billing_url` and `top_up` | `revcenter topup`, or see [billing](/guides/billing) |
+| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No plan, or not enough credits for the search's `max_credits`. `details` has `billing_url` and `top_up` | A smaller `max_credits`, `revcenter topup`, or see [billing](/guides/billing) |
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
 | `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
@@ -81,7 +82,7 @@ revcenter: project_not_found: No project with that id in this workspace.
 | Scoring apply, database pass, shortlist add and remove, cancel | Yes |
 | `POST /proposals/apply` | Yes for a search launch; otherwise as the action itself |
 | `POST /projects` | No: each call makes a project |
-| `POST /projects/{id}/expand` | No: each success uses a credit. Check `GET /projects/{id}/searches` first |
+| `POST /projects/{id}/expand` | No: each success reserves credits. Check `GET /projects/{id}/searches` first |
 
 Retry `429` after `Retry-After` and `5xx` with backoff. Fix other `4xx` before retrying.
 
