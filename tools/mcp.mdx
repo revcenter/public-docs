@@ -88,6 +88,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use credits. |
 | `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. |
 | `get_criteria_reference` | Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. | Does not use credits. |
+| `draft_criteria` | Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. | Does not use credits. |
 | `search_industries` | LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. | Does not use credits. |
 | `list_projects` | The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. | Does not use credits. |
 | `create_project` | Make a project: one role, one shortlist. | Does not use credits. |
@@ -138,6 +139,11 @@ Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `
 3. Otherwise, or if you don't answer within 10 minutes, the tool returns `status: "pending_approval"` with a
    `proposal`. Nothing has run. The agent shows it to you and calls `apply_proposal` after you agree. A
    proposal lasts 30 minutes.
+
+Criteria are reviewed before they run, wherever they come from: a requirement sentence in `must_have` is
+scored as context instead of matched as literal text (`review.changes` says so), and a place wider than the
+role's own (all of the United States for a role in Mount Jackson, VA) comes back in `review.warnings`. The
+prompt shows each warning on its own line, starting `Check:`, so you see it before you accept.
 
 Approvals that arrive together are asked once. When an agent launches several searches in parallel, or
 several subagents launch at the same moment, you get one prompt that lists every search and the total it

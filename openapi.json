@@ -1130,6 +1130,153 @@
         }
       }
     },
+    "/criteria/draft": {
+      "post": {
+        "operationId": "draft_criteria",
+        "summary": "Draft criteria from a job description",
+        "description": "Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. The same reading the app's composer makes: titles and their closest synonyms, the role's own place and radius, years, and requirements as short terms, with the rest as scored context. `review.warnings` names anything to check before launching (a place wider than the role's own); `compiled_query` is the exact query the criteria will send. Pass `project_id` to check the place against the project's name too. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "tags": [
+          "Reference"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jd_text"
+                ],
+                "properties": {
+                  "jd_text": {
+                    "type": "string",
+                    "description": "The job description or the client's request, at least 40 characters."
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "description": "Optional: the project the search is for."
+                  }
+                }
+              },
+              "example": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "criteria": {
+                          "$ref": "#/components/schemas/Criteria"
+                        },
+                        "review": {
+                          "$ref": "#/components/schemas/CriteriaReview"
+                        },
+                        "compiled_query": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "criteria": {
+                      "title_variants": [
+                        "Plant Controller",
+                        "Controller"
+                      ],
+                      "metro": "Camden, NJ",
+                      "geo_radius_mi": 40,
+                      "years_experience": {
+                        "min": 8,
+                        "enforcement": "hard"
+                      },
+                      "must_have": [
+                        "CPA"
+                      ]
+                    },
+                    "review": {
+                      "changes": [],
+                      "warnings": []
+                    },
+                    "compiled_query": {
+                      "titles": [
+                        "Plant Controller",
+                        "Controller"
+                      ],
+                      "locations": [
+                        "Camden, NJ"
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/reference/industries": {
       "get": {
         "operationId": "search_industries",
@@ -1971,7 +2118,8 @@
                     "closed_at": "2026-10-17T14:19:40.000Z",
                     "queue": null,
                     "credits_reserved": 1000,
-                    "credits_charged": 412
+                    "credits_charged": 412,
+                    "advice": []
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -5738,6 +5886,38 @@
           }
         }
       },
+      "CriteriaReview": {
+        "type": "object",
+        "description": "What Revcenter changed in criteria before running them, and what to check: the rules the app's composer applies.",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Corrections made, e.g. a requirement sentence moved from must_have to must_have_context."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "location_wider_than_role",
+                    "location_nationwide"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Not corrected; show them to the person before launching."
+          }
+        }
+      },
       "LaunchedSearch": {
         "type": "object",
         "properties": {
@@ -5756,6 +5936,9 @@
           },
           "criteria": {
             "$ref": "#/components/schemas/Criteria"
+          },
+          "review": {
+            "$ref": "#/components/schemas/CriteriaReview"
           },
           "database_only": {
             "type": "boolean"
@@ -5866,6 +6049,13 @@
               "null"
             ],
             "description": "What the search was charged once it closed, never more than credits_reserved; the rest was refunded. Null while it runs."
+          },
+          "advice": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What to check before the list goes to a client, once it finishes: a thin pool (under 75 people read) or a place wider than a city. Empty when there is nothing to check."
           }
         }
       },

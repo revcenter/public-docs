@@ -91,6 +91,7 @@
           "POST /actions/preview",
           "POST /proposals/apply",
           "GET /reference/criteria",
+          "POST /criteria/draft",
           "GET /reference/industries",
           "GET /projects",
           "POST /projects",

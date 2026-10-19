@@ -36,6 +36,7 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter topup [--amount <usd>]` | Opens Stripe checkout to buy credits at your plan's rate ($1,500 to $30,000; default $1,500). | Does not use credits. |
 | `revcenter actions` | Every API action and its cost. | Does not use credits. |
 | `revcenter reference` | Every criteria field and its allowed values. | Does not use credits. |
+| `revcenter draft <jd.txt> [--project <project_id>]` | Revcenter's criteria for a job description or a client's request, as the app drafts them, with `review.warnings` to check and the `compiled_query` it would send. Save it, edit it, then `revcenter search` or `revcenter launch` with it. Launches nothing. | Does not use credits. |
 | `revcenter industries <word>` | LinkedIn industries matching a word. | Does not use credits. |
 | `revcenter projects [--limit <n>] [--cursor <c>]` | Projects, newest first. | Does not use credits. |
 | `revcenter project create <name>` | Makes a project. | Does not use credits. |
