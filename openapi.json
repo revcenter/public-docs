@@ -2270,6 +2270,493 @@
         }
       }
     },
+    "/searches/{searchId}/records": {
+      "get": {
+        "operationId": "list_search_records",
+        "summary": "List every record a search returned",
+        "description": "Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one. list_people and the shortlist hold only the people a search scored; this is everyone it found, one record per person (the page that listed them first wins). scored: read and scored in this search. known: already in this workspace from another search, so not read again. not_read: listed but never read (screened out, left for a later round, or the search stopped). candidate_id and profile are null for people this workspace has not read. A database-only search returns no records. For every search in a project at once, use list_project_records; for everyone across the workspace, list_candidates. No contact details. Does not use shortlist credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Searches"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "profile",
+            "in": "query",
+            "required": false,
+            "description": "false to leave profiles out",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SearchRecord"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                      "status": "scored",
+                      "score": 91,
+                      "page": 1,
+                      "linkedin_url": "https://www.linkedin.com/in/example",
+                      "first_name": "Dana",
+                      "last_name": "Whitfield",
+                      "title": "Plant Controller",
+                      "company": "Garden State Foods",
+                      "location": "Cherry Hill, NJ",
+                      "summary": "Plant controller in food manufacturing.",
+                      "open_profile": true,
+                      "premium": false,
+                      "profile": null
+                    },
+                    {
+                      "candidate_id": null,
+                      "status": "not_read",
+                      "score": null,
+                      "page": 3,
+                      "linkedin_url": "https://www.linkedin.com/in/example-2",
+                      "first_name": "Sam",
+                      "last_name": "Ortiz",
+                      "title": "Assistant Controller",
+                      "company": "Delaware Valley Packaging",
+                      "location": "Cherry Hill, NJ",
+                      "summary": null,
+                      "open_profile": false,
+                      "premium": false,
+                      "profile": null
+                    }
+                  ],
+                  "cursor": null,
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/records.csv": {
+      "get": {
+        "operationId": "export_search_records",
+        "summary": "Download every record a search returned as CSV",
+        "description": "Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address and summary, and the read profile's experience, education and skills as text columns. Does not use shortlist credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Searches"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "status,score,page,first_name,last_name,title,company,location,linkedin_url,open_profile,premium,summary,candidate_id,about,experience_history,education,skills,certifications,languages,projects,connections\nscored,91,1,Dana,Whitfield,Plant Controller,Garden State Foods,\"Cherry Hill, NJ\",https://www.linkedin.com/in/example,yes,no,Plant controller in food manufacturing.,3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99,,,,,,,,\nnot_read,,3,Sam,Ortiz,Assistant Controller,Delaware Valley Packaging,\"Cherry Hill, NJ\",https://www.linkedin.com/in/example-2,no,no,,,,,,,,,,\n"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/records": {
+      "get": {
+        "operationId": "list_project_records",
+        "summary": "List every record a project's searches returned",
+        "description": "Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one. One record per person across the project (the earliest listing wins), with the same fields as list_search_records plus first_search_id (the search that listed them first) and search_ids (every search in the project that returned them). status is scored when any of the project's searches scored them, else known when this workspace already holds them, else not_read; score is the best any of the project's searches gave. For everyone across the whole workspace, use list_candidates. No contact details. Does not use shortlist credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "profile",
+            "in": "query",
+            "required": false,
+            "description": "false to leave profiles out",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectRecord"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                      "status": "scored",
+                      "score": 91,
+                      "page": 1,
+                      "linkedin_url": "https://www.linkedin.com/in/example",
+                      "first_name": "Dana",
+                      "last_name": "Whitfield",
+                      "title": "Plant Controller",
+                      "company": "Garden State Foods",
+                      "location": "Cherry Hill, NJ",
+                      "summary": "Plant controller in food manufacturing.",
+                      "open_profile": true,
+                      "premium": false,
+                      "profile": null,
+                      "first_search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                      "search_ids": [
+                        "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "7d2e4f1a-0c3b-4a5d-9e8f-6b1c2d3e4f52"
+                      ]
+                    }
+                  ],
+                  "cursor": null,
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/records.csv": {
+      "get": {
+        "operationId": "export_project_records",
+        "summary": "Download every record a project's searches returned as CSV",
+        "description": "Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;). Does not use shortlist credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "status,score,page,first_name,last_name,title,company,location,linkedin_url,open_profile,premium,summary,candidate_id,first_search_id,search_ids,about,experience_history,education,skills,certifications,languages,projects,connections\nscored,91,1,Dana,Whitfield,Plant Controller,Garden State Foods,\"Cherry Hill, NJ\",https://www.linkedin.com/in/example,yes,no,Plant controller in food manufacturing.,3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99,0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61,0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61;7d2e4f1a-0c3b-4a5d-9e8f-6b1c2d3e4f52,,,,,,,,\n"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/searches/{searchId}/scoring/preview": {
       "post": {
         "operationId": "preview_scoring",
@@ -4321,6 +4808,123 @@
             "description": "The full read profile: experience, education, skills, certifications, languages, projects. No contact details."
           }
         }
+      },
+      "SearchRecord": {
+        "type": "object",
+        "properties": {
+          "candidate_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The person's id in this workspace (as list_people, add_shortlist_members); null when this workspace has not read them."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scored",
+              "known",
+              "not_read"
+            ],
+            "description": "scored: read and scored in this search. known: already in this workspace from another search. not_read: listed, never read."
+          },
+          "score": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "page": {
+            "type": "integer",
+            "description": "The result page that listed them first."
+          },
+          "linkedin_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "open_profile": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Can be messaged without a connection."
+          },
+          "premium": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "profile": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "The full read profile, as list_people gives it; null when not read. No contact details."
+          }
+        }
+      },
+      "ProjectRecord": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SearchRecord"
+          },
+          {
+            "type": "object",
+            "description": "status rolls up across the project's searches (scored beats known beats not_read); score is the best any of them gave.",
+            "properties": {
+              "first_search_id": {
+                "type": "string",
+                "description": "The search whose page listed them first."
+              },
+              "search_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Every search in the project that returned them, earliest first."
+              }
+            }
+          }
+        ]
       },
       "Criteria": {
         "type": "object",

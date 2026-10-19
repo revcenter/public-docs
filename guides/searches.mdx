@@ -41,3 +41,35 @@ Titles and places can't be rescored; changing them needs a new search.
 
 `GET /v1/projects/{id}/shortlist` returns the shortlist with full profiles; `/shortlist.csv` is the same as a
 spreadsheet. Contact details are not included.
+
+## Every record a search returned
+
+The people list and the shortlist hold the people a search scored. A search's result pages list more than
+that: people already in your workspace, people screened out before reading, people left when the search
+stopped. `GET /v1/searches/{id}/records` returns all of them, one record per person in the order they were
+returned (a person listed twice keeps the first page), so you or your agent can work every profile yourself.
+
+| `status` | Meaning | `score` | `profile` |
+| --- | --- | --- | --- |
+| `scored` | Read and scored by this search. | Its score | The read profile |
+| `known` | Already in your workspace from another search, so not read again. | `null` | The read profile |
+| `not_read` | Listed, never read. | `null` | `null` |
+
+Each record also carries the name, title, company, location, LinkedIn address, summary and the page that
+listed them. `/records.csv` is the same as a spreadsheet, one row per record, with read profiles as text
+columns. Pages take `limit` (up to 500) and `cursor` ([Pagination](/guides/pagination)); `profile=false` leaves
+profiles out. A database-only search has none. Both are free, and contact details are not included.
+
+### Per search, per project, or the whole workspace
+
+| You want | API | MCP | CLI |
+| --- | --- | --- | --- |
+| Everyone one search returned | `/searches/{id}/records`, `/records.csv` | `list_search_records`, `export_search_records` | `revcenter records <search_id>` |
+| Everyone any of a project's searches returned, expansions included | `/projects/{id}/records`, `/records.csv` | `list_project_records`, `export_project_records` | `revcenter records --project <project_id>` |
+| Everyone across the workspace, from every project | `/candidates`, `/candidates.csv` | `list_candidates`, `export_candidates` | `revcenter candidates` |
+
+A project's records hold one record per person across all of its searches (the earliest listing wins). The
+`status` rolls up: `scored` by any of the project's searches beats `known`, which beats `not_read`, and `score`
+is the best any of them gave. Each record adds `first_search_id`, the search that listed them first, and
+`search_ids`, every search in the project that returned them (joined by `;` in the CSV). The workspace's
+candidate database holds the people its searches have read, across every project.

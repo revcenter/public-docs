@@ -43,6 +43,7 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter status <search_id> [--wait]` | Status, stage and outcome. `--wait` polls every 10 seconds, up to 15 minutes. | Does not use shortlist credits. |
 | `revcenter cancel <search_id>` | Stops a running search and keeps who it read. | Does not use shortlist credits. |
 | `revcenter people <search_id> [--min-score <n>] [--limit <n>] [--cursor <c>] [--no-profile]` | Everyone scored, best first. | Does not use shortlist credits. |
+| `revcenter records <search_id> [--limit <n>] [--cursor <c>] [--no-profile] [--csv [<file>]]` | Every person a search returned, read or not, with their status (`scored`, `known`, `not_read`) and score, or all of them as CSV. With `--project <project_id>` instead of a search id, every search in the project at once, one record per person with the `search_ids` that returned them. | Does not use shortlist credits. |
 | `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use shortlist credits. |
 | `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use shortlist credits. |
 | `revcenter expand <project_id>` | A new live pass for more people on the same role. | Uses 1 shortlist credit. |

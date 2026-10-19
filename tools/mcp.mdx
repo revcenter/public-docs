@@ -66,7 +66,7 @@ client, then ask it to "list my Revcenter projects".
 There's no cap on searches running at once: only your credits. Ask the agent to run one sub-agent per role, and
 each launches its own search; a burst that finds Revcenter briefly busy is retried for you. When they finish,
 `export_shortlist` and `export_candidates` save CSVs (every profile field, plus the profile as JSON) under
-`./revcenter-exports/`, ready for the agent to merge, filter or send on. Out of credits, `create_top_up` opens
+`./revcenter-exports/`, `export_search_records` and `export_project_records` save everyone a search or a whole project returned, read or not, ready for the agent to merge, filter or send on. Out of credits, `create_top_up` opens
 Stripe checkout in your browser.
 
 ## Tools
@@ -89,6 +89,10 @@ Stripe checkout in your browser.
 | `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results) and how many profiles it read; poll until status is no longer queued or running. | Does not use shortlist credits. |
 | `cancel_search` | Stop a running search: it buys nothing more, scores what it already read, and keeps them. | Does not use shortlist credits. |
 | `list_people` | Everyone a search scored, best first: score, fit readings, signals, whether they are on the shortlist, and the whole read profile. | Does not use shortlist credits. |
+| `list_search_records` | Every person a search's result pages listed, read or not, in the order returned: each with what became of them (`scored`, `known`, `not_read`), the score if scored, and the read profile when your workspace holds one. | Does not use shortlist credits. |
+| `export_search_records` | Every record a search returned as CSV, saved to a file (default `./revcenter-exports/<search_id>-records.csv`): one row per person, read profiles as text columns. | Does not use shortlist credits. |
+| `list_project_records` | Every person any of a project's searches returned, expansions included, once each: status rolled up across the searches, the best score, `first_search_id` and `search_ids`, and the read profile when your workspace holds one. | Does not use shortlist credits. |
+| `export_project_records` | Every record a project's searches returned as CSV, saved to a file (default `./revcenter-exports/<project_id>-records.csv`), with `first_search_id` and `search_ids` (joined by `;`). | Does not use shortlist credits. |
 | `preview_scoring` | What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. | Re-scores the people already found. Does not use shortlist credits. |
 | `apply_scoring` | Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. | Re-scores the people already found. Does not use shortlist credits. |
 | `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use shortlist credits. |
