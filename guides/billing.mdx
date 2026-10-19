@@ -18,14 +18,18 @@ balance. A standard search uses about 1,000 credits, so 37,000 credits is roughl
 
 ## How a search is charged
 
-1. **Cap.** `launch_search` and `expand_search` take `max_credits`: any whole number from 100 to 20,000, with
-   presets of 500, 1,000, 2,500 and 5,000. Leave it out for 1,000. The CLI flag is `--max-credits`.
+1. **Cap.** `launch_search` and `expand_search` take `max_credits`: any whole number from 250 to 20,000, with
+   presets of 500, 1,000, 2,500 and 5,000. Leave it out for 1,000. The CLI flag is `--max-credits`. A search
+   buys a page of results only when its cap also covers reading the profiles on it, and 250 is one page with
+   everyone on it read, so a smaller cap is refused with `400 max_credits_too_low`. In the app, say the cap in
+   your request ("only use 2,500 credits", "cap it at 5k credits"); the search plan shows it.
 2. **Reserve.** The cap is held from your balance when the search starts and returned as `credits_reserved`. If
    the balance can't cover it, the launch returns `402 shortlist_allocation_exhausted` and nothing runs.
 3. **Charge.** A search spends credits as it reads profiles, and stops at its cap. When it finishes it is charged
    what it used, never more than the cap, and the rest comes back. `GET /v1/searches/{id}` shows
    `credits_charged` once it has finished (`null` while it runs).
-4. **Refund.** A search that fails, or never starts, is refunded in full. A retry with the same `Idempotency-Key`
+4. **Refund.** A search that fails, or never starts, is refunded in full. So is one whose cap can't buy its
+   first page: it stops with `stop_reason` `cap_too_small` instead of reading anyone. A retry with the same `Idempotency-Key`
    never reserves twice.
 
 A bigger cap only lets a search read further; it never costs more than the profiles it reads. Use 500 for a quick

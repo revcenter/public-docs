@@ -28,7 +28,9 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_criteria` | Criteria failed validation | Fix the fields named; see `GET /v1/reference/criteria` |
 | `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters | Send one |
 | `400` | `idempotency_key_required` | A launch without an `Idempotency-Key` (8 to 160 characters) | Add the header |
-| `400` | `invalid_max_credits` | `max_credits` is not a whole number from 100 to 20,000 | Use 500, 1000, 2500 or 5000, or leave it out for 1,000 |
+| `400` | `max_credits_too_low` | `max_credits` is under 250, too small to buy one page of results and read its profiles (`details.minimum` is 250) | Send 250 or more; 500, 1000, 2500 or 5000, or leave it out for 1,000 |
+| `400` | `invalid_max_credits` | `max_credits` is not a whole number from 250 to 20,000 | Use 500, 1000, 2500 or 5000, or leave it out for 1,000 |
+| `400` | `invalid_format` | An export's `format` is not `csv` or `jsonl` | Leave it out for CSV, or send `format=jsonl` |
 | `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search |
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |

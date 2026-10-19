@@ -66,7 +66,9 @@ client, then ask it to "list my Revcenter projects".
 There's no cap on searches running at once: only your credits. Ask the agent to run one sub-agent per role, and
 each launches its own search; a burst that finds Revcenter briefly busy is retried for you. When they finish,
 `export_shortlist` and `export_candidates` save CSVs (every profile field, plus the profile as JSON) under
-`./revcenter-exports/`, `export_search_records` and `export_project_records` save everyone a search or a whole project returned, read or not, ready for the agent to merge, filter or send on. Out of credits, `create_top_up` opens
+`./revcenter-exports/`, `export_search_records` and `export_project_records` save everyone a search or a whole project returned, read or not, ready for the agent to merge, filter or send on.
+Every export tool takes `format`: `csv` (the default) for a spreadsheet, or `jsonl` for JSON Lines. For an AI
+agent, JSONL is lossless; CSV is for spreadsheets. Out of credits, `create_top_up` opens
 Stripe checkout in your browser.
 
 ## Results without an agent running
@@ -91,25 +93,25 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `create_project` | Make a project: one role, one shortlist. | Does not use credits. |
 | `get_project` | One project, with its search and shortlist counts. | Does not use credits. |
 | `list_searches` | The searches a project has run, oldest first. | Does not use credits. |
-| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. `max_credits` caps it (default 1,000). | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
+| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. `max_credits` caps it (default 1,000; at least 250). | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and `credits_reserved` / `credits_charged`; poll until status is no longer queued or running. | Does not use credits. |
 | `cancel_search` | Stop a running search: it buys nothing more, scores what it already read, and keeps them. | Does not use credits. |
 | `list_people` | Everyone a search scored, best first: score, fit readings, signals, whether they are on the shortlist, and the whole read profile. | Does not use credits. |
 | `list_search_records` | Every person a search's result pages listed, read or not, in the order returned: each with what became of them (`scored`, `known`, `not_read`), the score if scored, and the read profile when your workspace holds one. | Does not use credits. |
-| `export_search_records` | Every record a search returned as CSV, saved to a file (default `./revcenter-exports/<search_id>-records.csv`): one row per person, read profiles as text columns. | Does not use credits. |
+| `export_search_records` | Every record a search returned as CSV, saved to a file (default `./revcenter-exports/<search_id>-records.csv`): one row per person, read profiles as text and numbered columns. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `list_project_records` | Every person any of a project's searches returned, expansions included, once each: status rolled up across the searches, the best score, `first_search_id` and `search_ids`, and the read profile when your workspace holds one. | Does not use credits. |
-| `export_project_records` | Every record a project's searches returned as CSV, saved to a file (default `./revcenter-exports/<project_id>-records.csv`), with `first_search_id` and `search_ids` (joined by `;`). | Does not use credits. |
+| `export_project_records` | Every record a project's searches returned as CSV, saved to a file (default `./revcenter-exports/<project_id>-records.csv`), with `first_search_id` and `search_ids` (joined by `;`). `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `preview_scoring` | What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. | Re-scores the people already found. Does not use credits. |
 | `apply_scoring` | Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. | Re-scores the people already found. Does not use credits. |
 | `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use credits. |
 | `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Takes `max_credits` like a launch. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
-| `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): every profile field, the profile as JSON last. | Does not use credits. |
+| `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): fit readings and why, every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles. | Does not use credits. |
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use credits. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 10 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
-| `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. | Does not use credits. |
+| `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `create_top_up` | A Stripe checkout link to add credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use credits. |
 | `list_webhooks` | Your [webhook](/guides/webhooks) endpoints: URL, events, whether each is on. Never the secret. | Does not use credits. |
 | `create_webhook` | Add an HTTPS endpoint that receives search and shortlist events as signed POSTs; returns the signing secret once. | Does not use credits. |
@@ -126,11 +128,20 @@ Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `
 
 `launch_search` (unless `database_only`) and `expand_search` ask first:
 
-1. The server previews the action: what it does, the credits it reserves ("Reserves up to 1,000 credits; unused
-   credits are refunded."), and credits left.
-2. If the client supports MCP elicitation, it asks you. Yes runs exactly what was previewed.
-3. Otherwise the tool returns `status: "pending_approval"` with a `proposal`. Nothing has run. The agent shows
-   it to you and calls `apply_proposal` after you agree. A proposal lasts 30 minutes.
+1. The server previews the action: what it does, the credits it reserves, and credits left.
+2. If the client supports MCP elicitation, it asks you in one sentence, with Accept and Decline and nothing to
+   fill in: `Launch search "Associate · Paul Weiss · New York": reserves up to 1,000 credits, unused credits are
+   refunded. 421,000 credits left.` Accept runs exactly what was previewed; Decline (or closing the prompt) runs
+   nothing.
+3. Otherwise, or if you don't answer within 10 minutes, the tool returns `status: "pending_approval"` with a
+   `proposal`. Nothing has run. The agent shows it to you and calls `apply_proposal` after you agree. A
+   proposal lasts 30 minutes.
+
+A launch without its own `idempotency_key` gets one derived from the project and the request, so an agent that
+repeats an identical launch (after its tool call timed out, say) gets the first search back. It isn't asked
+again and nothing more is reserved.
+
+`max_credits` is at least 250: a smaller cap can't buy one page of results and read the profiles on it.
 
 ## Resources and prompts
 

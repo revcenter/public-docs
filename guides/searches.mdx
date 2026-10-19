@@ -73,3 +73,27 @@ A project's records hold one record per person across all of its searches (the e
 is the best any of them gave. Each record adds `first_search_id`, the search that listed them first, and
 `search_ids`, every search in the project that returned them (joined by `;` in the CSV). The workspace's
 candidate database holds the people its searches have read, across every project.
+
+## Exports: CSV or JSON Lines
+
+Every export (`/shortlist.csv`, `/records.csv`, `/candidates.csv`) answers in two formats. For an AI agent,
+JSONL is lossless; CSV is for spreadsheets.
+
+| Format | Ask for it | What you get |
+| --- | --- | --- |
+| CSV | the default (`format=csv`) | One row per person. UTF-8 with a byte order mark, so Excel shows "·" and "–" as written. A cell a spreadsheet would run as a formula is written as text. |
+| JSON Lines | `format=jsonl` (MCP `format: "jsonl"`, CLI `--jsonl`) | One JSON object per line, as the matching list call returns it (`get_shortlist`, `list_search_records`, `list_candidates`), with the whole read profile. Nothing is flattened or cut short. |
+
+Besides the readable text columns (`experience_history`, `education`), every CSV carries the career one
+column per fact, so a spreadsheet can filter on it and an agent can read it without parsing text:
+
+- `total_experience_months` (overlapping roles counted once) and `current_role_months`
+- `experience_1_title`, `experience_1_company`, `experience_1_location`, `experience_1_start`, `experience_1_end`,
+  `experience_1_months`, `experience_1_description`, through `experience_10_*` (current role first)
+- `education_1_school`, `education_1_degree`, `education_1_field`, `education_1_start`, `education_1_end`,
+  through `education_5_*`
+
+Dates are `YYYY-MM` (`YYYY` when the profile gives only a year), and a role still held ends `present`. The
+records CSV adds `headline`. The shortlist CSV adds `score_breakdown`, each fit reading as `criterion: reading`
+joined by `;` (for example `title: 1; location: 0.75; must-haves: 0.5`), and `why`, the readings that matched in
+full followed by the person's signals. Contact details are never included in either format.
