@@ -44,6 +44,9 @@
       "name": "Candidates"
     },
     {
+      "name": "Webhooks"
+    },
+    {
       "name": "Health"
     }
   ],
@@ -368,7 +371,9 @@
                         "searches:read",
                         "searches:write",
                         "shortlists:read",
-                        "shortlists:write"
+                        "shortlists:write",
+                        "webhooks:read",
+                        "webhooks:write"
                       ],
                       "expires_at": "2027-01-15T00:00:00.000Z"
                     },
@@ -4087,6 +4092,910 @@
           }
         }
       }
+    },
+    "/webhooks": {
+      "get": {
+        "operationId": "list_webhooks",
+        "summary": "List webhook endpoints",
+        "description": "The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. Does not use shortlist credits.\n\nNeeds scope `webhooks:read`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Webhook"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                      "url": "https://hooks.example.com/revcenter",
+                      "description": "ATS sync",
+                      "events": [
+                        "search.completed",
+                        "shortlist.changed"
+                      ],
+                      "enabled": true,
+                      "disabled_reason": null,
+                      "consecutive_failures": 0,
+                      "secret_hint": "whsec_…Qz1c",
+                      "created_at": "2026-10-19T09:12:00.000Z",
+                      "updated_at": "2026-10-19T09:12:00.000Z"
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_webhook",
+        "summary": "Add a webhook endpoint",
+        "description": "Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. Up to 10 endpoints a workspace. events defaults to every event ([\"*\"]). The URL must be public HTTPS; private, loopback and link-local addresses are refused, and redirects are never followed. Store secret now: it is not shown again. Does not use shortlist credits.\n\nNeeds scope `webhooks:write`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "https://… on a public host."
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "*",
+                        "search.queued",
+                        "search.started",
+                        "search.completed",
+                        "search.failed",
+                        "shortlist.changed",
+                        "webhook.test"
+                      ]
+                    },
+                    "description": "The events to send, or [\"*\"] (the default) for all."
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                }
+              },
+              "example": {
+                "url": "https://hooks.example.com/revcenter",
+                "events": [
+                  "search.completed",
+                  "shortlist.changed"
+                ],
+                "description": "ATS sync"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CreatedWebhook"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                    "url": "https://hooks.example.com/revcenter",
+                    "description": "ATS sync",
+                    "events": [
+                      "search.completed",
+                      "shortlist.changed"
+                    ],
+                    "enabled": true,
+                    "disabled_reason": null,
+                    "consecutive_failures": 0,
+                    "secret_hint": "whsec_…Qz1c",
+                    "created_at": "2026-10-19T09:12:00.000Z",
+                    "updated_at": "2026-10-19T09:12:00.000Z",
+                    "secret": "whsec_3q2-7wE1Vb0N8c5k2Lr9xY4mT6pA1sD0fG7hJ3kQz1c"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "patch": {
+        "operationId": "update_webhook",
+        "summary": "Change a webhook endpoint",
+        "description": "Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. Does not use shortlist credits.\n\nNeeds scope `webhooks:write`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "description": "A webhook id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "*",
+                        "search.queued",
+                        "search.started",
+                        "search.completed",
+                        "search.failed",
+                        "shortlist.changed",
+                        "webhook.test"
+                      ]
+                    }
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 200
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                    "url": "https://hooks.example.com/revcenter",
+                    "description": "ATS sync",
+                    "events": [
+                      "search.completed",
+                      "shortlist.changed"
+                    ],
+                    "enabled": false,
+                    "disabled_reason": "Turned off",
+                    "consecutive_failures": 0,
+                    "secret_hint": "whsec_…Qz1c",
+                    "created_at": "2026-10-19T09:12:00.000Z",
+                    "updated_at": "2026-10-19T09:12:00.000Z"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_webhook",
+        "summary": "Delete a webhook endpoint",
+        "description": "Remove an endpoint and its delivery history; nothing more is sent to it. Does not use shortlist credits.\n\nNeeds scope `webhooks:write`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "description": "A webhook id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "deleted": true
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}/test": {
+      "post": {
+        "operationId": "test_webhook",
+        "summary": "Send a test event",
+        "description": "Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. Sent once and not retried. Works on an endpoint that is turned off, so you can check it before turning it back on. Does not use shortlist credits.\n\nNeeds scope `webhooks:write`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "description": "A webhook id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookDelivery"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "2f1e0d9c-8b7a-4e6d-9c5b-4a3f2e1d0c9b",
+                    "webhook_id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                    "event_id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                    "event_type": "webhook.test",
+                    "status": "delivered",
+                    "attempt": 1,
+                    "response_status": 200,
+                    "response_ms": 184,
+                    "error": null,
+                    "next_attempt_at": null,
+                    "created_at": "2026-10-17T14:19:41.000Z",
+                    "delivered_at": "2026-10-17T14:19:41.000Z",
+                    "redelivery_of": null,
+                    "payload": {
+                      "id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                      "type": "webhook.test",
+                      "created_at": "2026-10-17T14:19:41.000Z",
+                      "workspace_id": "org_2xAmpLe",
+                      "api_version": "2026-10-19",
+                      "data": {
+                        "webhook_id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                        "message": "A test event from Revcenter."
+                      }
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}/deliveries": {
+      "get": {
+        "operationId": "list_webhook_deliveries",
+        "summary": "List an endpoint's deliveries",
+        "description": "What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. Does not use shortlist credits.\n\nNeeds scope `webhooks:read`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "description": "A webhook id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDelivery"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "2f1e0d9c-8b7a-4e6d-9c5b-4a3f2e1d0c9b",
+                      "webhook_id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                      "event_id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                      "event_type": "search.completed",
+                      "status": "delivered",
+                      "attempt": 1,
+                      "response_status": 200,
+                      "response_ms": 184,
+                      "error": null,
+                      "next_attempt_at": null,
+                      "created_at": "2026-10-17T14:19:41.000Z",
+                      "delivered_at": "2026-10-17T14:19:41.000Z",
+                      "redelivery_of": null,
+                      "payload": {
+                        "id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                        "type": "search.completed",
+                        "created_at": "2026-10-17T14:19:41.000Z",
+                        "workspace_id": "org_2xAmpLe",
+                        "api_version": "2026-10-19",
+                        "data": {
+                          "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                          "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                          "status": "complete",
+                          "outcome": "Shortlist ready",
+                          "stop_reason": "target_reached",
+                          "profiles_read": 212,
+                          "delivered": 14,
+                          "shortlisted": 14,
+                          "closed_at": "2026-10-17T14:19:40.000Z",
+                          "links": {
+                            "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                            "records": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records",
+                            "records_csv": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records.csv",
+                            "shortlist": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist",
+                            "shortlist_csv": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist.csv"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "cursor": null,
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/webhooks/deliveries/{deliveryId}/redeliver": {
+      "post": {
+        "operationId": "redeliver_webhook",
+        "summary": "Redeliver an event",
+        "description": "Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. Does not use shortlist credits.\n\nNeeds scope `webhooks:write`.",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "deliveryId",
+            "in": "path",
+            "required": true,
+            "description": "A delivery id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookDelivery"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+                    "webhook_id": "5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c",
+                    "event_id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                    "event_type": "search.completed",
+                    "status": "delivered",
+                    "attempt": 1,
+                    "response_status": 200,
+                    "response_ms": 184,
+                    "error": null,
+                    "next_attempt_at": null,
+                    "created_at": "2026-10-17T14:19:41.000Z",
+                    "delivered_at": "2026-10-17T14:19:41.000Z",
+                    "redelivery_of": "2f1e0d9c-8b7a-4e6d-9c5b-4a3f2e1d0c9b",
+                    "payload": {
+                      "id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+                      "type": "search.completed",
+                      "created_at": "2026-10-17T14:19:41.000Z",
+                      "workspace_id": "org_2xAmpLe",
+                      "api_version": "2026-10-19",
+                      "data": {
+                        "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                        "status": "complete",
+                        "outcome": "Shortlist ready",
+                        "stop_reason": "target_reached",
+                        "profiles_read": 212,
+                        "delivered": 14,
+                        "shortlisted": 14,
+                        "closed_at": "2026-10-17T14:19:40.000Z",
+                        "links": {
+                          "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                          "records": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records",
+                          "records_csv": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records.csv",
+                          "shortlist": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist",
+                          "shortlist_csv": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist.csv"
+                        }
+                      }
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4925,6 +5834,173 @@
             }
           }
         ]
+      },
+      "Webhook": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Event types it receives, or [\"*\"] for all."
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "disabled_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why it is off: turned off, or 20 deliveries in a row abandoned."
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "description": "Deliveries abandoned in a row; a delivered one resets it."
+          },
+          "secret_hint": {
+            "type": "string",
+            "description": "The secret's last four characters."
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "CreatedWebhook": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Webhook"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "type": "string",
+                "description": "The signing secret (whsec_…), shown once. Verify each delivery's Revcenter-Signature with it."
+              }
+            }
+          }
+        ]
+      },
+      "WebhookDelivery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "webhook_id": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "The same on every retry and redelivery: deduplicate on it."
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "delivered",
+              "failed",
+              "abandoned"
+            ],
+            "description": "failed: the last attempt failed and another is scheduled (next_attempt_at). abandoned: no more attempts."
+          },
+          "attempt": {
+            "type": "integer",
+            "description": "Attempts made."
+          },
+          "response_status": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The HTTP status your endpoint answered; null when it could not be reached."
+          },
+          "response_ms": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "next_attempt_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "delivered_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "redelivery_of": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The delivery this one repeats."
+          },
+          "payload": {
+            "$ref": "#/components/schemas/WebhookEvent"
+          }
+        }
+      },
+      "WebhookEvent": {
+        "type": "object",
+        "description": "What each delivery POSTs. data carries ids, counts and links, never profiles or contact details; read those through the links.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          },
+          "api_version": {
+            "type": "string",
+            "enum": [
+              "2026-10-19"
+            ]
+          },
+          "data": {
+            "type": "object"
+          }
+        }
       },
       "Criteria": {
         "type": "object",

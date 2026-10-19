@@ -53,6 +53,13 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter candidates [--q <text>] [--project <id>] [--title ..] [--company ..] [--location ..] [--limit <n>] [--cursor <c>] [--csv [<file>]]` | The workspace's candidate database (the Candidates tab), or all of it as CSV with every profile field. | Does not use shortlist credits. |
 | `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use shortlist credits. |
 | `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use shortlist credits. |
+| `revcenter webhooks list` | Your [webhook](/guides/webhooks) endpoints. | Does not use shortlist credits. |
+| `revcenter webhooks create <url> [--events <a,b>] [--description "<text>"]` | Adds an endpoint for search and shortlist events (all events unless `--events`) and prints its signing secret, once. | Does not use shortlist credits. |
+| `revcenter webhooks update <webhook_id> [--enable] [--disable] [--url <url>] [--events <a,b>] [--description "<text>"]` | Changes an endpoint, or turns it off and on. | Does not use shortlist credits. |
+| `revcenter webhooks delete <webhook_id>` | Removes an endpoint and its delivery history. | Does not use shortlist credits. |
+| `revcenter webhooks test <webhook_id>` | Sends a signed `webhook.test` event now and prints the status code your endpoint answered. | Does not use shortlist credits. |
+| `revcenter webhooks deliveries <webhook_id> [--limit <n>] [--cursor <c>]` | What was sent to an endpoint, newest first, with each status and response code. | Does not use shortlist credits. |
+| `revcenter webhooks redeliver <delivery_id>` | Sends a delivery's event again, with the same event id. | Does not use shortlist credits. |
 | `revcenter preview <action> --input <file.json>` | What an action would do and cost, with a `proposal_id`. Changes nothing. | Does not use shortlist credits. |
 | `revcenter apply <proposal_id>` | Runs a previewed action exactly as previewed. | Uses what its preview stated: 1 shortlist credit for a search or an expansion, nothing for anything else. |
 | `revcenter --version` · `revcenter --help` | Version, or the command list. `help <command>` shows examples. | Does not use shortlist credits. |

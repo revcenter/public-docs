@@ -1,0 +1,193 @@
+---
+title: "Webhooks"
+description: "Get search results delivered to your own systems as they happen: events, the signed envelope, verifying signatures in Node and Python, retries and deduplication."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+A webhook endpoint is a URL of yours that Revcenter POSTs to when a search is queued, starts, completes or fails,
+and when a project's shortlist changes. Your ATS, pipeline or job runner learns that results are ready without
+polling and without an agent running.
+
+Events carry ids, counts and links, never profiles or contact details. Read the people through the links, with an
+API key, as you would any other time.
+
+## Add an endpoint
+
+The URL must be public `https://`. Private, loopback and link-local addresses (cloud metadata addresses
+included) are refused, and redirects are never followed. A workspace has up to 10 endpoints.
+
+<Tabs>
+  <Tab title="App">
+    **Settings → Usage → Webhooks** (workspace admins). Add the URL, pick the events, and copy the signing secret
+    from the dialog: it is shown once.
+  </Tab>
+  <Tab title="API">
+    ```bash
+    curl -X POST https://api.revcenter.ai/v1/webhooks \
+      -H "Authorization: Bearer $REVCENTER_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"url": "https://hooks.example.com/revcenter", "events": ["search.completed", "shortlist.changed"]}'
+    ```
+
+    The response's `secret` (`whsec_…`) is returned this once. `GET /v1/webhooks` shows only its last four
+    characters.
+  </Tab>
+  <Tab title="CLI">
+    ```bash
+    revcenter webhooks create https://hooks.example.com/revcenter --events search.completed,shortlist.changed
+    revcenter webhooks test <webhook_id>
+    ```
+  </Tab>
+  <Tab title="MCP">
+    Ask your agent to add the endpoint: it calls `create_webhook` and shows you the secret once, then
+    `test_webhook` to check it.
+  </Tab>
+</Tabs>
+
+Omit `events` (or send `["*"]`) to receive every event, including types added later.
+
+## Events
+
+| Type | When | `data` |
+| --- | --- | --- |
+| `search.queued` | A search is waiting its turn to start | `search_id`, `project_id`, `status`, `links` |
+| `search.started` | A search started running | `search_id`, `project_id`, `status`, `links` |
+| `search.completed` | A search finished | `search_id`, `project_id`, `status`, `outcome` (`Shortlist ready`, `Poor yield`, `No results`), `stop_reason`, `profiles_read`, `delivered`, `shortlisted`, `closed_at`, `links` |
+| `search.failed` | A search stopped on an error before it could finish; a launch that fails gives its credit back | as `search.completed`, with `outcome` null |
+| `shortlist.changed` | Who is on a project's shortlist changed: people added or removed, a re-score, a search pass | `project_id`, `search_id` (when a search made the change), `kind`, `source`, `list_before`, `list_after`, `links` |
+| `webhook.test` | You sent a test (`test_webhook`, **Send test**); goes to that endpoint only | `webhook_id`, `message` |
+
+`links` on search events: `search` (`GET /v1/searches/{id}`), `records` and `records_csv` (every person the search
+returned), and `shortlist` and `shortlist_csv` (the project's live shortlist).
+
+## The envelope
+
+Every delivery is a `POST` with a JSON body:
+
+```json
+{
+  "id": "evt_4b1d0c9e8f7a6b5c4d3e2f1a0b9c8d7e",
+  "type": "search.completed",
+  "created_at": "2026-10-17T14:19:41.000Z",
+  "workspace_id": "org_2xAmpLe",
+  "api_version": "2026-10-19",
+  "data": {
+    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+    "status": "complete",
+    "outcome": "Shortlist ready",
+    "stop_reason": "target_reached",
+    "profiles_read": 212,
+    "delivered": 14,
+    "shortlisted": 14,
+    "closed_at": "2026-10-17T14:19:40.000Z",
+    "links": {
+      "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+      "records": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records",
+      "records_csv": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61/records.csv",
+      "shortlist": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist",
+      "shortlist_csv": "https://api.revcenter.ai/v1/projects/6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11/shortlist.csv"
+    }
+  }
+}
+```
+
+With these headers:
+
+| Header | Value |
+| --- | --- |
+| `Revcenter-Signature` | `t=<unix seconds>,v1=<hex HMAC-SHA256>` |
+| `Revcenter-Event-Id` | The event's `id` |
+| `Revcenter-Event-Type` | The event's `type` |
+| `User-Agent` | `Revcenter-Webhooks/1` |
+| `Content-Type` | `application/json` |
+
+`api_version` changes only when an event's shape changes in a way you would notice. New fields can appear in
+`data` at any time; ignore the ones you don't use.
+
+## Verify the signature
+
+`v1` is the HMAC-SHA256, keyed by the whole secret (`whsec_` included), of the timestamp, a `.`, and the raw
+request body, as hex. Compute it over the bytes you received, before parsing the JSON, compare in constant time,
+and refuse a timestamp more than five minutes from now.
+
+<Tabs>
+  <Tab title="Node">
+    ```js
+    import { createHmac, timingSafeEqual } from "node:crypto";
+
+    // rawBody: the request body exactly as received (a string or Buffer), not re-serialized JSON.
+    export function verifyRevcenter(rawBody, header, secret, toleranceSeconds = 300) {
+      const parts = Object.fromEntries(header.split(",").map((p) => p.trim().split("=", 2)));
+      const t = Number(parts.t);
+      if (!Number.isInteger(t) || !parts.v1) return false;
+      if (Math.abs(Date.now() / 1000 - t) > toleranceSeconds) return false;
+      const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest();
+      const given = Buffer.from(parts.v1, "hex");
+      return given.length === expected.length && timingSafeEqual(given, expected);
+    }
+
+    // Express: keep the raw body for this route.
+    app.post("/revcenter", express.raw({ type: "application/json" }), (req, res) => {
+      if (!verifyRevcenter(req.body.toString("utf8"), req.get("revcenter-signature") ?? "", process.env.REVCENTER_WEBHOOK_SECRET)) {
+        return res.status(400).end();
+      }
+      const event = JSON.parse(req.body.toString("utf8"));
+      res.status(200).end(); // answer first; do the work after
+      handle(event);
+    });
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    import hashlib, hmac, json, os, time
+
+    def verify_revcenter(raw_body: bytes, header: str, secret: str, tolerance_seconds: int = 300) -> bool:
+        parts = dict(p.strip().split("=", 1) for p in header.split(",") if "=" in p)
+        try:
+            t = int(parts["t"])
+        except (KeyError, ValueError):
+            return False
+        if abs(time.time() - t) > tolerance_seconds or "v1" not in parts:
+            return False
+        expected = hmac.new(secret.encode(), f"{t}.".encode() + raw_body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected, parts["v1"])
+
+    # Flask
+    @app.post("/revcenter")
+    def revcenter():
+        raw = request.get_data()  # the bytes as received
+        if not verify_revcenter(raw, request.headers.get("Revcenter-Signature", ""), os.environ["REVCENTER_WEBHOOK_SECRET"]):
+            return "", 400
+        event = json.loads(raw)
+        handle(event)
+        return "", 200
+    ```
+  </Tab>
+</Tabs>
+
+## Answer quickly, and retries
+
+Answer `2xx` within 10 seconds; do slow work after answering. Anything else (another status, a timeout, a
+redirect, a refused connection) is a failed attempt, retried after 30 seconds, 2 minutes, 10 minutes, 1 hour,
+6 hours and 24 hours. After the seventh failed attempt the delivery is **abandoned**. A test is sent once and
+not retried.
+
+An endpoint with 20 abandoned deliveries in a row is turned off, with the reason on the endpoint
+(`disabled_reason`). Fix it, send a test, and turn it back on (`update_webhook` with `enabled: true`, or the
+switch in the app); that clears the count.
+
+`list_webhook_deliveries` (`GET /v1/webhooks/{id}/deliveries`, **Settings → Usage → Webhooks**) shows every
+delivery: its status (`pending`, `delivered`, `failed` with the next retry, `abandoned`), attempts, and the status
+code your endpoint answered. `redeliver_webhook` sends one again now.
+
+## Deduplicate on the event id
+
+Deliveries are at least once: a retry after a timeout your endpoint did in fact process, or a redelivery you asked
+for, arrives with the same `id` (and `Revcenter-Event-Id`). Record the ids you have handled and skip one you have
+seen. A search's completion is one event however it is reported; a search that is completed again later (a new
+pass on the same search) is a new event with a new id.
+
+Events can arrive out of order. Use `created_at`, or read the current state through `links`, rather than relying on
+the order of arrival.

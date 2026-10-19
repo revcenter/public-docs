@@ -35,6 +35,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
 | `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount in range |
+| `400` | `invalid_webhook_url` · `invalid_webhook_events` · `invalid_webhook` | A webhook URL that isn't public HTTPS (private, loopback and link-local addresses are refused), an unknown event type, or a bad `description` or `enabled` | Fix the field named; see [webhooks](/guides/webhooks) |
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
 | `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
 | `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
@@ -42,10 +43,12 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
 | `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
+| `404` | `webhook_not_found` · `delivery_not_found` | No such webhook endpoint or delivery in this workspace | Check the id with `list_webhooks` |
 | `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new key |
 | `409` | `search_running` | A search on the project is still running | Wait for it |
 | `409` | `search_not_finished` · `no_search_to_expand` · `expansion_limit` | The project can't be expanded now (2 per project) | Wait, or launch a new search |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
+| `409` | `webhook_limit` · `webhook_disabled` | The workspace already has 10 webhook endpoints, or a redelivery to an endpoint that is turned off | Delete one; turn the endpoint on first |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
 | `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |

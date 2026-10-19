@@ -29,6 +29,7 @@ Every page is also available as Markdown: add `.md` to its address. All pages in
 - [Errors](https://docs.revcenter.ai/guides/errors.md): The error shape, every code the API returns, and which requests are safe to retry.
 - [Pagination](https://docs.revcenter.ai/guides/pagination.md): Cursor pagination on list endpoints, page sizes, and the deprecated offset.
 - [Async jobs](https://docs.revcenter.ai/guides/async-jobs.md): Searches and expansions run in the background: how to wait and which statuses mean done.
+- [Webhooks](https://docs.revcenter.ai/guides/webhooks.md): Get search results delivered to your own systems as they happen: events, the signed envelope, verifying signatures in Node and Python, retries and deduplication.
 - [Billing](https://docs.revcenter.ai/guides/billing.md): What uses a shortlist credit, and what is free.
 
 ## Recipes
@@ -81,4 +82,11 @@ Every page is also available as Markdown: add `.md` to its address. All pages in
 - DELETE https://api.revcenter.ai/v1/projects/{projectId}/shortlist/members/{candidateId}: Remove from the shortlist. Take someone off the shortlist, with an optional reason. Does not use shortlist credits.
 - GET https://api.revcenter.ai/v1/candidates: List the candidate database. Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. Does not use shortlist credits.
 - GET https://api.revcenter.ai/v1/candidates.csv: Download the candidate database CSV. The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field, and the profile as JSON in the last column. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/webhooks: List webhook endpoints. The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/webhooks: Add a webhook endpoint. Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. Up to 10 endpoints a workspace. events defaults to every event (["*"]). The URL must be public HTTPS; private, loopback and link-local addresses are refused, and redirects are never followed. Store secret now: it is not shown again. Does not use shortlist credits.
+- PATCH https://api.revcenter.ai/v1/webhooks/{webhookId}: Change a webhook endpoint. Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. Does not use shortlist credits.
+- DELETE https://api.revcenter.ai/v1/webhooks/{webhookId}: Delete a webhook endpoint. Remove an endpoint and its delivery history; nothing more is sent to it. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/webhooks/{webhookId}/test: Send a test event. Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. Sent once and not retried. Works on an endpoint that is turned off, so you can check it before turning it back on. Does not use shortlist credits.
+- GET https://api.revcenter.ai/v1/webhooks/{webhookId}/deliveries: List an endpoint's deliveries. What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. Does not use shortlist credits.
+- POST https://api.revcenter.ai/v1/webhooks/deliveries/{deliveryId}/redeliver: Redeliver an event. Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. Does not use shortlist credits.
 - [OpenAPI document](https://docs.revcenter.ai/openapi.json): the whole API, machine-readable

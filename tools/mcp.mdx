@@ -69,6 +69,12 @@ each launches its own search; a burst that finds Revcenter briefly busy is retri
 `./revcenter-exports/`, `export_search_records` and `export_project_records` save everyone a search or a whole project returned, read or not, ready for the agent to merge, filter or send on. Out of credits, `create_top_up` opens
 Stripe checkout in your browser.
 
+## Results without an agent running
+
+`create_webhook` adds an endpoint of yours that receives `search.completed`, `shortlist.changed` and the rest as
+signed POSTs, so a search launched by an agent reaches your ATS or pipeline after the agent has gone. See
+[Webhooks](/guides/webhooks).
+
 ## Tools
 
 | Tool | What it does | Cost |
@@ -105,6 +111,13 @@ Stripe checkout in your browser.
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use shortlist credits. |
 | `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. | Does not use shortlist credits. |
 | `create_top_up` | A Stripe checkout link to add shortlist credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use shortlist credits. |
+| `list_webhooks` | Your [webhook](/guides/webhooks) endpoints: URL, events, whether each is on. Never the secret. | Does not use shortlist credits. |
+| `create_webhook` | Add an HTTPS endpoint that receives search and shortlist events as signed POSTs; returns the signing secret once. | Does not use shortlist credits. |
+| `update_webhook` | Change an endpoint's URL, events or description, or turn it off and on. | Does not use shortlist credits. |
+| `delete_webhook` | Remove an endpoint and its delivery history. | Does not use shortlist credits. |
+| `test_webhook` | Send a signed `webhook.test` event now and return the status code the endpoint answered. | Does not use shortlist credits. |
+| `list_webhook_deliveries` | What was sent to an endpoint, newest first: status, attempts, response code, next retry. | Does not use shortlist credits. |
+| `redeliver_webhook` | Send a delivery's event again, with the same event id. | Does not use shortlist credits. |
 
 Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `data`, and on lists `cursor` and
 `total`. Errors return the [error code](/guides/errors), a one-line fix and the `request_id`.
