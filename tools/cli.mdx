@@ -61,6 +61,8 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use credits. |
 | `revcenter scoring <search_id>` | Why a search's list looks as it does: the cut-off, score bands, rejection reasons, missing must-haves and the best people just under the cut-off. | Does not use credits. |
 | `revcenter discard <search_id>` | Discards the scoring change the app's assistant left pending on a search. | Does not use credits. |
+| `revcenter score <search_id>` | Scores everyone the search already read again, under the requirements in force, and moves the shortlist to match: the app's Re-score everyone. | Re-scores the people already found. Does not use credits. |
+| `revcenter thread <search_id>` | The project's assistant conversation in the app, and any scoring change it proposed for the search that nobody has applied yet. | Does not use credits. |
 | `revcenter expand <project_id> [--max-credits <n>]` | A new live pass for more people on the same role. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `revcenter share <project_id>` | The project's public shortlist link, to paste into an email: the same URL every time, always showing the live shortlist. `shortlisted` says how many people it shows. | Does not use credits. |
 | `revcenter shortlist <project_id> [--csv [<file>]] [--jsonl [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV with every profile field, or as JSON Lines. | Does not use credits. |

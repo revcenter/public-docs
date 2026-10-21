@@ -7505,6 +7505,349 @@
           }
         }
       }
+    },
+    "/searches/{searchId}/rescore": {
+      "post": {
+        "operationId": "rescore_search",
+        "summary": "Re-score a search",
+        "description": "Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search whose run stopped before it scored everyone it read (the profiles are bought; they only need scoring), or to bring its list up to date. Buys nothing and changes no requirement: to change the cut-off, weights or requirements as well, use apply_scoring. Refused with 409 search_running while a pass on the search is still running. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "tags": [
+          "Scoring"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "description": "Everyone scored, and how many reach 85 (qualified)."
+                        },
+                        "shortlisted": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "cutoff": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "summary": {
+                      "total": 212,
+                      "qualified": 14
+                    },
+                    "shortlisted": 16,
+                    "cutoff": 80
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/thread": {
+      "get": {
+        "operationId": "get_search_thread",
+        "summary": "Read a search's conversation",
+        "description": "The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. messages is what people and the project's assistant wrote in Revcenter (the latest 200), each with its role, text and the search it was about. pending_change is null unless the assistant proposed a cut-off, weight or requirement change for this search that would move someone and that hasn't been applied or discarded; its preview counts the shortlist before and after. To make a change yourself, use preview_scoring and apply_scoring. thread_id is null when nobody has written in the project's conversation yet. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "tags": [
+          "Searches"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "project_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "thread_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "messages": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "user",
+                                  "assistant",
+                                  "system"
+                                ]
+                              },
+                              "content": {
+                                "type": "string"
+                              },
+                              "search_id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pending_change": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "criteria_version_id": {
+                              "type": "string"
+                            },
+                            "explanation": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "preview": {
+                              "type": "object",
+                              "properties": {
+                                "shortlist_before": {
+                                  "type": "integer"
+                                },
+                                "shortlist_after": {
+                                  "type": "integer"
+                                },
+                                "entering": {
+                                  "type": "integer"
+                                },
+                                "leaving": {
+                                  "type": "integer"
+                                },
+                                "cutoff_before": {
+                                  "type": "integer"
+                                },
+                                "cutoff_after": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "thread_id": "2a7c9e41-6b3d-4f58-9c0e-1d2f3a4b5c6d",
+                    "messages": [
+                      {
+                        "id": "8e1f2a3b-4c5d-4e6f-8a7b-9c0d1e2f3a4b",
+                        "role": "user",
+                        "content": "Drop anyone without a CPA.",
+                        "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "created_at": "2026-10-17T15:02:11.000Z"
+                      },
+                      {
+                        "id": "9f2a3b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+                        "role": "assistant",
+                        "content": "If applied: the shortlist goes from 14 to 11 (−3), at a cut-off of 80. Nothing changes until you apply it.",
+                        "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "created_at": "2026-10-17T15:02:19.000Z"
+                      }
+                    ],
+                    "pending_change": {
+                      "criteria_version_id": "4b5c6d7e-8f9a-4b0c-9d1e-2f3a4b5c6d7e",
+                      "explanation": "Make a CPA a must-have.",
+                      "created_at": "2026-10-17T15:02:19.000Z",
+                      "preview": {
+                        "shortlist_before": 14,
+                        "shortlist_after": 11,
+                        "entering": 0,
+                        "leaving": 3,
+                        "cutoff_before": 80,
+                        "cutoff_after": 80
+                      }
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {

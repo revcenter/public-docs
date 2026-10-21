@@ -119,6 +119,8 @@
           "POST /searches/{searchId}/database-pass",
           "GET /searches/{searchId}/scoring",
           "POST /searches/{searchId}/scoring/discard",
+          "POST /searches/{searchId}/rescore",
+          "GET /searches/{searchId}/thread",
           "GET /projects/{projectId}/shortlist",
           "GET /projects/{projectId}/shortlist.csv",
           "GET /projects/{projectId}/share-link",
