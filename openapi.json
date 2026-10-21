@@ -1844,10 +1844,11 @@
       "delete": {
         "operationId": "delete_project",
         "summary": "Delete a project",
-        "description": "Delete a project for good, sending its exact name as confirm_name. Its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Cannot be undone. confirm_name must be the project's name exactly as get_project returns it, or nothing is deleted (400 confirmation_required). The share link stops showing the list, so a client holding it sees nothing: to keep it, archive instead (update_project with archived true). A project with delivered work behind it is kept (409 project_in_use). Preview it with preview_action first to show the person what goes. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "description": "Delete a project for good, sending its exact name as confirm_name. Its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Cannot be undone. confirm_name must be the project's name exactly as get_project returns it, or nothing is deleted (400 confirmation_required). The share link stops showing the list, so a client holding it sees nothing: to keep it, archive instead (update_project with archived true). A project with delivered work behind it is kept (409 project_in_use). Preview it with preview_action first to show the person what goes. Does not use credits. It can't be undone, so the MCP server asks the person first, naming what goes.\n\nNeeds scope `projects:write`.",
         "tags": [
           "Projects"
         ],
+        "x-revcenter-confirm": "destructive",
         "parameters": [
           {
             "name": "projectId",
@@ -8289,10 +8290,11 @@
       "post": {
         "operationId": "publish_shortlist",
         "summary": "Publish the shortlist to the client",
-        "description": "Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is published. The version freezes who is on the shortlist when the proposal is applied, best first, with each person's name, title, company, place, LinkedIn address and why they are on it (a qualified match, or selected by the recruiter); never notes, scores' workings or removal reasons. Publishing a shortlist that hasn't changed returns the version already published. Send expected_members (how many people the person was shown, get_project's shortlisted) and a shortlist that has moved since is refused with shortlist_changed. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is published. The version freezes who is on the shortlist when the proposal is applied, best first, with each person's name, title, company, place, LinkedIn address and why they are on it (a qualified match, or selected by the recruiter); never notes, scores' workings or removal reasons. Publishing a shortlist that hasn't changed returns the version already published. Send expected_members (how many people the person was shown, get_project's shortlisted) and a shortlist that has moved since is refused with shortlist_changed. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what.\n\nNeeds scope `shortlists:write`.",
         "tags": [
           "Shortlists"
         ],
+        "x-revcenter-confirm": "client",
         "parameters": [
           {
             "name": "projectId",
@@ -8654,10 +8656,11 @@
       "post": {
         "operationId": "send_shortlist_email",
         "summary": "Email the shortlist to the client",
-        "description": "Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is sent. confirm_workspace_name is the client workspace's name as the person saw it in preview_shortlist_email; a different name is refused with workspace_name_mismatch, so one client never gets another's list. Send expected_total (preview_shortlist_email's total) and a shortlist that has moved since is refused with shortlist_changed. In testing, as in the app: developer keys only, and it goes to Revcenter's test inbox, never the client's members. Applying the same proposal twice sends once. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is sent. confirm_workspace_name is the client workspace's name as the person saw it in preview_shortlist_email; a different name is refused with workspace_name_mismatch, so one client never gets another's list. Send expected_total (preview_shortlist_email's total) and a shortlist that has moved since is refused with shortlist_changed. In testing, as in the app: developer keys only, and it goes to Revcenter's test inbox, never the client's members. Applying the same proposal twice sends once. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what.\n\nNeeds scope `shortlists:write`.",
         "tags": [
           "Shortlists"
         ],
+        "x-revcenter-confirm": "client",
         "parameters": [
           {
             "name": "projectId",

@@ -37,6 +37,10 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
+| `400` | `proposal_required` | `publish_shortlist` or `send_shortlist_email` called on its own route: it reaches the client, so it runs only from an applied proposal. Nothing was sent | Preview it with `preview_action`, show the person, then `apply_proposal` once they agree |
+| `400` | `confirmation_required` | Deleting a project without its exact name as `confirm_name`; nothing was deleted | Send the name `get_project` returns, or archive it instead |
+| `400` | `invalid_verdict` · `invalid_reason` · `invalid_dnc` · `invalid_project_update` · `invalid_expected_count` | A verdict, decline reason, do-not-contact entry, project change or expected count that isn't valid | Fix the field named in the message |
+| `400` | `client_workspace_required` | No client workspace to email: `client_workspace_id` isn't a workspace id, or the project isn't assigned to a client portal | Send `client_workspace_id` |
 | `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount in range |
 | `400` | `invalid_webhook_url` · `invalid_webhook_events` · `invalid_webhook` | A webhook URL that isn't public HTTPS (private, loopback and link-local addresses are refused), an unknown event type, or a bad `description` or `enabled` | Fix the field named; see [webhooks](/guides/webhooks) |
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
@@ -45,12 +49,19 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No plan, or not enough credits for the search's `max_credits`. `details` has `billing_url` and `top_up` | A smaller `max_credits`, `revcenter topup`, or see [billing](/guides/billing) |
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
 | `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
+| `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key from **Settings → Usage → API** or `revcenter auth login` |
+| `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (`get_share_link`) instead |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
 | `404` | `webhook_not_found` · `delivery_not_found` | No such webhook endpoint or delivery in this workspace | Check the id with `list_webhooks` |
+| `404` | `shortlist_version_not_found` · `client_workspace_not_found` | No such published shortlist version on the project, or no such client workspace | Check the id with `list_shortlist_versions` or `preview_shortlist_email` |
 | `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new key |
 | `409` | `search_running` | A search on the project is still running | Wait for it |
 | `409` | `search_not_finished` · `no_search_to_expand` · `expansion_limit` | The project can't be expanded now (2 per project) | Wait, or launch a new search |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
+| `409` | `project_in_use` | The project has delivered work that keeps it; nothing was deleted | Archive it instead (`update_project` with `archived` true) |
+| `409` | `shortlist_changed` | The shortlist holds a different number of people than the person was shown (`details` has `expected` and `actual`); nothing was sent | Preview again and show the person the new list |
+| `409` | `empty_shortlist` · `shortlist_not_publishable` | Nothing on the shortlist to publish or send, or no one on it came from a search in the project | Add people, or run a search in the project first |
+| `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (`preview_shortlist_email`) and send the name it shows |
 | `409` | `webhook_limit` · `webhook_disabled` | The workspace already has 10 webhook endpoints, or a redelivery to an endpoint that is turned off | Delete one; turn the endpoint on first |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
 | `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |

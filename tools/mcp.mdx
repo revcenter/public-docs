@@ -94,7 +94,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `create_project` | Make a project: one role, one shortlist. | Does not use credits. |
 | `get_project` | One project, with its search and shortlist counts. | Does not use credits. |
 | `update_project` | Rename a project, or archive it (or bring it back): an archived project leaves `list_projects` but keeps its searches, shortlist and share link. | Does not use credits. |
-| `delete_project` | Delete a project for good, sending its exact name as `confirm_name`: its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Ask the person first. | Does not use credits. |
+| `delete_project` | Delete a project for good, sending its exact name as `confirm_name`: its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Asks you first, naming the project. | Does not use credits. |
 | `get_project_insights` | The talent picture across a project's searches, as the app's Insights tab shows it: totals, verdict counts, and where the people are, who employs them, their titles, schools and skills. | Does not use credits. |
 | `get_shortlist_stats` | Everyone a project's searches scored, in aggregate: analyzed, qualified, the score spread, how many are on the shortlist, and the most common rejection reasons. | Does not use credits. |
 | `get_spend` | The credits a project's searches used: what each reserved and was charged, what running searches still hold, and the total. `search_id` narrows it to one search. | Does not use credits. |
@@ -130,9 +130,9 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `list_shortlist_versions` | The shortlist versions published to the project's client, newest first, each with its version number and how many people it holds. The client's portal shows the newest. | Does not use credits. |
 | `get_shortlist_version` | One published version exactly as the client sees it: who is on it, best first, and why. | Does not use credits. |
 | `export_shortlist_version` | A published version as CSV, the file the client downloads, saved to a file (default `./revcenter-exports/shortlist-version-<version_id>.csv`). `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
-| `publish_shortlist` | Publish the live shortlist as a new version the client's portal shows. Reaches the client, so it publishes nothing itself: it answers with who the client would see and a proposal; show the person, and call `apply_proposal` only if they agree. | Does not use credits. |
+| `publish_shortlist` | Publish the live shortlist as a new version the client's portal shows. Reaches the client, so it asks you first, showing who the client would see; nothing is published unless you accept. | Does not use credits. |
 | `preview_shortlist_email` | The shortlist email as it would go: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing. In testing, for developer keys. | Does not use credits. |
-| `send_shortlist_email` | Email the shortlist to the client. Reaches the client, so it sends nothing itself: it answers with who would get what and a proposal; show the person, and call `apply_proposal` only if they agree. | Does not use credits. |
+| `send_shortlist_email` | Email the shortlist to the client. Reaches the client, so it asks you first, showing who would get what; nothing is sent unless you accept. | Does not use credits. |
 | `list_client_feedback` | What the client said about the people on the shortlist: Accept and Not a fit on their portal, and verdicts on a published version, with reasons and notes. | Does not use credits. |
 | `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
@@ -174,6 +174,16 @@ reserves; one Accept launches them all side by side, one Decline runs none. Anyt
 prompt is open is asked next, together. For a batch the agent has already drafted, `launch_searches` takes up
 to 25 launches in one call and returns each one's outcome: `launched` (with its search), `declined`,
 `pending_approval` (with its `proposal_id`) or `failed` (with the error; the others still run).
+
+## Approval before reaching the client or deleting
+
+`publish_shortlist` and `send_shortlist_email` reach the client, and `delete_project` can't be undone. None
+uses credits, but each is asked the same way, in its own words: who the client will see (publishing), the
+client workspace, where the email goes, its subject, link and people (emailing), or the project's name and
+what goes with it (deleting). Accept applies exactly what was previewed, once; Decline runs nothing. A client
+that can't ask gets `status: "pending_approval"` with the proposal and `show_the_person`, the text to show you
+before `apply_proposal`. `list_actions` (`GET /v1/actions`) marks these with `confirm` (`client` or
+`destructive`). Called directly, publishing and emailing are refused with `proposal_required`.
 
 A launch without its own `idempotency_key` gets one derived from the project and the request, so an agent that
 repeats an identical launch (after its tool call timed out, say) gets the first search back. It isn't asked
