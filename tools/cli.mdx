@@ -41,6 +41,15 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter projects [--limit <n>] [--cursor <c>]` | Projects, newest first. | Does not use credits. |
 | `revcenter project create <name>` | Makes a project. | Does not use credits. |
 | `revcenter project <project_id>` | One project. | Does not use credits. |
+| `revcenter rename <project_id> <name>` | Renames a project. | Does not use credits. |
+| `revcenter archive <project_id>` · `revcenter unarchive <project_id>` | Archives a project (it leaves `projects` but keeps its searches, shortlist and share link), or brings it back. | Does not use credits. |
+| `revcenter delete <project_id> --confirm "<project name>"` | Deletes a project for good: its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. `--confirm` takes its exact name. | Does not use credits. |
+| `revcenter insights <project_id>` | The talent picture across a project's searches: totals, verdict counts, places, employers, titles, schools and skills. | Does not use credits. |
+| `revcenter stats <project_id>` | A project's people in aggregate: analyzed, qualified, score spread, shortlisted, top rejection reasons. | Does not use credits. |
+| `revcenter spend <project_id> [--search <search_id>]` | The credits a project's searches reserved and were charged, and what running searches still hold. | Does not use credits. |
+| `revcenter dnc <project_id> [--limit <n>]` | The project's do-not-contact list, and the workspace-wide one. | Does not use credits. |
+| `revcenter dnc add <project_id> <linkedin_url> … [--reason "<text>"]` | Adds people to the project's do-not-contact list; its searches skip them from now on. | Does not use credits. |
+| `revcenter dnc search <project_id> <search_id> [--reason "<text>"]` | Adds everyone a search found to the project's do-not-contact list. | Does not use credits. |
 | `revcenter searches <project_id> [--limit <n>] [--cursor <c>]` | A project's searches, oldest first. | Does not use credits. |
 | `revcenter search <project_id> --criteria <file.json> [--max-credits <n>]` | Launches a search on your criteria. `--jd <file.txt>` uses a job description instead. `--max-credits` caps it (500, 1000, 2500 or 5000; default 1000; at least 250). | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. None with `--database-only`. |
 | `revcenter launch <launches.json> [--max-credits <n>] [--wait]` | Launches many searches side by side from a JSON list of `{project_id, criteria \| jd_text, max_credits?}` (or `{"launches": [...]}`), up to 25. Each comes back with its `outcome`, `launched` or `failed`; one failing doesn't stop the rest, and the exit code is the first failure's. Running the same file again returns the searches already started. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. None with `database_only`. |
@@ -50,12 +59,17 @@ Needs Node 20 or later. The installer uses your global npm folder when it can wr
 | `revcenter records <search_id> [--limit <n>] [--cursor <c>] [--no-profile] [--csv [<file>]] [--jsonl [<file>]]` | Every person a search returned, read or not, with their status (`scored`, `known`, `not_read`) and score, or all of them as CSV or JSON Lines. With `--project <project_id>` instead of a search id, every search in the project at once, one record per person with the `search_ids` that returned them. | Does not use credits. |
 | `revcenter rescore <search_id> [--cutoff <n>] [--weight <term>=<n>] [--require <field>=<value>] [--preview]` | Previews or applies a scoring change. `--weight` and `--require` repeat. | Re-scores the people already found. Does not use credits. |
 | `revcenter database <search_id>` | Scores your workspace's candidates on file against the search. | Re-scores the people already found. Does not use credits. |
+| `revcenter scoring <search_id>` | Why a search's list looks as it does: the cut-off, score bands, rejection reasons, missing must-haves and the best people just under the cut-off. | Does not use credits. |
+| `revcenter discard <search_id>` | Discards the scoring change the app's assistant left pending on a search. | Does not use credits. |
 | `revcenter expand <project_id> [--max-credits <n>]` | A new live pass for more people on the same role. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `revcenter share <project_id>` | The project's public shortlist link, to paste into an email: the same URL every time, always showing the live shortlist. `shortlisted` says how many people it shows. | Does not use credits. |
 | `revcenter shortlist <project_id> [--csv [<file>]] [--jsonl [<file>]] [--no-profile]` | The shortlist as JSON, or saved as CSV with every profile field, or as JSON Lines. | Does not use credits. |
 | `revcenter candidates [--q <text>] [--project <id>] [--title ..] [--company ..] [--location ..] [--limit <n>] [--cursor <c>] [--csv [<file>]] [--jsonl [<file>]]` | The workspace's candidate database (the Candidates tab), or all of it as CSV with every profile field, or as JSON Lines. | Does not use credits. |
 | `revcenter add <project_id> <candidate_id> …` | Adds people to the shortlist. | Does not use credits. |
 | `revcenter remove <project_id> <candidate_id> [--reason "<text>"]` | Removes someone from the shortlist. | Does not use credits. |
+| `revcenter verdict <search_id> <candidate_id> <accept\|reject\|maybe\|clear> [--reason <code>] [--notes "<text>"] [--key <key>]` | Records your team's verdict on someone, with reason codes (`--reason` repeats) and private notes. Never shown to the client. | Does not use credits. |
+| `revcenter verdicts <search_id> [--candidate <candidate_id>]` | The latest verdict, reason codes and notes for each person in a search. | Does not use credits. |
+| `revcenter reasons` · `revcenter reasons add <label>` | Your workspace's decline reasons (the keys `--reason` takes), or adds one. | Does not use credits. |
 | `revcenter webhooks list` | Your [webhook](/guides/webhooks) endpoints. | Does not use credits. |
 | `revcenter webhooks create <url> [--events <a,b>] [--description "<text>"]` | Adds an endpoint for search and shortlist events (all events unless `--events`) and prints its signing secret, once. | Does not use credits. |
 | `revcenter webhooks update <webhook_id> [--enable] [--disable] [--url <url>] [--events <a,b>] [--description "<text>"]` | Changes an endpoint, or turns it off and on. | Does not use credits. |

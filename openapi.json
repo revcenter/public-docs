@@ -1718,6 +1718,261 @@
             "$ref": "#/components/responses/Error"
           }
         }
+      },
+      "patch": {
+        "operationId": "update_project",
+        "summary": "Rename or archive a project",
+        "description": "Rename a project, or archive it (or bring it back): an archived project leaves list_projects but keeps its searches, shortlist and share link. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "archived": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Project"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "name": "Plant Controller, Camden NJ",
+                    "created_at": "2026-10-17T14:02:11.000Z",
+                    "archived": true,
+                    "searches": 1,
+                    "shortlisted": 14
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_project",
+        "summary": "Delete a project",
+        "description": "Delete a project for good, sending its exact name as confirm_name. Its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Cannot be undone. confirm_name must be the project's name exactly as get_project returns it, or nothing is deleted (400 confirmation_required). The share link stops showing the list, so a client holding it sees nothing: to keep it, archive instead (update_project with archived true). A project with delivered work behind it is kept (409 project_in_use). Preview it with preview_action first to show the person what goes. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirm_name"
+                ],
+                "properties": {
+                  "confirm_name": {
+                    "type": "string",
+                    "description": "The project's exact name."
+                  }
+                }
+              },
+              "example": {
+                "confirm_name": "Plant Controller, Camden NJ"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": {
+                          "type": "boolean"
+                        },
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "searches_kept": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "deleted": true,
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "name": "Plant Controller, Camden NJ",
+                    "searches_kept": 1
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
       }
     },
     "/projects/{projectId}/searches": {
@@ -5331,6 +5586,1888 @@
                         }
                       }
                     }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/candidates/{candidateId}/verdict": {
+      "post": {
+        "operationId": "set_candidate_verdict",
+        "summary": "Record a verdict and notes",
+        "description": "Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes, e.g. \"Ask about work authorization\". The same judgement the candidate panel in the app records. Verdicts, reason codes and notes are private to your workspace: they never appear on the share link, the client portal, a shortlist email or any export. Each call is kept (get_candidate_verdicts reads the latest per person) and lands with review_state pending: Revcenter reviews verdicts to calibrate scoring, so recording one does not move the shortlist; to take someone off, use remove_shortlist_member. reason_codes are keys from list_decline_reasons. Send an Idempotency-Key to make a retry safe: the same key and body return the first verdict. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "tags": [
+          "Candidates"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "description": "A candidate id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Optional, 8-160 printable characters: a retry with the same key and body records nothing new.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "verdict"
+                ],
+                "properties": {
+                  "verdict": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "accept",
+                      "reject",
+                      "maybe",
+                      null
+                    ],
+                    "description": "null clears the verdict."
+                  },
+                  "reason_codes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "maxItems": 30,
+                    "description": "Keys from list_decline_reasons, e.g. wrong_seniority."
+                  },
+                  "notes": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 4000,
+                    "description": "Private notes for your team."
+                  }
+                }
+              },
+              "example": {
+                "verdict": "maybe",
+                "reason_codes": [
+                  "tenure_concern"
+                ],
+                "notes": "Ask about work authorization: contract via staffing vendor."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "candidate_id": {
+                          "type": "string"
+                        },
+                        "verdict": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "reason_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "notes": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "review_state": {
+                          "type": "string",
+                          "description": "pending until Revcenter reviews it."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6e",
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                    "verdict": "maybe",
+                    "reason_codes": [
+                      "tenure_concern"
+                    ],
+                    "notes": "Ask about work authorization: contract via staffing vendor.",
+                    "review_state": "pending"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/verdicts": {
+      "get": {
+        "operationId": "get_candidate_verdicts",
+        "summary": "Read verdicts and notes",
+        "description": "The latest verdict, reason codes and private notes for each person in a search, newest first: what your team (or the client, on the portal) decided. source is team for a verdict recorded in the app or through this API, and client for the client's own Accept on the portal's live shortlist. Pass candidate_id for one person. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Candidates"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "in": "query",
+            "required": false,
+            "description": "Only this person",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "candidate_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "verdict": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "reason_codes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "notes": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "team",
+                              "client"
+                            ]
+                          },
+                          "review_state": {
+                            "type": "string"
+                          },
+                          "recorded_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                      "name": "Dana Whitfield",
+                      "verdict": "maybe",
+                      "reason_codes": [
+                        "tenure_concern"
+                      ],
+                      "notes": "Ask about work authorization: contract via staffing vendor.",
+                      "source": "team",
+                      "review_state": "pending",
+                      "recorded_at": "2026-10-21T15:04:00.000Z"
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/decline-reasons": {
+      "get": {
+        "operationId": "list_decline_reasons",
+        "summary": "List decline reasons",
+        "description": "Your workspace's decline reasons: the reason_codes a verdict takes. Ten defaults, then the ones your team added, most used first. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Candidates"
+        ],
+        "parameters": [
+          {
+            "name": "include_hidden",
+            "in": "query",
+            "required": false,
+            "description": "true to include reasons hidden in Settings",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string",
+                            "description": "What reason_codes takes."
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "default": {
+                            "type": "boolean"
+                          },
+                          "hidden": {
+                            "type": "boolean"
+                          },
+                          "use_count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "4a3b2c1d-0e9f-4a8b-9c7d-6e5f4a3b2c1d",
+                      "key": "wrong_seniority",
+                      "label": "Wrong seniority",
+                      "default": true,
+                      "hidden": false,
+                      "use_count": 0
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_decline_reason",
+        "summary": "Add a decline reason",
+        "description": "Add a decline reason your team can use in verdicts; returns its key. The same label again returns the one already there. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "tags": [
+          "Candidates"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "label"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                }
+              },
+              "example": {
+                "label": "No work authorization"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string",
+                          "description": "What reason_codes takes."
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "default": {
+                          "type": "boolean"
+                        },
+                        "hidden": {
+                          "type": "boolean"
+                        },
+                        "use_count": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "1d2c3b4a-5f6e-4d7c-8b9a-0f1e2d3c4b5a",
+                    "key": "custom:no_work_authorization",
+                    "label": "No work authorization",
+                    "default": false,
+                    "hidden": false,
+                    "use_count": 0
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/dnc": {
+      "get": {
+        "operationId": "list_dnc",
+        "summary": "List do-not-contact",
+        "description": "The people this project's searches skip, newest first: the project's own do-not-contact list and the workspace-wide one. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 (default 200).",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "linkedin_id": {
+                            "type": "string"
+                          },
+                          "linkedin_url": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "reason": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "scope": {
+                            "type": "string",
+                            "enum": [
+                              "project",
+                              "workspace"
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "6d5c4b3a-2f1e-4d0c-9b8a-7f6e5d4c3b2a",
+                      "linkedin_id": "example",
+                      "linkedin_url": "https://www.linkedin.com/in/example",
+                      "name": "Dana Whitfield",
+                      "reason": "Client already interviewed",
+                      "scope": "project",
+                      "created_at": "2026-10-21T15:10:00.000Z"
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "add_dnc",
+        "summary": "Add to do-not-contact",
+        "description": "Add people to the project's do-not-contact list by LinkedIn address: its searches skip them from now on. People already on it are left as they are. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "people"
+                ],
+                "properties": {
+                  "people": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 2000,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "url"
+                      ],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "description": "https://www.linkedin.com/in/… or the id after /in/"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                }
+              },
+              "example": {
+                "people": [
+                  {
+                    "url": "https://www.linkedin.com/in/example",
+                    "name": "Dana Whitfield"
+                  }
+                ],
+                "reason": "Client already interviewed"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "added": {
+                          "type": "integer"
+                        },
+                        "submitted": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "added": 1,
+                    "submitted": 1
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/dnc/from-search/{searchId}": {
+      "post": {
+        "operationId": "add_dnc_from_search",
+        "summary": "Add a whole search to do-not-contact",
+        "description": "Add everyone a search found to the project's do-not-contact list in one call, for when the client turned down the whole list. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Defaults to \"Rejected batch from search <id>\"."
+                  }
+                }
+              },
+              "example": {
+                "reason": "Client passed on the first list"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "added": {
+                          "type": "integer"
+                        },
+                        "submitted": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "added": 212,
+                    "submitted": 212
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/scoring": {
+      "get": {
+        "operationId": "get_scoring_diagnostics",
+        "summary": "Why the list looks as it does",
+        "description": "How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. Read it before preview_scoring: it says whether the cut-off, a must-have or a weight is what keeps the list short. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "tags": [
+          "Scoring"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "floors": {
+                          "type": "object"
+                        },
+                        "analyzed": {
+                          "type": "integer"
+                        },
+                        "unscored": {
+                          "type": "integer"
+                        },
+                        "enriched": {
+                          "type": "integer"
+                        },
+                        "shortlisted": {
+                          "type": "integer"
+                        },
+                        "bands": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "rejected": {
+                          "type": "integer"
+                        },
+                        "rejectReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "mustHaves": {
+                          "type": "object"
+                        },
+                        "nearMisses": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "weights": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "floors": {
+                      "qualified": 85,
+                      "shortlist": 80,
+                      "custom": false
+                    },
+                    "analyzed": 212,
+                    "unscored": 0,
+                    "enriched": 212,
+                    "shortlisted": 14,
+                    "bands": [
+                      {
+                        "label": "85+",
+                        "min": 85,
+                        "max": null,
+                        "count": 9,
+                        "big4": {
+                          "current": 0,
+                          "past": 2
+                        }
+                      },
+                      {
+                        "label": "80–84",
+                        "min": 80,
+                        "max": 84,
+                        "count": 5,
+                        "big4": {
+                          "current": 0,
+                          "past": 1
+                        }
+                      }
+                    ],
+                    "rejected": 61,
+                    "rejectReasons": [
+                      {
+                        "code": "GEO_OUT",
+                        "label": "outside the target area",
+                        "count": 33
+                      }
+                    ],
+                    "underFloorReasons": [],
+                    "mustHaves": {
+                      "gate": true,
+                      "items": [
+                        {
+                          "requirement": "CPA",
+                          "missing": 48,
+                          "of": 212
+                        }
+                      ]
+                    },
+                    "nearMisses": [
+                      {
+                        "candidateId": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                        "name": "Dana Whitfield",
+                        "roleTitle": "Plant Controller",
+                        "company": "Garden State Foods",
+                        "profileUrl": "https://www.linkedin.com/in/example",
+                        "score": 78
+                      }
+                    ],
+                    "weights": {
+                      "title": 0.3,
+                      "geo": 0.2,
+                      "years": 0.15,
+                      "seniority": 0.1,
+                      "skills": 0.15,
+                      "industry": 0.1
+                    },
+                    "outsideLocation": 40,
+                    "preferredEmployer": {
+                      "current": 0,
+                      "past": 3
+                    },
+                    "belowCutoff": {
+                      "count": 22,
+                      "pointsLost": [
+                        {
+                          "dimension": "skills",
+                          "points": 6.2
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/scoring/discard": {
+      "post": {
+        "operationId": "discard_scoring",
+        "summary": "Discard a proposed scoring change",
+        "description": "Discard the scoring change the app's assistant proposed for a search and left pending, keeping the criteria in force; returns what was discarded, or discarded false when nothing was pending. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "tags": [
+          "Scoring"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "discarded": {
+                          "type": "boolean"
+                        },
+                        "criteria_version_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "explanation": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "proposed_criteria": {
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "discarded": true,
+                    "criteria_version_id": "2b1a0f9e-8d7c-4b6a-9e5d-4c3b2a1f0e9d",
+                    "explanation": "Lower the cut-off to 75 to widen the list.",
+                    "proposed_criteria": {
+                      "title_variants": [
+                        "Plant Controller",
+                        "Controller"
+                      ],
+                      "metro": "Camden, NJ",
+                      "geo_radius_mi": 40,
+                      "years_experience": {
+                        "min": 8,
+                        "enforcement": "hard"
+                      },
+                      "must_have": [
+                        "CPA"
+                      ],
+                      "shortlist_min_score": 75
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/stats": {
+      "get": {
+        "operationId": "get_shortlist_stats",
+        "summary": "Project stats",
+        "description": "Everyone a project's searches scored, in aggregate: how many were analyzed and qualified, the score spread, how many are on the shortlist, and the most common reasons people were rejected. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "shortlisted": {
+                          "type": "integer"
+                        },
+                        "analyzed": {
+                          "type": "integer"
+                        },
+                        "qualified": {
+                          "type": "integer"
+                        },
+                        "scoreBands": {
+                          "type": "object"
+                        },
+                        "topRejectReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "shortlisted": 14,
+                    "analyzed": 212,
+                    "qualified": 9,
+                    "scoreBands": {
+                      "85+": 9,
+                      "70-84": 41,
+                      "under 70": 162
+                    },
+                    "topRejectReasons": [
+                      {
+                        "reason": "GEO_OUT",
+                        "count": 33
+                      }
+                    ]
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/spend": {
+      "get": {
+        "operationId": "get_spend",
+        "summary": "Credits a project used",
+        "description": "The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. credits_state per search: held (running; its cap is reserved), charged (finished; charged for the profiles it read, the rest refunded), refunded (its whole reservation came back: it failed or never started), none (database only, or no plan). Does not use credits.\n\nNeeds scope `searches:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search_id",
+            "in": "query",
+            "required": false,
+            "description": "Only this search",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "credits_charged": {
+                          "type": "integer"
+                        },
+                        "credits_held": {
+                          "type": "integer"
+                        },
+                        "searches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "search_id": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "credits_state": {
+                                "type": "string",
+                                "enum": [
+                                  "held",
+                                  "charged",
+                                  "refunded",
+                                  "none"
+                                ]
+                              },
+                              "credits_reserved": {
+                                "type": "integer"
+                              },
+                              "credits_charged": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "credits_charged": 412,
+                    "credits_held": 1000,
+                    "searches": [
+                      {
+                        "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "status": "complete",
+                        "created_at": "2026-10-17T14:03:02.000Z",
+                        "credits_state": "charged",
+                        "credits_reserved": 1000,
+                        "credits_charged": 412
+                      },
+                      {
+                        "search_id": "7d2e4f1a-0c3b-4a5d-9e8f-6b1c2d3e4f52",
+                        "status": "running",
+                        "created_at": "2026-10-18T09:00:00.000Z",
+                        "credits_state": "held",
+                        "credits_reserved": 1000,
+                        "credits_charged": null
+                      }
+                    ]
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/insights": {
+      "get": {
+        "operationId": "get_project_insights",
+        "summary": "Project insights",
+        "description": "The talent picture across a project's searches, as the app's Insights tab shows it: totals and verdict counts, and where the people are, who employs them, their titles, schools and skills. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "kind": "project_insights",
+                    "generatedAt": "2026-10-21T15:20:00.000Z",
+                    "project": {
+                      "id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                      "name": "Plant Controller, Camden NJ",
+                      "clientName": null
+                    },
+                    "summary": {
+                      "searches": 1,
+                      "candidateAppearances": 212,
+                      "uniqueCandidates": 212,
+                      "enriched": 212,
+                      "qualified": 9,
+                      "accepted": 0,
+                      "maybe": 1,
+                      "rejected": 0,
+                      "averageScore": 61.4
+                    },
+                    "distributions": {
+                      "locations": [
+                        {
+                          "label": "Cherry Hill, NJ",
+                          "count": 31
+                        }
+                      ],
+                      "companies": [
+                        {
+                          "label": "Garden State Foods",
+                          "count": 4
+                        }
+                      ],
+                      "titles": [
+                        {
+                          "label": "Plant Controller",
+                          "count": 57
+                        }
+                      ],
+                      "schools": [
+                        {
+                          "label": "Rutgers University",
+                          "count": 22
+                        }
+                      ],
+                      "skills": [
+                        {
+                          "label": "Cost Accounting",
+                          "count": 80
+                        }
+                      ]
+                    },
+                    "searches": [
+                      {
+                        "id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                        "title": "Plant Controller",
+                        "createdAt": "2026-10-17T14:03:02.000Z"
+                      }
+                    ]
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
