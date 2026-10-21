@@ -7848,6 +7848,1199 @@
           }
         }
       }
+    },
+    "/projects/{projectId}/shortlist/versions": {
+      "get": {
+        "operationId": "list_shortlist_versions",
+        "summary": "List published shortlist versions",
+        "description": "The shortlist versions published to the project's client, newest first: each a frozen copy of the shortlist, with its version number and how many people it holds. The client's portal shows the newest. publish_shortlist makes a version. A version that holds someone since taken off the shortlist or put on the do-not-contact list is withdrawn: the client can't open it, and it is not listed. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "published_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "members": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "9a7c5e3b-1d2f-4a6b-8c0d-2e4f6a8b0c13",
+                      "version": 2,
+                      "published_at": "2026-10-18T15:20:04.000Z",
+                      "members": 14
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/shortlist/versions/{versionId}.csv": {
+      "get": {
+        "operationId": "export_shortlist_version",
+        "summary": "Download a published version as CSV",
+        "description": "A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. Columns: rank, tier, gaps, name, title, company, location, profile_url, evidence, snapshot_id, snapshot_version, snapshot_hash, canonical_shortlist_hash, generated_at. UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line, as get_shortlist_version lists them, with version_id and version. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "description": "A published version id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "csv (the default) for a spreadsheet, with a UTF-8 byte order mark; jsonl for JSON Lines: one person per line with the whole read profile, lossless, for an AI agent",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "jsonl"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "rank,tier,gaps,name,title,company,location,profile_url,evidence,snapshot_id,snapshot_version,snapshot_hash,canonical_shortlist_hash,generated_at\n1,tier1,,Dana Whitfield,Plant Controller,Garden State Foods,\"Cherry Hill, NJ\",https://www.linkedin.com/in/example,Qualified match,9a7c5e3b-1d2f-4a6b-8c0d-2e4f6a8b0c13,2,5f0c…,b81e…,2026-10-18T15:20:04.000Z\n"
+              },
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "format=jsonl: one JSON object per line."
+                },
+                "example": "{\"rank\":1,\"id\":\"3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99\",\"name\":\"Dana Whitfield\",\"title\":\"Plant Controller\",\"company\":\"Garden State Foods\",\"location\":\"Cherry Hill, NJ\",\"linkedin_url\":\"https://www.linkedin.com/in/example\",\"why\":[\"Qualified match\"],\"tier\":\"tier1\",\"gaps\":[],\"version_id\":\"9a7c5e3b-1d2f-4a6b-8c0d-2e4f6a8b0c13\",\"version\":2}\n"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/shortlist/versions/{versionId}": {
+      "get": {
+        "operationId": "get_shortlist_version",
+        "summary": "Get a published version",
+        "description": "One published shortlist version exactly as the client sees it: who is on it, best first, with title, company, place, LinkedIn address and why each is on it. Frozen when it was published: later changes to the shortlist show in the next version, not this one. No scores, notes or contact details: only what the client was given. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "description": "A published version id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "published_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "snapshot_hash": {
+                          "type": "string"
+                        },
+                        "members": {
+                          "type": "integer"
+                        },
+                        "candidates": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "rank": {
+                                "type": "integer"
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "company": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "location": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "linkedin_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "why": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "tier": {
+                                "type": "string",
+                                "enum": [
+                                  "tier1",
+                                  "tier2"
+                                ]
+                              },
+                              "gaps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "9a7c5e3b-1d2f-4a6b-8c0d-2e4f6a8b0c13",
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "version": 2,
+                    "published_at": "2026-10-18T15:20:04.000Z",
+                    "snapshot_hash": "5f0c9d2e…",
+                    "members": 1,
+                    "candidates": [
+                      {
+                        "rank": 1,
+                        "id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                        "name": "Dana Whitfield",
+                        "title": "Plant Controller",
+                        "company": "Garden State Foods",
+                        "location": "Cherry Hill, NJ",
+                        "linkedin_url": "https://www.linkedin.com/in/example",
+                        "why": [
+                          "Qualified match"
+                        ],
+                        "tier": "tier1",
+                        "gaps": []
+                      }
+                    ]
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/shortlist/publish": {
+      "post": {
+        "operationId": "publish_shortlist",
+        "summary": "Publish the shortlist to the client",
+        "description": "Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is published. The version freezes who is on the shortlist when the proposal is applied, best first, with each person's name, title, company, place, LinkedIn address and why they are on it (a qualified match, or selected by the recruiter); never notes, scores' workings or removal reasons. Publishing a shortlist that hasn't changed returns the version already published. Send expected_members (how many people the person was shown, get_project's shortlisted) and a shortlist that has moved since is refused with shortlist_changed. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expected_members": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "How many people the person was shown; refused if the shortlist holds a different number now."
+                  }
+                }
+              },
+              "example": {
+                "expected_members": 14
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "version_id": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "members": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "version_id": "9a7c5e3b-1d2f-4a6b-8c0d-2e4f6a8b0c13",
+                    "version": 2,
+                    "members": 14
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/shortlist/email/preview": {
+      "post": {
+        "operationId": "preview_shortlist_email",
+        "summary": "Preview the shortlist email",
+        "description": "The email send_shortlist_email would send for the project's shortlist, without sending it: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing and makes no link. In testing, as in the app: for keys made by a developer account only (shortlist_email_in_testing otherwise), and every email goes to Revcenter's test inbox (send_to) instead of the client workspace's members (intended_recipients). client_workspace_id defaults to the client portal the project is assigned to. url is the client's link when it already exists; otherwise it is null and sending makes it. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_workspace_id": {
+                    "type": "string",
+                    "description": "The client workspace to email; defaults to the client portal the project is assigned to."
+                  }
+                }
+              },
+              "example": {
+                "client_workspace_id": "org_2xClIeNt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "client_workspace": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "mode": {
+                          "type": "string",
+                          "enum": [
+                            "test"
+                          ]
+                        },
+                        "send_to": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Where it is actually sent."
+                        },
+                        "intended_recipients": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "The client workspace's members, who it would reach live."
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "link_exists": {
+                          "type": "boolean"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "people": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "company": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "location": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "linkedin_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "score": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "client_workspace": {
+                      "id": "org_2xClIeNt",
+                      "name": "Garden State Foods"
+                    },
+                    "mode": "test",
+                    "send_to": [
+                      "test-inbox@revcenter.ai"
+                    ],
+                    "intended_recipients": [
+                      "hiring@gardenstatefoods.example"
+                    ],
+                    "subject": "14 candidates for Plant Controller, Camden NJ",
+                    "text": "Open the shortlist: https://app.revcenter.ai/share/rvs_3f9a1c7e2b\n…",
+                    "url": "https://app.revcenter.ai/share/rvs_3f9a1c7e2b",
+                    "link_exists": true,
+                    "total": 14,
+                    "people": [
+                      {
+                        "name": "Dana Whitfield",
+                        "title": "Plant Controller",
+                        "company": "Garden State Foods",
+                        "location": "Cherry Hill, NJ",
+                        "linkedin_url": "https://www.linkedin.com/in/example",
+                        "score": 91
+                      }
+                    ]
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/shortlist/email/send": {
+      "post": {
+        "operationId": "send_shortlist_email",
+        "summary": "Email the shortlist to the client",
+        "description": "Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is sent. confirm_workspace_name is the client workspace's name as the person saw it in preview_shortlist_email; a different name is refused with workspace_name_mismatch, so one client never gets another's list. Send expected_total (preview_shortlist_email's total) and a shortlist that has moved since is refused with shortlist_changed. In testing, as in the app: developer keys only, and it goes to Revcenter's test inbox, never the client's members. Applying the same proposal twice sends once. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirm_workspace_name"
+                ],
+                "properties": {
+                  "client_workspace_id": {
+                    "type": "string",
+                    "description": "The client workspace to email; defaults to the client portal the project is assigned to."
+                  },
+                  "confirm_workspace_name": {
+                    "type": "string",
+                    "description": "The client workspace's name, as preview_shortlist_email showed it."
+                  },
+                  "expected_total": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "preview_shortlist_email's total; refused if the shortlist holds a different number now."
+                  }
+                }
+              },
+              "example": {
+                "client_workspace_id": "org_2xClIeNt",
+                "confirm_workspace_name": "Garden State Foods",
+                "expected_total": 14
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "project_id": {
+                          "type": "string"
+                        },
+                        "client_workspace": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "mode": {
+                          "type": "string",
+                          "enum": [
+                            "test"
+                          ]
+                        },
+                        "sent_to": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "intended_recipients": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
+                    "client_workspace": {
+                      "id": "org_2xClIeNt",
+                      "name": "Garden State Foods"
+                    },
+                    "mode": "test",
+                    "sent_to": [
+                      "test-inbox@revcenter.ai"
+                    ],
+                    "intended_recipients": [
+                      "hiring@gardenstatefoods.example"
+                    ],
+                    "url": "https://app.revcenter.ai/share/rvs_3f9a1c7e2b",
+                    "total": 14
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/client-feedback": {
+      "get": {
+        "operationId": "list_client_feedback",
+        "summary": "List the client's feedback",
+        "description": "What the client said about the people on the project's shortlist, newest first: Accept and Not a fit on their portal's live list, and verdicts on a published version, with their reasons and notes. Each is recorded as the client gave it and waits for Revcenter's review (review_state pending, approved or rejected) before it changes any scoring. not_a_fit is true when the client passed on the person, which also takes them off the shortlist. given_on says where: the live shortlist, or a published version (version_id). Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Shortlists"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 (default 100).",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "candidate_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "title": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "company": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "verdict": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "accept",
+                              "reject",
+                              "maybe",
+                              null
+                            ]
+                          },
+                          "not_a_fit": {
+                            "type": "boolean"
+                          },
+                          "reason_codes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "notes": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "given_on": {
+                            "type": "string",
+                            "enum": [
+                              "live_shortlist",
+                              "shortlist_version"
+                            ]
+                          },
+                          "version_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "decided_by": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "decided_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "review_state": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "approved",
+                              "rejected"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "4d3c2b1a-0f9e-4d8c-8b7a-6f5e4d3c2b1a",
+                      "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                      "name": "Dana Whitfield",
+                      "title": "Plant Controller",
+                      "company": "Garden State Foods",
+                      "verdict": "accept",
+                      "not_a_fit": false,
+                      "reason_codes": [],
+                      "notes": null,
+                      "given_on": "live_shortlist",
+                      "version_id": null,
+                      "decided_by": "hiring@gardenstatefoods.example",
+                      "decided_at": "2026-10-19T13:02:44.000Z",
+                      "review_state": "pending"
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {

@@ -127,6 +127,13 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `get_candidate_verdicts` | The latest verdict, reason codes and private notes for each person in a search, and the client's own Accepts from the portal. | Does not use credits. |
 | `list_decline_reasons` | Your workspace's decline reasons: the keys `reason_codes` takes. | Does not use credits. |
 | `create_decline_reason` | Add a decline reason your team can use in verdicts. | Does not use credits. |
+| `list_shortlist_versions` | The shortlist versions published to the project's client, newest first, each with its version number and how many people it holds. The client's portal shows the newest. | Does not use credits. |
+| `get_shortlist_version` | One published version exactly as the client sees it: who is on it, best first, and why. | Does not use credits. |
+| `export_shortlist_version` | A published version as CSV, the file the client downloads, saved to a file (default `./revcenter-exports/shortlist-version-<version_id>.csv`). `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
+| `publish_shortlist` | Publish the live shortlist as a new version the client's portal shows. Reaches the client, so it publishes nothing itself: it answers with who the client would see and a proposal; show the person, and call `apply_proposal` only if they agree. | Does not use credits. |
+| `preview_shortlist_email` | The shortlist email as it would go: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing. In testing, for developer keys. | Does not use credits. |
+| `send_shortlist_email` | Email the shortlist to the client. Reaches the client, so it sends nothing itself: it answers with who would get what and a proposal; show the person, and call `apply_proposal` only if they agree. | Does not use credits. |
+| `list_client_feedback` | What the client said about the people on the shortlist: Accept and Not a fit on their portal, and verdicts on a published version, with reasons and notes. | Does not use credits. |
 | `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (1,000 by default); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
