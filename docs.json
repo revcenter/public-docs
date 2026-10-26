@@ -48,6 +48,8 @@
       {
         "group": "Guides",
         "pages": [
+          "guides/writing-a-search",
+          "guides/search-approaches",
           "guides/criteria",
           "guides/searches",
           "guides/rate-limits",

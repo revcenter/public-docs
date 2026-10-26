@@ -35,6 +35,9 @@ field and its allowed values.
 | `exclude_companies` | `["Acme Staffing"]` | Current employers to leave out. |
 | `schools`, `exclude_schools` | `["University of Michigan"]` | Schools attended. |
 | `exclude_titles` | `["Intern"]` | Current titles to leave out. |
+| `title_boolean` | `"\"data center\" AND (manager OR director)"` | The title rule as written, at most 400 characters. Shown and edited in the app's plan; `title_requires` and `exclude_titles` carry what it means. |
+| `keyword_boolean` | `"\"data center\" AND (construction OR \"mission critical\")"` | A keyword rule over the whole profile, applied before any profile is read. At most 245 characters and 12 phrases, no commas. Reaches people whose titles do not name the specialty. |
+| `title_requires` | `[["data center"], ["manager", "director"]]` | A title rule: every group must appear in the current title, any phrase within a group. This one reads "data center" AND (manager OR director). Sent with the title search, and checked again on each listed person's title before any profile is read. |
 | `exclude_locations` | `["New York, NY"]` | Places to leave out. |
 | `recently_changed_jobs` | `true` | Changed jobs in the last 90 days. |
 | `profile_languages` | `["es"]` | The language the profile is written in, not a language spoken. |
@@ -45,7 +48,7 @@ field and its allowed values.
 | --- | --- | --- |
 | `must_have` | `["CPA", "PE license"]` | Each must be evidenced on the profile. Keep each to a short term; a sentence rarely matches anyone. |
 | `skills`, `skills_required` | `["NetSuite"]`, `["CPA or Enrolled Agent"]` | `"A or B"` matches either. |
-| `keywords` | `["SAP S/4HANA"]` | Words anywhere on the profile. |
+| `keywords` | `["SAP S/4HANA"]` | Words anywhere on the profile, scored after reading. To search for them before reading, use `keyword_boolean`. |
 | `languages_required` | `["Spanish"]` | Spoken languages. |
 | `preferred_employers` | `["Big 4"]` | Ranks people there now or before higher; never excludes. |
 | `geo_radius_mi` | `50` | Distance from `metro` for the location score. |

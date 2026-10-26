@@ -23,6 +23,8 @@ Every page is also available as Markdown: add `.md` to its address. All pages in
 
 ## Guides
 
+- [Writing a search](https://docs.revcenter.ai/guides/writing-a-search.md): How to ask for the people you want: what narrows who is searched, what ranks them, and tips that improve results.
+- [Search approaches](https://docs.revcenter.ai/guides/search-approaches.md): The ways a request can be searched, what each one asks for before anything is spent, and when to use it.
 - [Criteria](https://docs.revcenter.ai/guides/criteria.md): What a search looks for: which fields filter LinkedIn before anything is read, and which score after.
 - [Searches and shortlists](https://docs.revcenter.ai/guides/searches.md): How a search runs, what its outcome means, and how to get more people without starting over.
 - [Rate limits](https://docs.revcenter.ai/guides/rate-limits.md): Request and search limits, the 429 response, and how to retry.

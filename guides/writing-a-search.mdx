@@ -1,0 +1,67 @@
+---
+title: "Writing a search"
+description: "How to ask for the people you want: what narrows who is searched, what ranks them, and tips that improve results."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Write your request the way you would brief a sourcer. Revcenter reads it, shows you the plan, and you can change
+anything in the plan before the search starts. Everything in a request does one of two jobs:
+
+- **Filters** decide who is searched. They are applied before anything is paid for, so a good filter saves credits.
+- **Ranking** decides how people are scored once their profiles are read. It never removes anyone on its own; it moves
+  people up or down the list.
+
+## Filters: who is searched
+
+These are applied before anything is paid for.
+
+| What | Say it like this | Good to know |
+| --- | --- | --- |
+| Titles | "Titles: Construction Project Manager, Data Center PM, Site PM" | Name 3 to 10 real titles. If you name none, Revcenter picks the role's title and its closest synonyms, which may not be the ones you would choose. A bare title like "Project Manager" is not searched on its own next to a qualified one like "Construction Project Manager": it would match every project manager anywhere. |
+| Title rule | `("Project Manager" OR "Construction Manager") AND "Data Center" NOT Assistant` | Type it in your request (on its own line, or after "Titles:") and it is kept exactly as written; it also shows in the plan's **Title rule** field, where you can edit it. Use AND, OR and NOT in capitals, brackets, and "quoted phrases", up to 400 characters and 20 phrases; a long list of titles is searched in parts, but one title with the rest of the rule must fit in 245 characters and 12 phrases. It is part of the title search, and anyone whose current title does not match is dropped before their profile is read. If you write none, the plan drafts one from the role's titles and its field ("Data Center" OR "Mission Critical") for you to keep, change or clear. |
+| Profile keywords | `"data center" AND (construction OR "mission critical")` | On a line starting "Keywords:", or in the plan's **Profile keywords** field. Searches the whole profile (experience, summary, skills), not only titles, so it reaches people whose titles do not name the specialty. Up to 12 phrases and 245 characters; use OR, not commas. Combine it with a title rule for niche roles. |
+| Excluded titles | "Not assistant PMs or project coordinators" | People whose current title matches are left out. |
+| Past titles | "Previously a superintendent" | Searches people who held the title before their current job. |
+| Location | "Based in Chicago", "within 30 miles of downtown Chicago", "open to remote", "not in Gary, Indiana" | The one hard rule. Shortlists are people who can commute to the job; people outside the area are removed unless you say remote is fine. |
+| Level | "Manager level", "director or VP" | Searched with one level either side, so titles that read a level up or down are not lost. |
+| Current or past employers | "Currently at Turner, Clayco or AECOM", "previously at a general contractor", "not from Clayco" | Named employers you require narrow the search. Employers you only prefer ("prefer Big 4") rank people instead (see Ranking). "Not from" leaves out their current staff. |
+| Employer size | "Companies with 200 to 5,000 employees" | Sizes come in bands (201–500, 501–1,000, 1,001–5,000 and so on), so the edges are approximate. |
+| Current employer's industry | "Currently in construction" | The industry of the company they work for now. |
+| Job function | "Project management function", "not sales" | Include or leave out a job function. |
+| Tenure | "At least 2 years in their current role", "changed jobs in the last 90 days" | Time at the current employer, or a recent move. |
+| Schools | "Went to Purdue or UIUC" | Schools attended. |
+| Profile language | "Profile in Spanish" | The language the profile is written in, not a language the person speaks. For a spoken language, say "speaks Spanish" (it ranks). |
+
+## Ranking: how people are scored after their profiles are read
+
+| What | Say it like this | Good to know |
+| --- | --- | --- |
+| Years of experience | "3 to 5 years of relevant experience" | Set it as **Must have** or **Nice to have** in the plan. As a must have it also narrows who is searched, with a little tolerance at each end. As nice to have, people outside the range lose points rather than being removed. |
+| Requirements | "Must have data center construction" | Keep each to 2 to 4 words. A long sentence is kept as context for the reader rather than matched word for word. |
+| Skills | "Skills: scheduling, MEP coordination, Procore" | Ranks people whose profiles show them. |
+| Keywords | "Mission critical, hyperscale" | Words anywhere on the profile. |
+| Industry | "Background in commercial construction" | The industries in someone's career, not only their current employer. |
+| Preferred employers | "Bonus if at Microsoft, Google or AWS" | Ranks people there now or before higher. Never removes anyone. |
+| Cut-off | "Shortlist anyone 70 or above" | Say it in the project chat once results are in. Any score from 50 to 85; the default is 80. |
+| Credit cap | "Use up to 2,500 credits" | The most this search may use. On a trial, every search is capped at 1,000 credits. On a paid plan, a search may use up to the maximum your admins set per search (5,000 unless they change it), and a request that names no cap uses that maximum. Either way it is held to the credits you have left, and unused credits come back when it finishes. See [Billing](/guides/billing). |
+
+## Tips that improve results
+
+- **Name the titles yourself.** Three to ten titles people really hold beat one vague title.
+- **Give years as a range.** "5 to 10 years" ranks better than "senior".
+- **Use metro-level locations.** "Chicago" or "Dallas–Fort Worth" finds more people than a neighborhood or a
+  region like "the Midwest".
+- **Name 3 to 10 employers when you know them.** Named companies are matched to the companies themselves; descriptions like
+  "top firms" can only be guessed at.
+- **Keep requirements short.** "PMP", "data center construction", "Procore". Put the story in the description.
+- **Use a title rule for precision and profile keywords for reach.** Profile keywords find people whose
+  titles do not say the specialty but whose experience does; combine both for niche roles.
+- **Use a title rule for precision, not reach.** `"Project Manager" AND ("Data Center" OR "Mission Critical")` in
+  Chicago found 24 people, 23 of them exactly right, where a plain title list matched about 14,000. When the
+  field is not in people's titles (a Quality Manager at an injection-molding plant), use employers or the current
+  employer's industry instead.
+- **Name the words you want to leave out.** NOT only removes titles that contain those words: for an Operations
+  Manager, `NOT (Revenue OR Marketing OR IT OR Legal)`.
+- **Review and edit the plan before starting.** The plan shows the titles, location, level and experience that
+  narrow the search, and the requirements and skills that rank it. Change anything there, then start the search.

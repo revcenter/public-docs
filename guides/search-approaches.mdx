@@ -1,0 +1,107 @@
+---
+title: "Search approaches"
+description: "The ways a request can be searched, what each one asks for before anything is spent, and when to use it."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Your request decides how the search runs. Revcenter reads it, and the plan opens with the approach it chose, in plain
+words, and the exact pieces it will ask for before anything is spent. If the approach is not what you meant, edit your
+request and submit it again: a changed request is read again, and the same request always gives the same plan.
+
+Every approach also takes the filters in the last section, and every approach is followed by the same reading and
+scoring of each profile. See [Writing a search](/guides/writing-a-search) for how to phrase each part.
+
+## Titles in a place
+
+**Example:** "Construction Project Managers in Chicago, 5 to 10 years."
+
+**Asks for:** the titles you named (or the role's title and closest synonyms) in that place.
+
+**Use it when** the job title says what the job is. It is the default and finds the most people.
+
+**Limits:** a bare title such as "Project Manager" is not searched on its own beside a qualified one such as
+"Construction Project Manager", because it would match every project manager anywhere.
+
+## Boolean titles in a place
+
+**Example:** `("Project Manager" OR "Construction Manager") AND ("Data Center" OR "Mission Critical") NOT Assistant`,
+in Chicago.
+
+**Asks for:** that expression on current titles, exactly as you wrote it, in that place. Write it in the request
+(on its own line or after "Titles:") or in the plan's Title rule field. When you write none, the plan may draft
+one from the role's titles and its field for you to keep, change or clear.
+
+**Use it when** the specialty appears in people's titles. It is precise: in one Chicago search, this kind of
+expression found 24 people, 23 of them exactly right, where a plain list of titles matched about 14,000.
+
+**Limits:**
+- Each search query holds at most 12 phrases and 245 characters. A long list of titles joined by OR is split into
+  several queries automatically, and a person found by two of them is counted once. A rule that cannot fit even
+  with one title is refused in the plan, with a message, before anything is spent.
+- It only finds what is in the title. When the specialty is not in titles (a Quality Manager at an
+  injection-molding plant), use named employers or the current employer's industry instead.
+- NOT removes titles that contain the words you name, so name the words actually in the titles you do not want:
+  for an Operations Manager, `NOT (Revenue OR Marketing OR IT OR Legal)`.
+
+## Profile keywords
+
+**Example:** `Keywords: "data center" AND (construction OR "mission critical")`, with the title Project Manager, in Chicago.
+
+**Asks for:** that expression on the whole profile (experience, summary, skills), as you wrote it, alongside any of
+the other approaches. Write it on a line starting "Keywords:" or in the plan's Profile keywords field.
+
+**Use it when** the specialty lives in people's experience rather than their titles. A title rule is precision; a
+profile keyword rule is reach. In one Chicago search, adding this rule to the title Project Manager found several
+times as many people as the title rule alone, including senior project managers at builders whose titles never
+say "data center". Combine both for niche roles.
+
+**Limits:** at most 12 phrases and 245 characters, and use OR rather than commas. A rule over the limit is refused in
+the plan before anything is spent.
+
+## Titles at named employers
+
+**Example:** "Engagement managers in Boston, only McKinsey, BCG and Bain."
+
+**Asks for:** the titles at those companies now, in that place. With only a few companies, the titles are widened
+to the role's broad word (for example "Manager"), because the exact title at one firm is often a handful of people;
+reading and scoring then narrow to the role.
+
+**Use it when** the client wants people from specific companies. Words like "only at", "currently at" and "now at"
+mean working there now; "not from", "excluding" and "except" leave a company's current staff out.
+
+**Limits:** each name is matched to the company itself, and the plan shows what it matched. A name that matches no
+company is shown as not found and will not filter; fix the spelling or remove it. A broad title word can let in
+nearby titles ("Principal" can match "Principal AI Engineer"), so add NOT terms for the titles you do not want.
+
+## People who worked at named employers
+
+**Example:** "Ex-MBB, now VP Strategy in New York."
+
+**Asks for:** people who worked at those companies before (with "worked at" or "from", before or now), with the
+titles and place you named.
+
+**Use it when** the background matters more than the current employer: alumni of a firm, people who trained at a
+competitor. "Ex-", "formerly at", "previously at" and "alumni of" mean worked there before.
+
+## Everyone at named companies
+
+**Example:** "Everyone at Bain & Company in Boston, director level."
+
+**Asks for:** the companies and the place, with no title filter, plus any filters you add (level, function).
+
+**Use it when** you want a team or an org chart rather than one role. Add a level or function to keep it focused.
+
+**Limits:** without a title, the list is as wide as the company is large; the credit cap still applies.
+
+## Filters on any approach
+
+Any of the approaches above can also be narrowed, before anything is spent, by:
+
+- level ("director or VP", searched with one level either side)
+- job function ("project management function", "not sales")
+- the current employer's industry ("currently in construction")
+- employer size ("200 to 5,000 employees")
+- years of experience when it is a must have ("at least 8 years")
+- time in the current company, or a recent job change
+- past titles, schools, and the language the profile is written in

@@ -1070,7 +1070,7 @@
                 },
                 "example": {
                   "data": {
-                    "version": "revcenter-criteria.v2.2026-10-18",
+                    "version": "revcenter-criteria.v2.2026-10-26",
                     "fields": {
                       "title_variants": {
                         "use": "filter",
@@ -9706,6 +9706,13 @@
               "string",
               "null"
             ]
+          },
+          "stop_detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the search was refused before buying anything, in a sentence: a required employer that matched no company, or a place that did not resolve. Null otherwise."
           },
           "queue": {
             "type": [
