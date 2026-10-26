@@ -1,0 +1,83 @@
+---
+title: "Connectors"
+description: "Add Revcenter to ChatGPT, Claude, Gemini and Perplexity from the browser: one URL, sign in, pick a workspace."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Revcenter runs a hosted MCP server. Add it to your AI app as a custom connector and the app can draft
+criteria, run searches and read shortlists in your workspace, with nothing to install.
+
+```text
+https://api.revcenter.ai/mcp
+```
+
+When you add it, the app sends you to Revcenter to sign in. Pick the workspace to connect and click
+**Authorize**. A workspace admin connects apps, and the workspace needs a plan or credits.
+
+## Add it to your app
+
+<Tabs>
+  <Tab title="Claude">
+    1. Open **Customize → Connectors** and choose **Add custom connector**. On Team and Enterprise, an owner
+       adds it first under **Organization settings → Connectors**, then members click **Connect**.
+    2. Name it Revcenter, paste the URL and click **Add**.
+    3. Click **Connect**, sign in to Revcenter and pick the workspace.
+
+    Works in Claude on the web, desktop and mobile. On the Free plan you can add one custom connector.
+  </Tab>
+  <Tab title="ChatGPT">
+    1. Open **Plugins**, click **+** and choose **Add custom MCP server**. Your plan or workspace admin must
+       allow custom MCP servers.
+    2. Name it Revcenter, paste the URL and choose **OAuth**.
+    3. Sign in to Revcenter when asked and pick the workspace.
+  </Tab>
+  <Tab title="Gemini">
+    1. In the Gemini web app, open **Settings → Connected Apps** and choose **Add a custom app**.
+    2. Paste the URL, sign in to Revcenter and pick the workspace.
+
+    The Gemini app takes custom apps only on personal Google accounts in the US, in English. With a work or
+    school account, use Gemini CLI instead:
+
+    ```bash
+    gemini mcp add --transport http revcenter https://api.revcenter.ai/mcp
+    ```
+  </Tab>
+  <Tab title="Perplexity">
+    1. Open **Customize → Connectors**, choose **Add custom**, then **Add MCP connector**. Custom connectors
+       need Pro, Max or Enterprise; on Enterprise an admin must allow members to add them.
+    2. Paste the URL and choose **OAuth** for authentication.
+    3. Sign in to Revcenter when asked and pick the workspace.
+  </Tab>
+</Tabs>
+
+Any other MCP client that speaks Streamable HTTP and OAuth can connect the same way.
+
+## What it can do
+
+The same tools as the [local MCP server](/tools/mcp), with two differences:
+
+- **No file exports.** A chat can't save files, so the export tools are left out. Page through people with
+  `list_people`, `list_search_records` and `list_candidates`, and send a client `get_share_link`.
+- **Spending asks first.** `launch_search`, `launch_searches` and `expand_search` reserve credits;
+  `publish_shortlist` and `send_shortlist_email` reach the client; `delete_project` can't be undone. Each one
+  runs nothing at first: it returns `pending_approval` with a proposal and what to show you. The app runs it
+  with `apply_proposal` only after you agree. Repeating a launch returns the same search and never pays twice.
+
+Searches take minutes. Ask the app to wait for the search (`wait_for_search` waits up to three minutes a
+call), then to list everyone scoring 80 or more.
+
+## Disconnect
+
+**Settings → Usage → Connectors** lists the connected apps. **Revoke** stops one at once. Each connection is
+also an API key in **Settings → Usage → API**, named after the app; revoking it there does the same.
+Connecting the same app again replaces its earlier connection.
+
+## Security
+
+- Sign-in uses OAuth 2.1 with PKCE. The app never sees your password or an API key.
+- An access token lasts an hour and works only at `https://api.revcenter.ai/mcp`, for the one workspace you
+  picked. The app renews it with a refresh token that changes on every use; a refresh token used twice
+  disconnects the app.
+- Every call runs through the Revcenter API as that connection: the same permissions, plan, credits and
+  rate limits as an API key.

@@ -40,6 +40,7 @@
       {
         "group": "Tools",
         "pages": [
+          "tools/connectors",
           "tools/cli",
           "tools/mcp",
           "tools/agents"

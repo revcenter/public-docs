@@ -2114,7 +2114,7 @@
       "post": {
         "operationId": "launch_search",
         "summary": "Launch a search",
-        "description": "Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's most per search; held to 1,000 on a trial, to the workspace's most per search on a plan (5,000 unless its admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the results pages and profile reads it bought (on a plan 25 credits a page of up to 25 people and 2 a profile read; on a trial 50 and 5; lookups, AI screening, people already in the workspace and cached results are free), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's most per search; held to 1,000 on a trial, to the workspace's most per search on a plan (5,000 unless its admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the results pages and profile reads it bought (on a plan 25 credits a page of up to 25 people and 2 a profile read; on a trial 50 and 5; lookups, AI screening, people already in the workspace and cached results are free), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -2152,6 +2152,11 @@
                     "type": "string",
                     "minLength": 40,
                     "description": "A job description, when not sending criteria."
+                  },
+                  "brief": {
+                    "type": "string",
+                    "maxLength": 20000,
+                    "description": "The person's own words about the role, as they wrote them, sent with criteria. Revcenter applies the app's rules to them where the criteria are silent: \"no visa sponsorship\" sets signal_options.needs_sponsorship, a typed title rule (AND/OR/NOT) sets title_boolean, a \"Keywords:\" rule sets keyword_boolean, and \"ex-\", \"only at\" or \"not from\" before a preferred employer sets employers. Fields the criteria set are never changed."
                   },
                   "database_only": {
                     "type": "boolean",
