@@ -8,6 +8,32 @@ description: "Credits: what a search reserves, what it is charged, and what is f
 The API uses your workspace's **credits**: the same plan and top-ups as the Revcenter app. There is no separate API
 balance. A standard search uses about 1,000 credits, so 37,000 credits is roughly 37 standard searches.
 
+## Prices
+
+A search is charged for what it buys: pages of results and the profiles it reads. The price depends on whether
+your workspace is on a plan when the search starts.
+
+| Unit | On a plan | On a trial |
+| --- | --- | --- |
+| One results page (up to 25 people screened) | 25 credits | 50 credits |
+| One profile read | 2 credits | 5 credits |
+| Company and location lookups | free | free |
+| AI screening and scoring | free | free |
+| People already in your workspace's database | free | free |
+| Pages and profiles served from cache | free | free |
+
+A page is charged in full even when it is the last one and lists fewer than 25 people. A person whose profile
+is read once in a search is one read. Contact details (email or phone), where a search asks for them, are charged
+as used.
+
+A search keeps the prices it started with: one started on a trial is charged trial prices even if the workspace
+moves to a plan before it finishes. **Settings → Plan & billing** shows your workspace's prices, and on a trial
+the prices a plan gets.
+
+At the paid prices, 1,000 credits covers about 20 pages (500 people screened) and 240 profile reads, assuming a
+search reads about 12 people a page; at trial prices, about 9 pages (225 people) and 108 reads. The search plan in
+the app and the launch preview say what your cap covers.
+
 | Action | Uses |
 | --- | --- |
 | Launching a search | Up to its `max_credits` (by default your workspace's most per search); unused credits are refunded |
@@ -30,10 +56,14 @@ balance. A standard search uses about 1,000 credits, so 37,000 credits is roughl
    lower, the launch says so in `credits_note`, and `credits_reserved` is the cap the search runs under.
 3. **Reserve.** The cap is held from your balance when the search starts and returned as `credits_reserved`. If
    the balance can't cover it, the launch returns `402 shortlist_allocation_exhausted` and nothing runs.
-4. **Charge.** A search spends credits as it pages through results and reads profiles, and keeps going until it
-   has used its cap or LinkedIn has no one left for its titles and places. When it finishes it is charged
-   what it used, never more than the cap, and the rest comes back. `GET /v1/searches/{id}` shows
-   `credits_charged` once it has finished (`null` while it runs).
+4. **Charge.** A search spends credits as it buys pages of results and reads profiles, and keeps going until it
+   has used its cap or LinkedIn has no one left for its titles and places. It buys the next page only when its
+   cap still covers that page and the reads a page usually needs. When it finishes it is charged
+   pages × page price + reads × read price, never more than the cap, and the rest comes back.
+   `GET /v1/searches/{id}` shows `credits_charged` once it has finished (`null` while it runs) and
+   `credits_breakdown`, the arithmetic: for example `"10 pages × 25 + 81 reads × 2 = 412 credits"`, with
+   `", capped at 1,000"` when the cap held it. `GET /v1/projects/{id}/spend` and `revcenter spend` show the same
+   line for every search in a project.
 5. **Refund.** A search that fails, or never starts, is refunded in full. So is one whose cap can't buy its
    first page: it stops with `stop_reason` `cap_too_small` instead of reading anyone. A retry with the same `Idempotency-Key`
    never reserves twice.
