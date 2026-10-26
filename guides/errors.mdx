@@ -32,6 +32,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_max_credits` | `max_credits` is not a whole number from 250 to 20,000 | Use 500, 1000, 2500 or 5000, or leave it out for 1,000 |
 | `400` | `invalid_format` | An export's `format` is not `csv` or `jsonl` | Leave it out for CSV, or send `format=jsonl` |
 | `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search |
+| `400` | `weights_in_settings` | A scoring change sent `rubric_weights`: weights are a workspace setting | Ask a workspace admin to change them in Settings, Scoring |
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |

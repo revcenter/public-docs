@@ -3221,7 +3221,7 @@
       "post": {
         "operationId": "preview_scoring",
         "summary": "Preview a scoring change",
-        "description": "What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Scoring"
         ],
@@ -3247,14 +3247,7 @@
                     "type": "integer",
                     "minimum": 50,
                     "maximum": 85,
-                    "description": "The shortlist cut-off (default 80). Free."
-                  },
-                  "rubric_weights": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "number"
-                    },
-                    "description": "title, geo, years, seniority, skills, industry: 0.02 to 0.5 each. Free."
+                    "description": "The shortlist cut-off (default 80). Counted from the scores already stored: nobody is re-scored. Free."
                   },
                   "criteria_patch": {
                     "type": "object",
@@ -3350,7 +3343,7 @@
       "post": {
         "operationId": "apply_scoring",
         "summary": "Apply a scoring change",
-        "description": "Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Apply a cut-off or requirement change: a cut-off is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
@@ -3376,14 +3369,7 @@
                     "type": "integer",
                     "minimum": 50,
                     "maximum": 85,
-                    "description": "The shortlist cut-off (default 80). Free."
-                  },
-                  "rubric_weights": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "number"
-                    },
-                    "description": "title, geo, years, seniority, skills, industry: 0.02 to 0.5 each. Free."
+                    "description": "The shortlist cut-off (default 80). Counted from the scores already stored: nobody is re-scored. Free."
                   },
                   "criteria_patch": {
                     "type": "object",
@@ -6690,7 +6676,7 @@
       "get": {
         "operationId": "get_scoring_diagnostics",
         "summary": "Why the list looks as it does",
-        "description": "How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. Read it before preview_scoring: it says whether the cut-off, a must-have or a weight is what keeps the list short. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. Read it before preview_scoring: it says whether the cut-off or a must-have is what keeps the list short. weights are the ones in force: the workspace's from Settings when an admin set them, else the search's own. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Scoring"
         ],
@@ -7517,7 +7503,7 @@
       "post": {
         "operationId": "rescore_search",
         "summary": "Re-score a search",
-        "description": "Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search whose run stopped before it scored everyone it read (the profiles are bought; they only need scoring), or to bring its list up to date. Buys nothing and changes no requirement: to change the cut-off, weights or requirements as well, use apply_scoring. Refused with 409 search_running while a pass on the search is still running. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search whose run stopped before it scored everyone it read (the profiles are bought; they only need scoring), or to bring its list up to date. Buys nothing and changes no requirement: to change the cut-off or requirements as well, use apply_scoring. Refused with 409 search_running while a pass on the search is still running. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
@@ -7640,7 +7626,7 @@
       "get": {
         "operationId": "get_search_thread",
         "summary": "Read a search's conversation",
-        "description": "The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. messages is what people and the project's assistant wrote in Revcenter (the latest 200), each with its role, text and the search it was about. pending_change is null unless the assistant proposed a cut-off, weight or requirement change for this search that would move someone and that hasn't been applied or discarded; its preview counts the shortlist before and after. To make a change yourself, use preview_scoring and apply_scoring. thread_id is null when nobody has written in the project's conversation yet. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. messages is what people and the project's assistant wrote in Revcenter (the latest 200), each with its role, text and the search it was about. pending_change is null unless the assistant proposed a cut-off or requirement change for this search that would move someone and that hasn't been applied or discarded; its preview counts the shortlist before and after. To make a change yourself, use preview_scoring and apply_scoring. thread_id is null when nobody has written in the project's conversation yet. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Searches"
         ],
