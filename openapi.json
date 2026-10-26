@@ -673,7 +673,7 @@
                       "path": "/projects/{projectId}/searches",
                       "scope": "searches:write",
                       "cost": "credits",
-                      "cost_line": "Reserves up to max_credits credits (1,000 by default); unused credits are refunded.",
+                      "cost_line": "Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.",
                       "summary": "Start a LinkedIn search in a project.",
                       "proposable": true
                     }
@@ -2114,7 +2114,7 @@
       "post": {
         "operationId": "launch_search",
         "summary": "Launch a search",
-        "description": "Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000, default 1,000; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the profiles it read, never more than max_credits, and the rest comes back (get_search credits_charged). A search that fails is refunded in full. Reserves up to max_credits credits (1,000 by default); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's most per search; held to 1,000 on a trial, to the workspace's most per search on a plan (5,000 unless its admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the profiles it read, never more than max_credits, and the rest comes back (get_search credits_charged). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -2166,8 +2166,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "default": 1000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the profiles it reads, and the rest refunded when it finishes. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
+                    "description": "The most this search may use, in credits: reserved now, charged for the profiles it reads, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
                   }
                 }
               },
@@ -3578,7 +3577,7 @@
       "post": {
         "operationId": "expand_search",
         "summary": "Expand a search",
-        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Reserves max_credits like a launch. Reserves up to max_credits credits (1,000 by default); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Reserves max_credits like a launch. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -3604,8 +3603,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "default": 1000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the profiles it reads, and the rest refunded when it finishes. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
+                    "description": "The most this search may use, in credits: reserved now, charged for the profiles it reads, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
                   }
                 }
               },
@@ -5438,7 +5436,7 @@
                           "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
                           "status": "complete",
                           "outcome": "Shortlist ready",
-                          "stop_reason": "target_reached",
+                          "stop_reason": "budget_exhausted",
                           "profiles_read": 212,
                           "delivered": 14,
                           "shortlisted": 14,
@@ -5573,7 +5571,7 @@
                         "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
                         "status": "complete",
                         "outcome": "Shortlist ready",
-                        "stop_reason": "target_reached",
+                        "stop_reason": "budget_exhausted",
                         "profiles_read": 212,
                         "delivered": 14,
                         "shortlisted": 14,
@@ -6833,6 +6831,14 @@
                       }
                     ],
                     "underFloorReasons": [],
+                    "penaltyReasons": [
+                      {
+                        "code": "YEARS_OVER",
+                        "label": "over the experience range",
+                        "count": 18,
+                        "points": 10
+                      }
+                    ],
                     "mustHaves": {
                       "gate": true,
                       "items": [
@@ -9621,7 +9627,11 @@
           },
           "credits_reserved": {
             "type": "integer",
-            "description": "Credits held for this search: its max_credits, or 0 for database_only."
+            "description": "Credits held for this search: its max_credits as held to the workspace's limit and balance, or 0 for database_only."
+          },
+          "credits_note": {
+            "type": "string",
+            "description": "Present when the cap asked for was held lower: the trial's 1,000 per search, the workspace's most per search, or the credits left."
           }
         }
       },
@@ -9656,7 +9666,7 @@
               "string",
               "null"
             ],
-            "description": "Why it stopped: target_reached, discovery_exhausted (LinkedIn had no more), low_yield, page_cap, budget_exhausted (used its cap), cap_too_small (its cap could not buy one page of results and read it: nothing bought, every credit refunded), cancelled, failed."
+            "description": "Why it stopped. A search runs until one of these: budget_exhausted (used its cap), discovery_exhausted (LinkedIn had no more), page_cap (the most pages LinkedIn serves for one query), cap_too_small (its cap could not buy one page of results and read it: nothing bought, every credit refunded), cancelled, failed. Searches that ran before 2026-10-26 may also show target_reached or low_yield."
           },
           "outcome": {
             "type": [

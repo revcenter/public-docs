@@ -10,8 +10,8 @@ balance. A standard search uses about 1,000 credits, so 37,000 credits is roughl
 
 | Action | Uses |
 | --- | --- |
-| Launching a search | Up to its `max_credits` (1,000 by default); unused credits are refunded |
-| Expanding a search | Up to its `max_credits` (1,000 by default); unused credits are refunded |
+| Launching a search | Up to its `max_credits` (by default your workspace's most per search); unused credits are refunded |
+| Expanding a search | Up to its `max_credits` (by default your workspace's most per search); unused credits are refunded |
 | Database-only search | nothing |
 | Rescoring (cut-off, weights, requirements), database pass | nothing |
 | Reading, editing and exporting | nothing |
@@ -19,21 +19,28 @@ balance. A standard search uses about 1,000 credits, so 37,000 credits is roughl
 ## How a search is charged
 
 1. **Cap.** `launch_search` and `expand_search` take `max_credits`: any whole number from 250 to 20,000, with
-   presets of 500, 1,000, 2,500 and 5,000. Leave it out for 1,000. The CLI flag is `--max-credits`. A search
+   presets of 500, 1,000, 2,500 and 5,000. Leave it out for your workspace's most per search. The CLI flag is
+   `--max-credits`. A search
    buys a page of results only when its cap also covers reading the profiles on it, and 250 is one page with
    everyone on it read, so a smaller cap is refused with `400 max_credits_too_low`. In the app, say the cap in
    your request ("only use 2,500 credits", "cap it at 5k credits"); the search plan shows it.
-2. **Reserve.** The cap is held from your balance when the search starts and returned as `credits_reserved`. If
+2. **Limit.** Every cap is held to your workspace's most per search. On a trial that is 1,000 credits, whatever
+   the request asks. On a plan it is 5,000 unless a workspace admin sets another under **Settings → Workspace →
+   Credits per search** (250 to 20,000). A cap is also held to the credits you have left. When a cap was held
+   lower, the launch says so in `credits_note`, and `credits_reserved` is the cap the search runs under.
+3. **Reserve.** The cap is held from your balance when the search starts and returned as `credits_reserved`. If
    the balance can't cover it, the launch returns `402 shortlist_allocation_exhausted` and nothing runs.
-3. **Charge.** A search spends credits as it reads profiles, and stops at its cap. When it finishes it is charged
+4. **Charge.** A search spends credits as it pages through results and reads profiles, and keeps going until it
+   has used its cap or LinkedIn has no one left for its titles and places. When it finishes it is charged
    what it used, never more than the cap, and the rest comes back. `GET /v1/searches/{id}` shows
    `credits_charged` once it has finished (`null` while it runs).
-4. **Refund.** A search that fails, or never starts, is refunded in full. So is one whose cap can't buy its
+5. **Refund.** A search that fails, or never starts, is refunded in full. So is one whose cap can't buy its
    first page: it stops with `stop_reason` `cap_too_small` instead of reading anyone. A retry with the same `Idempotency-Key`
    never reserves twice.
 
-A bigger cap only lets a search read further; it never costs more than the profiles it reads. Use 500 for a quick
-look at a narrow role and 2,500 or 5,000 for a broad one or several places.
+A search runs until its cap is used or the market runs out, so a bigger cap reads further and usually uses more;
+it never costs more than the cap. Use 500 for a quick look at a narrow role and 2,500 or 5,000 for a broad one or
+several places.
 
 ## Balance
 
