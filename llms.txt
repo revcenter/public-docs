@@ -17,7 +17,7 @@ Every page is also available as Markdown: add `.md` to its address. All pages in
 
 ## Tools
 
-- [Connectors](https://docs.revcenter.ai/tools/connectors.md): Add Revcenter to ChatGPT, Claude, Gemini and Perplexity from the browser: one URL, sign in, pick a workspace.
+- [Connectors](https://docs.revcenter.ai/tools/connectors.md): Add Revcenter to Claude and ChatGPT from the browser, or to your own LLM or agent with an API key: one URL.
 - [CLI reference](https://docs.revcenter.ai/tools/cli.md): Every revcenter command, its options, and whether it uses credits.
 - [MCP](https://docs.revcenter.ai/tools/mcp.md): Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI and other MCP clients.
 - [Agents](https://docs.revcenter.ai/tools/agents.md): Hand a search to an AI agent: setup, the workflow, and a prompt to start from.
