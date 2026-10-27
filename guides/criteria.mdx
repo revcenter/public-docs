@@ -51,6 +51,7 @@ field and its allowed values.
 | `keywords` | `["SAP S/4HANA"]` | Words anywhere on the profile, scored after reading. To search for them before reading, use `keyword_boolean`. |
 | `languages_required` | `["Spanish"]` | Spoken languages. |
 | `preferred_employers` | `["Big 4"]` | Ranks people there now or before higher; never excludes. |
+| `degree_country` | `{ "countries": ["US"], "level": "bachelor_or_higher", "flag": "prefer" }` | Where a degree is from, by each school's LinkedIn page and the country on file for it. ISO country codes; `level` is `bachelor_or_higher` (default) or `any`; `flag` is `prefer` (default, adds 5 points) or `must` (leaves out people whose degrees are all known to be elsewhere). A school whose country is not on file is "not verified": never a match and never a failure. Set it only when asked; it is never read from school names. |
 | `geo_radius_mi` | `50` | Distance from `metro` for the location score. |
 | `rubric_weights` | `{ "skills": 0.15 }` | How much each part counts: `title`, `geo`, `years`, `seniority`, `skills`, `industry`, each 0.02–0.5. A workspace admin's weights in Settings, Scoring replace these when set. |
 | `shortlist_min_score` | `75` | The shortlist cut-off, 50–85. The default is 80. |

@@ -1070,7 +1070,7 @@
                 },
                 "example": {
                   "data": {
-                    "version": "revcenter-criteria.v2.2026-10-26",
+                    "version": "revcenter-criteria.v2.2026-10-27",
                     "fields": {
                       "title_variants": {
                         "use": "filter",
@@ -10449,6 +10449,33 @@
           },
           "shortlist_min_score": {
             "type": "integer"
+          },
+          "degree_country": {
+            "type": "object",
+            "description": "Where a degree is from, by school; only when asked. See GET /reference/criteria.",
+            "properties": {
+              "countries": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$"
+                }
+              },
+              "level": {
+                "type": "string",
+                "enum": [
+                  "bachelor_or_higher",
+                  "any"
+                ]
+              },
+              "flag": {
+                "type": "string",
+                "enum": [
+                  "must",
+                  "prefer"
+                ]
+              }
+            }
           }
         },
         "additionalProperties": true
