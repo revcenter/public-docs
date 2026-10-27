@@ -3360,7 +3360,7 @@
       "post": {
         "operationId": "apply_scoring",
         "summary": "Apply a scoring change",
-        "description": "Apply a cut-off or requirement change: a cut-off is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
