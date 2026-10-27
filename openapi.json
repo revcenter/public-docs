@@ -315,7 +315,7 @@
       "get": {
         "operationId": "get_me",
         "summary": "Who am I",
-        "description": "The key's workspace, name, scopes and expiry, the workspace's plan and limits, and today's usage. Does not use credits.\n\nAny valid key.",
+        "description": "The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. Does not use credits.\n\nAny valid key.",
         "tags": [
           "Account"
         ],
@@ -393,6 +393,10 @@
                       "requests": 41,
                       "searches": 2,
                       "running": 1
+                    },
+                    "acts_as": {
+                      "user_id": "user_2xEditor",
+                      "role": "editor"
                     }
                   },
                   "meta": {
@@ -10728,6 +10732,26 @@
               },
               "running": {
                 "type": "integer"
+              }
+            }
+          },
+          "acts_as": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "The person this key acts as, and their role in the workspace now: an admin's key sees every project, an editor's only the projects they made. Null for a key with no member behind it.",
+            "properties": {
+              "user_id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "editor",
+                  "team"
+                ]
               }
             }
           }

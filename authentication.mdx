@@ -11,18 +11,51 @@ Every request sends an API key as a bearer token:
 curl https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
 ```
 
-Keys look like `rvc_live_…`. A key acts for one workspace and can read and edit its projects, searches and
-shortlists.
+Keys look like `rvc_live_…`. A key acts for one workspace, as the person who made it, with their role there.
 
 ## Getting a key
 
 | Way | How |
 | --- | --- |
 | **Browser login** (CLI, MCP) | Run `revcenter auth login`, pick a workspace and authorize in your browser. The key is saved on that machine. |
-| **Settings** | A workspace admin creates one under **Settings → Usage → API**. It is shown once; copy it or download it as `revcenter.env`. |
+| **Settings** | Any member creates one under **Settings → Usage → API**. It is shown once; copy it or download it as `revcenter.env`. |
+| **Claude, ChatGPT** | Any member connects the app ([Connectors](/tools/connectors)); the connection holds its own key. |
 
-Either way, the workspace needs API access (ask your Revcenter contact) and an active plan or credits, and an
-admin makes or approves the key. Keys expire after 30, 90 or 365 days. A workspace can have 5 active keys.
+Admins and Editors both make their own keys, unless the workspace's admins turned Editors' keys off. The workspace
+needs an active plan or credits. Keys expire after 30, 90 or 365 days. A workspace can have 5 active keys.
+
+## What a key can do
+
+A key carries its creator's permissions, checked again on every call:
+
+| Creator | The key sees and changes |
+| --- | --- |
+| **Admin** | Every project in the workspace, its searches, people, shortlists, records, exports and share links, and the workspace's webhooks. |
+| **Editor** | Only the projects that Editor made, and everything under them, exactly as in the app. A project the key creates is theirs. Webhooks and top-ups answer `403 admin_required`. |
+
+Another member's project or search answers `404`, as one in another workspace does. `GET /v1/me` returns
+`acts_as`: the person and their role.
+
+The role is read on every call. Make an Admin an Editor and their keys narrow at once; remove someone from the
+workspace (in the app, or in your identity provider) and every key and connected app they made is revoked.
+
+Searches a key launches spend the workspace's credits, as the person could in the app, under the same caps and
+approvals.
+
+## Limits for members
+
+Admins set these under **Settings → Usage → API**, for every member's keys and connected apps, and can override
+any of them for one member. Each takes effect on the next call.
+
+| Limit | Default | Past it |
+| --- | --- | --- |
+| Editors can create keys and connect apps | On | `403 member_keys_disabled` |
+| Max credits per search through the API or MCP (at most the workspace's own per-search maximum) | None | `400 member_api_search_cap` |
+| Credits a member's API and MCP searches may hold or spend each calendar month (UTC) | None | `402 member_api_budget_reached` |
+| Requests a minute, across a member's keys | None | `429 member_rate_limited`, with `Retry-After` |
+
+A search launched without `max_credits` reserves the member's max per search, or what is left of their monthly
+budget. Editors see their own limits and this month's use on the same page.
 
 <Frame caption="Settings → Usage → API: create a key, see when each was last used, and revoke it.">
   <img src="/images/api-keys.webp" alt="Revcenter Settings, Usage, API tab: credits, a create-key form, and a list of keys with created, last used and expiry dates" />
@@ -41,7 +74,9 @@ Give each machine or system its own key, so you can revoke one without touching 
 
 ## Revoking
 
-Revoke a key under **Settings → Usage → API**; it stops working immediately. To rotate, create a new key,
+Revoke a key under **Settings → Usage → API**; it stops working immediately. Editors see and revoke their own
+keys; admins see every key in the workspace, with who made it, when, how (Settings, CLI, Claude, ChatGPT or
+another app), its scopes and when it was last used, and can revoke any of them. To rotate, create a new key,
 deploy it, then revoke the old one. Revcenter stores only a hash and can't show a key again.
 
 ## Browser login API
@@ -82,5 +117,8 @@ and other CLIs sign in:
 | `402` | `plan_required` | No active plan |
 | `403` | `api_access_disabled` | API access isn't on for this workspace |
 | `403` | `insufficient_scope` | The key can't make this call |
+| `403` | `admin_required` | Only an admin can do this; the key acts as an Editor |
+| `403` | `key_owner_removed` | The person who made the key is no longer in the workspace |
+| `400` · `402` · `429` | `member_api_search_cap` · `member_api_budget_reached` · `member_rate_limited` | A [limit for members](#limits-for-members) |
 
 Another workspace's ids answer `404`.

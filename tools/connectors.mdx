@@ -13,7 +13,8 @@ https://api.revcenter.ai/mcp
 ```
 
 When you add it, the app sends you to Revcenter to sign in. Pick the workspace to connect and click
-**Authorize**. A workspace admin connects apps, and the workspace needs a plan or credits.
+**Authorize**. Any member, Admin or Editor, connects apps, and the workspace needs a plan or credits. The app acts
+as you, with your role: an Editor's connection sees only their own projects.
 
 ## Add it to your app
 
@@ -53,7 +54,7 @@ Header:  Authorization: Bearer rvc_live_…
 
 ### Get an API key
 
-A workspace admin creates one under **Settings → Usage → API** ([Authentication](/authentication)). A key made
+Any member creates one under **Settings → Usage → API** ([Authentication](/authentication)); it acts as them, with their role. A key made
 there holds every agent scope (`projects`, `searches`, `shortlists` and `webhooks`, each `:read` and
 `:write`), which is what the tools need. A key with fewer scopes lists only the tools its scopes reach, and a
 call beyond them is refused with `insufficient_scope`, exactly as the [API](/api-reference/introduction) refuses it.
