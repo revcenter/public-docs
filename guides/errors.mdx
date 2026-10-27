@@ -53,6 +53,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key from **Settings → Usage → API** or `revcenter auth login` |
 | `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (`get_share_link`) instead |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
+| `404` | `scoring_job_not_found` | No such scoring job on this search | Use the `job_id` `preview_scoring` or `apply_scoring` returned |
 | `404` | `webhook_not_found` · `delivery_not_found` | No such webhook endpoint or delivery in this workspace | Check the id with `list_webhooks` |
 | `404` | `shortlist_version_not_found` · `client_workspace_not_found` | No such published shortlist version on the project, or no such client workspace | Check the id with `list_shortlist_versions` or `preview_shortlist_email` |
 | `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new key |
@@ -68,6 +69,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |
 | `503` | `access_check_unavailable` · `plan_check_unavailable` | Access or plan couldn't be checked; nothing ran | Retry after `Retry-After` |
+| `503` | `busy` | Revcenter is busy. A read or preview changed nothing; `details` has `retry_after_seconds` | Retry after `Retry-After` |
 | `503` | `top_up_unavailable` | Top-ups can't be started here | Use **Settings → Plan & billing** |
 
 A top-up can also answer `409 top_up_needs_plan` (top-ups use a plan's rate; choose a plan first), with

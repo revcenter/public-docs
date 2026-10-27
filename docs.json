@@ -119,6 +119,7 @@
           "POST /projects/{projectId}/expand",
           "POST /searches/{searchId}/scoring/preview",
           "POST /searches/{searchId}/scoring/apply",
+          "GET /searches/{searchId}/scoring/jobs/{jobId}",
           "POST /searches/{searchId}/database-pass",
           "GET /searches/{searchId}/scoring",
           "POST /searches/{searchId}/scoring/discard",

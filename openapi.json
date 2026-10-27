@@ -3238,7 +3238,7 @@
       "post": {
         "operationId": "preview_scoring",
         "summary": "Preview a scoring change",
-        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Scoring"
         ],
@@ -3360,7 +3360,7 @@
       "post": {
         "operationId": "apply_scoring",
         "summary": "Apply a scoring change",
-        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. An apply runs once: repeating it with the same Idempotency-Key (or applying the same proposal again) returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
@@ -3442,6 +3442,130 @@
                     },
                     "shortlisted": 19,
                     "cutoff": 75
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/searches/{searchId}/scoring/jobs/{jobId}": {
+      "get": {
+        "operationId": "get_scoring_job",
+        "summary": "Get a scoring job",
+        "description": "A scoring preview or apply that is still re-scoring everyone (a job_id from preview_scoring or apply_scoring): its status, and its result once status is done. status is queued, running, done or failed. result is what preview_scoring or apply_scoring would have answered; error is set when it failed, and code busy means Revcenter was busy and nothing changed: ask again. wait_seconds (0 to 25) waits for the job to finish before answering. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "tags": [
+          "Scoring"
+        ],
+        "parameters": [
+          {
+            "name": "searchId",
+            "in": "path",
+            "required": true,
+            "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "description": "A scoring job id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "wait_seconds",
+            "in": "query",
+            "required": false,
+            "description": "Wait up to this many seconds (0 to 25) for the job to finish before answering. Default 0.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "job_id": "2f1c9a4e-7b3d-5e21-9c4a-8d1e6f0b3a72",
+                    "kind": "preview",
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "status": "done",
+                    "result": {
+                      "shortlistBefore": 14,
+                      "shortlistAfter": 19,
+                      "added": 5,
+                      "removed": 0
+                    },
+                    "error": null,
+                    "created_at": "2026-10-26T22:00:00.000Z",
+                    "finished_at": "2026-10-26T22:00:21.000Z"
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
