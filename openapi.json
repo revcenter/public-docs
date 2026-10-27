@@ -2216,7 +2216,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
+                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
                   }
                 }
               },
@@ -4725,8 +4725,8 @@
     "/projects/{projectId}/expand": {
       "post": {
         "operationId": "expand_search",
-        "summary": "Expand a search",
-        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; at most 2 per project. Reserves max_credits like a launch. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "summary": "Expand or continue a search",
+        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. Without search_id: a new pass on the project's first search's criteria, once it has finished. With search_id: the same search's criteria from where it stopped, when it was stopped, interrupted or used its credits and LinkedIn still has people (pages it already read are reused at no cost); a search LinkedIn ran out of is refused with 409 cannot_continue, so expand without search_id instead. A project's searches share a credit limit of three searches' worth at the workspace's per-search limit (3,000 on a trial, 15,000 on a plan at the default 5,000 per search): a cap above what the project has left is held to it, and 409 project_credit_limit is returned when less than 250 is left. One pass at a time per project (409 search_running). Send an Idempotency-Key: a retry with the same key returns the same pass. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -4752,7 +4752,11 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Presets 500, 1000, 2500, 5000."
+                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
+                  },
+                  "search_id": {
+                    "type": "string",
+                    "description": "Continue this search (one of the project's) from where it stopped, on its own criteria. Leave it out for a new pass on the first search's criteria."
                   }
                 }
               },

@@ -36,7 +36,7 @@ The outcome is fixed when the search finishes. Later changes move the shortlist,
 | --- | --- | --- |
 | **Rescore** | New cut-off or requirements for everyone already read. Preview first. | Does not use credits. |
 | **Database pass** | Score your workspace's candidates on file against the search. | Does not use credits. |
-| **Expand** | A new live pass, skipping everyone already found. Up to 2 per project. | Reserves up to its `max_credits` (by default the workspace's most per search) per expansion; unused credits are refunded. |
+| **Expand** | A new live pass, skipping everyone already found; with `search_id`, that search continued from where it stopped. A project's searches share a credit limit of three searches' worth. | Reserves up to its `max_credits` (by default the workspace's most per search) per expansion; unused credits are refunded. |
 | **Database-only search** | A new search of your own candidates only (`database_only: true`). | Does not use credits. |
 
 Titles and places can't be rescored; changing them needs a new search.
