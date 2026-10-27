@@ -48,14 +48,14 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `invalid_webhook_url` · `invalid_webhook_events` · `invalid_webhook` | A webhook URL that isn't public HTTPS (private, loopback and link-local addresses are refused), an unknown event type, or a bad `description` or `enabled` | Fix the field named; see [webhooks](/guides/webhooks) |
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send the key |
 | `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
-| `400` | `member_api_search_cap` | `max_credits` is above the most your workspace's admins allow you per search through the API | Send a smaller `max_credits`, or ask an admin to raise it in **Settings → Usage → API** |
+| `400` | `member_api_search_cap` | `max_credits` is above the most your workspace's admins allow you per search through the API | Send a smaller `max_credits`, or ask an admin to raise it in **Settings → Integrations → API** |
 | `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
 | `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No plan, or not enough credits for the search's `max_credits`. `details` has `billing_url` and `top_up` | A smaller `max_credits`, `revcenter topup`, or see [billing](/guides/billing) |
-| `402` | `member_api_budget_reached` | Your monthly API budget, set by your workspace's admins, doesn't cover this search | A smaller `max_credits`, wait for the 1st (UTC), or ask an admin to raise it in **Settings → Usage → API** |
+| `402` | `member_api_budget_reached` | Your monthly API budget, set by your workspace's admins, doesn't cover this search | A smaller `max_credits`, wait for the 1st (UTC), or ask an admin to raise it in **Settings → Integrations → API** |
 | `403` | `admin_required` | Only a workspace admin can do this, and your key acts as you, an Editor | Ask an admin, or use an admin's key |
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |
-| `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Usage → API** |
-| `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key from **Settings → Usage → API** or `revcenter auth login` |
+| `403` | `insufficient_scope` | The key can't make this call | Use a key from **Settings → Integrations → API** |
+| `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key from **Settings → Integrations → API** or `revcenter auth login` |
 | `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (`get_share_link`) instead |
 | `404` | `project_not_found` · `search_not_found` · `candidate_not_found` | No such id in this workspace | Check the id |
 | `404` | `scoring_job_not_found` | No such scoring job on this search | Use the `job_id` `preview_scoring` or `apply_scoring` returned |
@@ -74,7 +74,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `409` | `webhook_limit` · `webhook_disabled` | The workspace already has 10 webhook endpoints, or a redelivery to an endpoint that is turned off | Delete one; turn the endpoint on first |
 | `413` | `response_too_large` | `get_shortlist` with `fields` would be more than one answer holds (about 100 KB); nothing was cut | Ask for fewer fields, or page through `list_people` with `fields` |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
-| `429` | `member_rate_limited` | Your workspace's admins limit how many requests a minute you can make | Wait for `Retry-After`, or ask an admin to raise it in **Settings → Usage → API** |
+| `429` | `member_rate_limited` | Your workspace's admins limit how many requests a minute you can make | Wait for `Retry-After`, or ask an admin to raise it in **Settings → Integrations → API** |
 | `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |
 | `503` | `access_check_unavailable` · `plan_check_unavailable` | Access or plan couldn't be checked; nothing ran | Retry after `Retry-After` |

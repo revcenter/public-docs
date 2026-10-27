@@ -18,7 +18,7 @@ Keys look like `rvc_live_…`. A key acts for one workspace, as the person who m
 | Way | How |
 | --- | --- |
 | **Browser login** (CLI, MCP) | Run `revcenter auth login`, pick a workspace and authorize in your browser. The key is saved on that machine. |
-| **Settings** | Any member creates one under **Settings → Usage → API**. It is shown once; copy it or download it as `revcenter.env`. |
+| **Settings** | Any member creates one under **Settings → Integrations → API**. It is shown once; copy it or download it as `revcenter.env`. |
 | **Claude, ChatGPT** | Any member connects the app ([Connectors](/tools/connectors)); the connection holds its own key. |
 
 Admins and Editors both make their own keys, unless the workspace's admins turned Editors' keys off. The workspace
@@ -44,7 +44,7 @@ approvals.
 
 ## Limits for members
 
-Admins set these under **Settings → Usage → API**, for every member's keys and connected apps, and can override
+Admins set these under **Settings → Integrations → API**, for every member's keys and connected apps, and can override
 any of them for one member. Each takes effect on the next call.
 
 | Limit | Default | Past it |
@@ -57,7 +57,7 @@ any of them for one member. Each takes effect on the next call.
 A search launched without `max_credits` reserves the member's max per search, or what is left of their monthly
 budget. Editors see their own limits and this month's use on the same page.
 
-<Frame caption="Settings → Usage → API: create a key, see when each was last used, and revoke it.">
+<Frame caption="Settings → Integrations → API: create a key, see when each was last used, and revoke it.">
   <img src="/images/api-keys.webp" alt="Revcenter Settings, Usage, API tab: credits, a create-key form, and a list of keys with created, last used and expiry dates" />
 </Frame>
 
@@ -74,7 +74,7 @@ Give each machine or system its own key, so you can revoke one without touching 
 
 ## Revoking
 
-Revoke a key under **Settings → Usage → API**; it stops working immediately. Editors see and revoke their own
+Revoke a key under **Settings → Integrations → API**; it stops working immediately. Editors see and revoke their own
 keys; admins see every key in the workspace, with who made it, when, how (Settings, CLI, Claude, ChatGPT or
 another app), its scopes and when it was last used, and can revoke any of them. To rotate, create a new key,
 deploy it, then revoke the old one. Revcenter stores only a hash and can't show a key again.

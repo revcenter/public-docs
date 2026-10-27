@@ -54,7 +54,7 @@ Header:  Authorization: Bearer rvc_live_…
 
 ### Get an API key
 
-Any member creates one under **Settings → Usage → API** ([Authentication](/authentication)); it acts as them, with their role. A key made
+Any member creates one under **Settings → Integrations → API** ([Authentication](/authentication)); it acts as them, with their role. A key made
 there holds every agent scope (`projects`, `searches`, `shortlists` and `webhooks`, each `:read` and
 `:write`), which is what the tools need. A key with fewer scopes lists only the tools its scopes reach, and a
 call beyond them is refused with `insufficient_scope`, exactly as the [API](/api-reference/introduction) refuses it.
@@ -214,14 +214,14 @@ call), then to list everyone scoring 80 or more.
 
 ## Disconnect
 
-**Settings → Usage → Connectors** lists the connected apps. **Revoke** stops one at once. Each connection is
-also an API key in **Settings → Usage → API**, named after the app; revoking it there does the same.
+**Settings → Integrations → Connectors** lists the connected apps. **Revoke** stops one at once. Each connection is
+also an API key in **Settings → Integrations → API**, named after the app; revoking it there does the same.
 Connecting the same app again replaces its earlier connection.
 
 ## Security
 
 - Sign-in uses OAuth 2.1 with PKCE. The app never sees your password or an API key. Custom LLMs and agents
-  use an API key you give them instead; revoke it in **Settings → Usage → API** to cut them off.
+  use an API key you give them instead; revoke it in **Settings → Integrations → API** to cut them off.
 - An access token lasts an hour and works only at `https://api.revcenter.ai/mcp`, for the one workspace you
   picked. The app renews it with a refresh token that changes on every use; a refresh token used twice
   disconnects the app.

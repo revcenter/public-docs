@@ -10371,7 +10371,7 @@
       "bearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "An API key from Settings → Usage → API (rvc_live_…)."
+        "description": "An API key from Settings → Integrations → API (rvc_live_…)."
       }
     },
     "headers": {

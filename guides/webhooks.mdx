@@ -19,7 +19,7 @@ included) are refused, and redirects are never followed. A workspace has up to 1
 
 <Tabs>
   <Tab title="App">
-    **Settings → Usage → Webhooks** (workspace admins). Add the URL, pick the events, and copy the signing secret
+    **Settings → Integrations → Webhooks** (workspace admins). Add the URL, pick the events, and copy the signing secret
     from the dialog: it is shown once.
   </Tab>
   <Tab title="API">
@@ -178,7 +178,7 @@ An endpoint with 20 abandoned deliveries in a row is turned off, with the reason
 (`disabled_reason`). Fix it, send a test, and turn it back on (`update_webhook` with `enabled: true`, or the
 switch in the app); that clears the count.
 
-`list_webhook_deliveries` (`GET /v1/webhooks/{id}/deliveries`, **Settings → Usage → Webhooks**) shows every
+`list_webhook_deliveries` (`GET /v1/webhooks/{id}/deliveries`, **Settings → Integrations → Webhooks**) shows every
 delivery: its status (`pending`, `delivered`, `failed` with the next retry, `abandoned`), attempts, and the status
 code your endpoint answered. `redeliver_webhook` sends one again now.
 
