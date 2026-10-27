@@ -47,7 +47,7 @@ Titles and places can't be rescored; changing them needs a new search.
 `fit`, the readings behind it (`title_match`, `geo_fit`, `years_fit`, `seniority_fit`, `skills_match`,
 `industry_match`, `must_have_coverage`, `tier`, `qualified`, `reject_code`).
 
-`GET /v1/projects/{id}/shortlist` returns the shortlist with full profiles; `/shortlist.csv` is the same as a
+`GET /v1/projects/{id}/shortlist` returns the shortlist with full profiles (`fields=experience,education` for slices, held to one answer's size; `profile=false` for none); `/shortlist.csv` is the same as a
 spreadsheet. Contact details are not included.
 
 ## Every record a search returned
@@ -65,8 +65,8 @@ returned (a person listed twice keeps the first page), so you or your agent can 
 
 Each record also carries the name, title, company, location, LinkedIn address, summary and the page that
 listed them. `/records.csv` is the same as a spreadsheet, one row per record, with read profiles as text
-columns. Pages take `limit` (up to 500) and `cursor` ([Pagination](/guides/pagination)); `profile=false` leaves
-profiles out. A database-only search has none. Both are free, and contact details are not included.
+columns. Pages take `limit` (up to 500) and `cursor` ([Pagination](/guides/pagination)); `fields` picks profile slices (`profile` for the whole read profile, or `about`, `experience`, `education`, `skills`, `certifications`, `languages`, `projects`) and `profile=false` leaves profiles out; with neither, the API returns whole profiles, as it always has. A page stops at about 100 KB with a `cursor` for the rest. The MCP connector's tools (Claude, ChatGPT and other chat apps) leave profiles out unless `fields` asks, since a page of whole profiles outgrows what a chat app reads.
+A database-only search has none. Both are free, and contact details are not included.
 
 ### Per search, per project, or the whole workspace
 

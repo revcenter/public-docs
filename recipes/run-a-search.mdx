@@ -60,7 +60,13 @@ search and uses nothing. `--wait` prints progress to standard error and the fini
   "expansion": false,
   "criteria": { "metro": "Lancaster, PA", "title_variants": ["Plant Maintenance Manager", "Maintenance Manager"] },
   "created_at": "2026-10-16T14:02:12.000Z",
-  "closed_at": "2026-10-16T14:05:40.000Z"
+  "closed_at": "2026-10-16T14:05:40.000Z",
+  "queue": null,
+  "credits_reserved": 1000,
+  "credits_charged": null,
+  "credits_breakdown": null,
+  "advice": [],
+  "stop_detail": null
 }
 ```
 
@@ -99,7 +105,7 @@ revcenter people "$SEARCH" --min-score 80 --no-profile
 }
 ```
 
-Leave out `--no-profile` to get each person's full profile. Free.
+Leave out `--no-profile` to get each person's full profile, or pass `--fields experience,education` for parts of it. Free.
 
 ## 4. Export the shortlist
 
@@ -110,7 +116,7 @@ revcenter shortlist "$PROJECT" --csv shortlist.csv
 
 {/* expect */}
 ```json
-{ "path": "shortlist.csv", "rows": 1 }
+{ "path": "shortlist.csv", "format": "csv", "rows": 1 }
 ```
 
 `shortlist.csv` has one row per person on the shortlist, best first, with their full profile in the last

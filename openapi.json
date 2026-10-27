@@ -420,6 +420,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -508,6 +511,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -611,6 +617,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -701,6 +710,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -888,6 +900,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1014,6 +1029,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1116,6 +1134,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -1265,6 +1286,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1363,6 +1387,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1388,7 +1415,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -1494,6 +1521,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -1607,6 +1637,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1706,6 +1739,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -1828,6 +1864,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -1964,6 +2003,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -1998,7 +2040,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -2098,6 +2140,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -2280,6 +2325,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2296,7 +2344,7 @@
       "get": {
         "operationId": "get_search",
         "summary": "Get a search",
-        "description": "A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and the credits it reserved and, once it closes, was charged; poll until status is no longer queued or running. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and the credits it reserved and, once it closes, was charged. To wait for it, use wait_for_search rather than calling this in a loop; view=status is the light read for checking often. view=status answers only the status, stage, counts, queue place and credits (no criteria, advice or credit breakdown) and stays fast while the search runs. A search takes minutes and status running is normal; a slow answer is not an error. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Searches"
         ],
@@ -2308,6 +2356,19 @@
             "description": "A search id",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "description": "full (the default) or status: the light read, without criteria, advice or the credit breakdown.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "status"
+              ]
             }
           }
         ],
@@ -2418,6 +2479,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2513,6 +2577,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2529,7 +2596,7 @@
       "get": {
         "operationId": "list_people",
         "summary": "List scored people",
-        "description": "Everyone a search scored, best first: score, fit readings, signals, whether they are on the shortlist, and the whole read profile. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The hosted connector's tool returns profiles only when fields asks. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Searches"
         ],
@@ -2553,13 +2620,23 @@
             }
           },
           {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Profile slices to include, comma-separated: profile, about, experience, education, skills, certifications, languages, projects (profile is the whole read profile). Left out, the API returns the whole profile (or none with profile=false); the MCP tools return none unless asked. Ask only for what you need: a page stops at about 100 KB, so whole profiles come a few at a time; exports carry everything.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "profile",
             "in": "query",
             "required": false,
-            "description": "false to leave profiles out",
+            "description": "false to leave profiles out; true (the default when fields is not sent) for the whole read profile.",
             "schema": {
               "type": "string",
               "enum": [
+                "true",
                 "false"
               ]
             }
@@ -2568,7 +2645,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -2695,6 +2772,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2711,7 +2791,7 @@
       "get": {
         "operationId": "list_search_records",
         "summary": "List every record a search returned",
-        "description": "Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one. list_people and the shortlist hold only the people a search scored; this is everyone it found, one record per person (the page that listed them first wins). scored: read and scored in this search. known: already in this workspace from another search, so not read again. not_read: listed but never read (screened out, left for a later round, or the search stopped). candidate_id and profile are null for people this workspace has not read. A database-only search returns no records. For every search in a project at once, use list_project_records; for everyone across the workspace, list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). list_people and the shortlist hold only the people a search scored; this is everyone it found, one record per person (the page that listed them first wins). scored: read and scored in this search. known: already in this workspace from another search, so not read again. not_read: listed but never read (screened out, left for a later round, or the search stopped). candidate_id and profile are null for people this workspace has not read. A database-only search returns no records. For every search in a project at once, use list_project_records; for everyone across the workspace, list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Searches"
         ],
@@ -2726,13 +2806,23 @@
             }
           },
           {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Profile slices to include, comma-separated: profile, about, experience, education, skills, certifications, languages, projects (profile is the whole read profile). Left out, the API returns the whole profile (or none with profile=false); the MCP tools return none unless asked. Ask only for what you need: a page stops at about 100 KB, so whole profiles come a few at a time; exports carry everything.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "profile",
             "in": "query",
             "required": false,
-            "description": "false to leave profiles out",
+            "description": "false to leave profiles out; true (the default when fields is not sent) for the whole read profile.",
             "schema": {
               "type": "string",
               "enum": [
+                "true",
                 "false"
               ]
             }
@@ -2741,7 +2831,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -2863,6 +2953,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2964,6 +3057,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -2980,7 +3076,7 @@
       "get": {
         "operationId": "list_project_records",
         "summary": "List every record a project's searches returned",
-        "description": "Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one. One record per person across the project (the earliest listing wins), with the same fields as list_search_records plus first_search_id (the search that listed them first) and search_ids (every search in the project that returned them). status is scored when any of the project's searches scored them, else known when this workspace already holds them, else not_read; score is the best any of the project's searches gave. For everyone across the whole workspace, use list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). One record per person across the project (the earliest listing wins), with the same fields as list_search_records plus first_search_id (the search that listed them first) and search_ids (every search in the project that returned them). status is scored when any of the project's searches scored them, else known when this workspace already holds them, else not_read; score is the best any of the project's searches gave. For everyone across the whole workspace, use list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Projects"
         ],
@@ -2995,13 +3091,23 @@
             }
           },
           {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Profile slices to include, comma-separated: profile, about, experience, education, skills, certifications, languages, projects (profile is the whole read profile). Left out, the API returns the whole profile (or none with profile=false); the MCP tools return none unless asked. Ask only for what you need: a page stops at about 100 KB, so whole profiles come a few at a time; exports carry everything.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "profile",
             "in": "query",
             "required": false,
-            "description": "false to leave profiles out",
+            "description": "false to leave profiles out; true (the default when fields is not sent) for the whole read profile.",
             "schema": {
               "type": "string",
               "enum": [
+                "true",
                 "false"
               ]
             }
@@ -3010,7 +3116,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -3121,6 +3227,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3222,6 +3331,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3268,7 +3380,456 @@
                   },
                   "criteria_patch": {
                     "type": "object",
-                    "description": "Requirement fields to change (must_have, skills, exclusions…): re-scores everyone already read. Titles and places need a new search."
+                    "additionalProperties": false,
+                    "description": "Requirement fields to change, each replacing the search's own (must_have, must_have_context, skills, exclusions, signal_options to turn optional signals on or off…): re-scores everyone already read. Titles and places need a new search; weights are a workspace setting. must_have is short literal terms matched as text (at most 5, each at most 6 words, like \"CPA\"); prose goes in must_have_context (at most 10 items). A single string where a list is taken is read as a one-item list.",
+                    "properties": {
+                      "seniority": {
+                        "type": "string",
+                        "enum": [
+                          "c_suite",
+                          "vp",
+                          "director",
+                          "manager",
+                          "ic"
+                        ],
+                        "description": "Filter, sent before any profile is bought: the level, sent with one level either side."
+                      },
+                      "allowed_seniority": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "c_suite",
+                            "vp",
+                            "director",
+                            "manager",
+                            "ic"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: levels to accept, instead of seniority's one either side."
+                      },
+                      "must_have": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: short literal terms a profile must show, matched as text: at most 5 terms of at most 6 words each, like \"CPA\" or \"PE license\". Prose goes in must_have_context."
+                      },
+                      "must_have_context": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: requirements as prose, at most 10 items: context for screening, never matched as text."
+                      },
+                      "search_titles": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "description": "Filter, sent before any profile is bought: the exact titles to send instead of title_variants (at most 10), when the person edited the list."
+                      },
+                      "title_requires": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: a title rule as groups that must all appear in the current title, any phrase per group: [[\"data center\"], [\"manager\", \"director\"]] reads \"data center\" AND (manager OR director)."
+                      },
+                      "title_boolean": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 400,
+                        "description": "Filter, sent before any profile is bought: the title rule as written, at most 400 characters: AND, OR, NOT in capitals, brackets, \"quoted phrases\"."
+                      },
+                      "keyword_boolean": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 245,
+                        "description": "Filter, sent before any profile is bought: a keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, \"quoted phrases\"; at most 245 characters and 12 phrases, no commas."
+                      },
+                      "industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
+                      },
+                      "source_company_keywords": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
+                      },
+                      "exclude_titles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current titles to leave out."
+                      },
+                      "exclude_industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current employer industries to leave out (LinkedIn industry names)."
+                      },
+                      "exclude_companies": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current employers to leave out."
+                      },
+                      "avoid_titles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: titles to rank down, never reject."
+                      },
+                      "avoid_industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: industries to rank down, never reject."
+                      },
+                      "avoid_companies": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: employers to rank down, never reject."
+                      },
+                      "comp_band": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "Scored after a profile is read: [low, high] annual pay, in USD."
+                      },
+                      "years_experience": {
+                        "type": "object",
+                        "properties": {
+                          "min": {
+                            "type": "number"
+                          },
+                          "max": {
+                            "type": "number"
+                          },
+                          "ideal": {
+                            "type": "number"
+                          },
+                          "basis": {
+                            "type": "string",
+                            "enum": [
+                              "total",
+                              "relevant"
+                            ]
+                          },
+                          "enforcement": {
+                            "type": "string",
+                            "enum": [
+                              "hard",
+                              "preferred"
+                            ]
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: {min, max, ideal, basis: total|relevant, enforcement: hard|preferred}. Hard bands are sent; preferred only ranks."
+                      },
+                      "permitted_gaps": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "preferred_experience",
+                            "preferred_background"
+                          ]
+                        },
+                        "description": "Scored after a profile is read: gaps a Tier 2 match may have."
+                      },
+                      "min_avg_tenure_years": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
+                      },
+                      "skills": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: skills that rank."
+                      },
+                      "skills_required": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: hard skills; 'A or B' matches either."
+                      },
+                      "languages_required": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: spoken languages the role needs."
+                      },
+                      "signal_options": {
+                        "type": "object",
+                        "properties": {
+                          "move_ready_tenure": {
+                            "type": "boolean"
+                          },
+                          "open_to_work": {
+                            "type": "boolean"
+                          },
+                          "needs_sponsorship": {
+                            "type": "boolean"
+                          },
+                          "keyword_match": {
+                            "type": "boolean"
+                          },
+                          "estimated_current_salary": {
+                            "type": "boolean"
+                          }
+                        },
+                        "description": "Scored after a profile is read: optional signals; needs_sponsorship true when the role can't sponsor a visa."
+                      },
+                      "target_company_profile": {
+                        "type": "object",
+                        "properties": {
+                          "sector": {
+                            "type": "string"
+                          },
+                          "employee_range": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ]
+                          },
+                          "pe_backed_preferred": {
+                            "type": "boolean"
+                          }
+                        },
+                        "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
+                      },
+                      "shortlist_min_score": {
+                        "type": "integer",
+                        "minimum": 50,
+                        "maximum": 95,
+                        "description": "Scored after a profile is read: the shortlist cut-off (default 80); a scoring change takes 50 to 85."
+                      },
+                      "preferred_employers": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: employers that rank up (current +8, past +5); never a gate."
+                      },
+                      "employers": {
+                        "maxItems": 50,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "temporal": {
+                              "default": "either",
+                              "type": "string",
+                              "enum": [
+                                "current",
+                                "past",
+                                "either"
+                              ]
+                            },
+                            "flag": {
+                              "default": "must",
+                              "type": "string",
+                              "enum": [
+                                "must",
+                                "prefer",
+                                "exclude"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: named employers: {name, temporal: current|past|either, flag: must|prefer|exclude}. must and exclude filter; prefer only ranks."
+                      },
+                      "past_titles": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: titles held before the current one."
+                      },
+                      "company_headcount": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                            "G",
+                            "H",
+                            "I"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: current employer size bands, A (self-employed) to I (10,001+)."
+                      },
+                      "recently_changed_jobs": {
+                        "type": "boolean",
+                        "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
+                      },
+                      "current_industries": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: industries the current employer must be in (LinkedIn names, search_industries)."
+                      },
+                      "functions": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: LinkedIn job functions to include."
+                      },
+                      "exclude_functions": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: LinkedIn job functions to leave out."
+                      },
+                      "years_at_current_company": {
+                        "type": "object",
+                        "properties": {
+                          "min": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "max": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: {min, max} years at the current employer."
+                      },
+                      "schools": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: schools attended, by name."
+                      },
+                      "exclude_schools": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: schools to leave out."
+                      },
+                      "profile_languages": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: the language the profile is written in, not a spoken language."
+                      },
+                      "keywords": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: words anywhere on the profile, scored after reading; to filter by words before reading, use keyword_boolean."
+                      },
+                      "exclude_locations": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: places candidates must not be in."
+                      },
+                      "degree_country": {
+                        "type": "object",
+                        "properties": {
+                          "countries": {
+                            "minItems": 1,
+                            "maxItems": 20,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "pattern": "^[A-Z]{2}$"
+                            }
+                          },
+                          "level": {
+                            "default": "bachelor_or_higher",
+                            "type": "string",
+                            "enum": [
+                              "bachelor_or_higher",
+                              "any"
+                            ]
+                          },
+                          "flag": {
+                            "default": "prefer",
+                            "type": "string",
+                            "enum": [
+                              "must",
+                              "prefer"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "countries"
+                        ],
+                        "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
+                      }
+                    }
                   }
                 }
               },
@@ -3344,6 +3905,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3390,7 +3954,456 @@
                   },
                   "criteria_patch": {
                     "type": "object",
-                    "description": "Requirement fields to change (must_have, skills, exclusions…): re-scores everyone already read. Titles and places need a new search."
+                    "additionalProperties": false,
+                    "description": "Requirement fields to change, each replacing the search's own (must_have, must_have_context, skills, exclusions, signal_options to turn optional signals on or off…): re-scores everyone already read. Titles and places need a new search; weights are a workspace setting. must_have is short literal terms matched as text (at most 5, each at most 6 words, like \"CPA\"); prose goes in must_have_context (at most 10 items). A single string where a list is taken is read as a one-item list.",
+                    "properties": {
+                      "seniority": {
+                        "type": "string",
+                        "enum": [
+                          "c_suite",
+                          "vp",
+                          "director",
+                          "manager",
+                          "ic"
+                        ],
+                        "description": "Filter, sent before any profile is bought: the level, sent with one level either side."
+                      },
+                      "allowed_seniority": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "c_suite",
+                            "vp",
+                            "director",
+                            "manager",
+                            "ic"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: levels to accept, instead of seniority's one either side."
+                      },
+                      "must_have": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: short literal terms a profile must show, matched as text: at most 5 terms of at most 6 words each, like \"CPA\" or \"PE license\". Prose goes in must_have_context."
+                      },
+                      "must_have_context": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: requirements as prose, at most 10 items: context for screening, never matched as text."
+                      },
+                      "search_titles": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "description": "Filter, sent before any profile is bought: the exact titles to send instead of title_variants (at most 10), when the person edited the list."
+                      },
+                      "title_requires": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: a title rule as groups that must all appear in the current title, any phrase per group: [[\"data center\"], [\"manager\", \"director\"]] reads \"data center\" AND (manager OR director)."
+                      },
+                      "title_boolean": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 400,
+                        "description": "Filter, sent before any profile is bought: the title rule as written, at most 400 characters: AND, OR, NOT in capitals, brackets, \"quoted phrases\"."
+                      },
+                      "keyword_boolean": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 245,
+                        "description": "Filter, sent before any profile is bought: a keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, \"quoted phrases\"; at most 245 characters and 12 phrases, no commas."
+                      },
+                      "industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
+                      },
+                      "source_company_keywords": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
+                      },
+                      "exclude_titles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current titles to leave out."
+                      },
+                      "exclude_industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current employer industries to leave out (LinkedIn industry names)."
+                      },
+                      "exclude_companies": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: current employers to leave out."
+                      },
+                      "avoid_titles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: titles to rank down, never reject."
+                      },
+                      "avoid_industries": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: industries to rank down, never reject."
+                      },
+                      "avoid_companies": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: employers to rank down, never reject."
+                      },
+                      "comp_band": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "Scored after a profile is read: [low, high] annual pay, in USD."
+                      },
+                      "years_experience": {
+                        "type": "object",
+                        "properties": {
+                          "min": {
+                            "type": "number"
+                          },
+                          "max": {
+                            "type": "number"
+                          },
+                          "ideal": {
+                            "type": "number"
+                          },
+                          "basis": {
+                            "type": "string",
+                            "enum": [
+                              "total",
+                              "relevant"
+                            ]
+                          },
+                          "enforcement": {
+                            "type": "string",
+                            "enum": [
+                              "hard",
+                              "preferred"
+                            ]
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: {min, max, ideal, basis: total|relevant, enforcement: hard|preferred}. Hard bands are sent; preferred only ranks."
+                      },
+                      "permitted_gaps": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "preferred_experience",
+                            "preferred_background"
+                          ]
+                        },
+                        "description": "Scored after a profile is read: gaps a Tier 2 match may have."
+                      },
+                      "min_avg_tenure_years": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
+                      },
+                      "skills": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: skills that rank."
+                      },
+                      "skills_required": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: hard skills; 'A or B' matches either."
+                      },
+                      "languages_required": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: spoken languages the role needs."
+                      },
+                      "signal_options": {
+                        "type": "object",
+                        "properties": {
+                          "move_ready_tenure": {
+                            "type": "boolean"
+                          },
+                          "open_to_work": {
+                            "type": "boolean"
+                          },
+                          "needs_sponsorship": {
+                            "type": "boolean"
+                          },
+                          "keyword_match": {
+                            "type": "boolean"
+                          },
+                          "estimated_current_salary": {
+                            "type": "boolean"
+                          }
+                        },
+                        "description": "Scored after a profile is read: optional signals; needs_sponsorship true when the role can't sponsor a visa."
+                      },
+                      "target_company_profile": {
+                        "type": "object",
+                        "properties": {
+                          "sector": {
+                            "type": "string"
+                          },
+                          "employee_range": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ]
+                          },
+                          "pe_backed_preferred": {
+                            "type": "boolean"
+                          }
+                        },
+                        "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
+                      },
+                      "shortlist_min_score": {
+                        "type": "integer",
+                        "minimum": 50,
+                        "maximum": 95,
+                        "description": "Scored after a profile is read: the shortlist cut-off (default 80); a scoring change takes 50 to 85."
+                      },
+                      "preferred_employers": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: employers that rank up (current +8, past +5); never a gate."
+                      },
+                      "employers": {
+                        "maxItems": 50,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "temporal": {
+                              "default": "either",
+                              "type": "string",
+                              "enum": [
+                                "current",
+                                "past",
+                                "either"
+                              ]
+                            },
+                            "flag": {
+                              "default": "must",
+                              "type": "string",
+                              "enum": [
+                                "must",
+                                "prefer",
+                                "exclude"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: named employers: {name, temporal: current|past|either, flag: must|prefer|exclude}. must and exclude filter; prefer only ranks."
+                      },
+                      "past_titles": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: titles held before the current one."
+                      },
+                      "company_headcount": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                            "G",
+                            "H",
+                            "I"
+                          ]
+                        },
+                        "description": "Filter, sent before any profile is bought: current employer size bands, A (self-employed) to I (10,001+)."
+                      },
+                      "recently_changed_jobs": {
+                        "type": "boolean",
+                        "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
+                      },
+                      "current_industries": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: industries the current employer must be in (LinkedIn names, search_industries)."
+                      },
+                      "functions": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: LinkedIn job functions to include."
+                      },
+                      "exclude_functions": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: LinkedIn job functions to leave out."
+                      },
+                      "years_at_current_company": {
+                        "type": "object",
+                        "properties": {
+                          "min": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "max": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "description": "Filter, sent before any profile is bought: {min, max} years at the current employer."
+                      },
+                      "schools": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: schools attended, by name."
+                      },
+                      "exclude_schools": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: schools to leave out."
+                      },
+                      "profile_languages": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: the language the profile is written in, not a spoken language."
+                      },
+                      "keywords": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Scored after a profile is read: words anywhere on the profile, scored after reading; to filter by words before reading, use keyword_boolean."
+                      },
+                      "exclude_locations": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: places candidates must not be in."
+                      },
+                      "degree_country": {
+                        "type": "object",
+                        "properties": {
+                          "countries": {
+                            "minItems": 1,
+                            "maxItems": 20,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "pattern": "^[A-Z]{2}$"
+                            }
+                          },
+                          "level": {
+                            "default": "bachelor_or_higher",
+                            "type": "string",
+                            "enum": [
+                              "bachelor_or_higher",
+                              "any"
+                            ]
+                          },
+                          "flag": {
+                            "default": "prefer",
+                            "type": "string",
+                            "enum": [
+                              "must",
+                              "prefer"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "countries"
+                        ],
+                        "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
+                      }
+                    }
                   }
                 }
               },
@@ -3466,6 +4479,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -3592,6 +4608,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3686,6 +4705,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -3804,6 +4826,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3905,6 +4930,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -3921,7 +4949,7 @@
       "get": {
         "operationId": "get_shortlist",
         "summary": "Get the shortlist",
-        "description": "Everyone on the project's live shortlist, best first, with full profiles. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Shortlists"
         ],
@@ -3936,13 +4964,23 @@
             }
           },
           {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Profile slices to include, comma-separated: profile, about, experience, education, skills, certifications, languages, projects (profile is the whole read profile). Left out, the API returns the whole profile (or none with profile=false); the MCP tools return none unless asked. Ask only for what you need: a page stops at about 100 KB, so whole profiles come a few at a time; exports carry everything.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "profile",
             "in": "query",
             "required": false,
-            "description": "false to leave profiles out",
+            "description": "false to leave profiles out; true (the default when fields is not sent) for the whole read profile.",
             "schema": {
               "type": "string",
               "enum": [
+                "true",
                 "false"
               ]
             }
@@ -4040,6 +5078,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -4149,6 +5190,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -4275,6 +5319,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -4397,6 +5444,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -4464,10 +5514,19 @@
             }
           },
           {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Profile slices to include, comma-separated: profile, about, experience, education, skills, certifications, languages, projects (profile is the whole read profile). Left out, no profile (as before). With fields, a page holds at most 10 people.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -4574,6 +5633,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -4713,6 +5775,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -4834,6 +5899,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -4934,6 +6002,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -5077,6 +6148,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -5230,6 +6304,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -5320,6 +6397,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -5441,6 +6521,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -5475,7 +6558,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Up to 500 per page (default 100; 50 for projects).",
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
             "schema": {
               "type": "integer"
             }
@@ -5603,6 +6686,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -5736,6 +6822,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -5945,6 +7034,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -6107,6 +7199,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -6232,6 +7327,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -6364,6 +7462,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -6514,6 +7615,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -6667,6 +7771,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -6799,6 +7906,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -7034,6 +8144,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -7175,6 +8288,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -7306,6 +8422,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -7503,6 +8622,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -7655,6 +8777,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -7776,6 +8901,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -7998,6 +9126,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -8117,6 +9248,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -8225,6 +9359,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -8434,6 +9571,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -8566,6 +9706,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -8800,6 +9943,9 @@
           "409": {
             "$ref": "#/components/responses/Error"
           },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
           "429": {
             "$ref": "#/components/responses/Error"
           },
@@ -8981,6 +10127,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -9191,6 +10340,9 @@
             "$ref": "#/components/responses/Error"
           },
           "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
             "$ref": "#/components/responses/Error"
           },
           "429": {
@@ -10336,25 +11488,18 @@
       },
       "Criteria": {
         "type": "object",
-        "description": "See the Criteria guide and GET /reference/criteria for every field.",
+        "description": "The search's criteria: title_variants (or an employer with flag must) and a metro, allowed_metros or remote_ok at least. draft_criteria writes them from a job description; get_criteria_reference explains every field. Keep must_have to short literal terms (at most 5, each at most 6 words); prose goes in must_have_context. A single string where a list is taken is read as a one-item list.",
         "properties": {
+          "family": {
+            "type": "string",
+            "description": "Scored after a profile is read: a role family label. Never sent as a title."
+          },
           "title_variants": {
             "type": "array",
             "items": {
               "type": "string"
-            }
-          },
-          "metro": {
-            "type": "string"
-          },
-          "allowed_metros": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "remote_ok": {
-            "type": "boolean"
+            },
+            "description": "Filter, sent before any profile is bought: current job titles, literal, OR'd. The first is the role; it and its closest synonyms are sent (5 at most). Optional when an employer is a current must."
           },
           "seniority": {
             "type": "string",
@@ -10364,7 +11509,171 @@
               "director",
               "manager",
               "ic"
-            ]
+            ],
+            "description": "Filter, sent before any profile is bought: the level, sent with one level either side."
+          },
+          "allowed_seniority": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "c_suite",
+                "vp",
+                "director",
+                "manager",
+                "ic"
+              ]
+            },
+            "description": "Filter, sent before any profile is bought: levels to accept, instead of seniority's one either side."
+          },
+          "must_have": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: short literal terms a profile must show, matched as text: at most 5 terms of at most 6 words each, like \"CPA\" or \"PE license\". Prose goes in must_have_context."
+          },
+          "must_have_context": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: requirements as prose, at most 10 items: context for screening, never matched as text."
+          },
+          "search_titles": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "description": "Filter, sent before any profile is bought: the exact titles to send instead of title_variants (at most 10), when the person edited the list."
+          },
+          "title_requires": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "minItems": 1,
+              "maxItems": 10,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "description": "Filter, sent before any profile is bought: a title rule as groups that must all appear in the current title, any phrase per group: [[\"data center\"], [\"manager\", \"director\"]] reads \"data center\" AND (manager OR director)."
+          },
+          "title_boolean": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400,
+            "description": "Filter, sent before any profile is bought: the title rule as written, at most 400 characters: AND, OR, NOT in capitals, brackets, \"quoted phrases\"."
+          },
+          "keyword_boolean": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 245,
+            "description": "Filter, sent before any profile is bought: a keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, \"quoted phrases\"; at most 245 characters and 12 phrases, no commas."
+          },
+          "industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
+          },
+          "source_company_keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
+          },
+          "metro": {
+            "type": "string",
+            "description": "Filter, sent before any profile is bought: the role's own place: 'City, ST', a state or a country."
+          },
+          "allowed_metros": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: more places, OR'd with metro."
+          },
+          "location_anchor_zips": {
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{5}$"
+            },
+            "description": "Scored after a profile is read: 5-digit ZIP codes the radius is measured from, at most 25."
+          },
+          "geo_radius_mi": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Scored after a profile is read: commute radius around metro, in miles."
+          },
+          "remote_ok": {
+            "type": "boolean",
+            "description": "Scored after a profile is read: true when the role is remote: location then doesn't gate."
+          },
+          "exclude_titles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: current titles to leave out."
+          },
+          "exclude_industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: current employer industries to leave out (LinkedIn industry names)."
+          },
+          "exclude_companies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: current employers to leave out."
+          },
+          "avoid_titles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: titles to rank down, never reject."
+          },
+          "avoid_industries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: industries to rank down, never reject."
+          },
+          "avoid_companies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: employers to rank down, never reject."
+          },
+          "comp_band": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "Scored after a profile is read: [low, high] annual pay, in USD."
           },
           "years_experience": {
             "type": "object",
@@ -10375,6 +11684,16 @@
               "max": {
                 "type": "number"
               },
+              "ideal": {
+                "type": "number"
+              },
+              "basis": {
+                "type": "string",
+                "enum": [
+                  "total",
+                  "relevant"
+                ]
+              },
               "enforcement": {
                 "type": "string",
                 "enum": [
@@ -10382,35 +11701,140 @@
                   "preferred"
                 ]
               }
-            }
+            },
+            "description": "Filter, sent before any profile is bought: {min, max, ideal, basis: total|relevant, enforcement: hard|preferred}. Hard bands are sent; preferred only ranks."
           },
-          "current_industries": {
+          "permitted_gaps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "preferred_experience",
+                "preferred_background"
+              ]
+            },
+            "description": "Scored after a profile is read: gaps a Tier 2 match may have."
+          },
+          "min_avg_tenure_years": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
+          },
+          "skills": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Scored after a profile is read: skills that rank."
           },
-          "exclude_industries": {
+          "skills_required": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Scored after a profile is read: hard skills; 'A or B' matches either."
           },
-          "functions": {
+          "languages_required": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Scored after a profile is read: spoken languages the role needs."
+          },
+          "signal_options": {
+            "type": "object",
+            "properties": {
+              "move_ready_tenure": {
+                "type": "boolean"
+              },
+              "open_to_work": {
+                "type": "boolean"
+              },
+              "needs_sponsorship": {
+                "type": "boolean"
+              },
+              "keyword_match": {
+                "type": "boolean"
+              },
+              "estimated_current_salary": {
+                "type": "boolean"
+              }
+            },
+            "description": "Scored after a profile is read: optional signals; needs_sponsorship true when the role can't sponsor a visa."
+          },
+          "target_company_profile": {
+            "type": "object",
+            "properties": {
+              "sector": {
+                "type": "string"
+              },
+              "employee_range": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "pe_backed_preferred": {
+                "type": "boolean"
+              }
+            },
+            "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
+          },
+          "rubric_weights": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "number"
+              },
+              "years": {
+                "type": "number"
+              },
+              "skills": {
+                "type": "number"
+              },
+              "geo": {
+                "type": "number"
+              },
+              "industry": {
+                "type": "number"
+              },
+              "seniority": {
+                "type": "number"
+              }
+            },
+            "description": "A workspace setting: refused on a search (weights_in_settings)."
+          },
+          "shortlist_min_score": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 95,
+            "description": "Scored after a profile is read: the shortlist cut-off (default 80); a scoring change takes 50 to 85."
+          },
+          "preferred_employers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: employers that rank up (current +8, past +5); never a gate."
           },
           "employers": {
+            "maxItems": 50,
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
                 },
                 "temporal": {
+                  "default": "either",
                   "type": "string",
                   "enum": [
                     "current",
@@ -10419,6 +11843,7 @@
                   ]
                 },
                 "flag": {
+                  "default": "must",
                   "type": "string",
                   "enum": [
                     "must",
@@ -10426,35 +11851,127 @@
                     "exclude"
                   ]
                 }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "description": "Filter, sent before any profile is bought: named employers: {name, temporal: current|past|either, flag: must|prefer|exclude}. must and exclude filter; prefer only ranks."
+          },
+          "past_titles": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: titles held before the current one."
+          },
+          "company_headcount": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I"
+              ]
+            },
+            "description": "Filter, sent before any profile is bought: current employer size bands, A (self-employed) to I (10,001+)."
+          },
+          "recently_changed_jobs": {
+            "type": "boolean",
+            "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
+          },
+          "current_industries": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: industries the current employer must be in (LinkedIn names, search_industries)."
+          },
+          "functions": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: LinkedIn job functions to include."
+          },
+          "exclude_functions": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: LinkedIn job functions to leave out."
+          },
+          "years_at_current_company": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number",
+                "minimum": 0
+              },
+              "max": {
+                "type": "number",
+                "minimum": 0
               }
-            }
+            },
+            "description": "Filter, sent before any profile is bought: {min, max} years at the current employer."
           },
           "schools": {
+            "maxItems": 20,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Filter, sent before any profile is bought: schools attended, by name."
           },
-          "must_have": {
+          "exclude_schools": {
+            "maxItems": 20,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Filter, sent before any profile is bought: schools to leave out."
           },
-          "skills": {
+          "profile_languages": {
+            "maxItems": 10,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Filter, sent before any profile is bought: the language the profile is written in, not a spoken language."
           },
-          "shortlist_min_score": {
-            "type": "integer"
+          "keywords": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scored after a profile is read: words anywhere on the profile, scored after reading; to filter by words before reading, use keyword_boolean."
+          },
+          "exclude_locations": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: places candidates must not be in."
           },
           "degree_country": {
             "type": "object",
-            "description": "Where a degree is from, by school; only when asked. See GET /reference/criteria.",
             "properties": {
               "countries": {
+                "minItems": 1,
+                "maxItems": 20,
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -10462,6 +11979,7 @@
                 }
               },
               "level": {
+                "default": "bachelor_or_higher",
                 "type": "string",
                 "enum": [
                   "bachelor_or_higher",
@@ -10469,13 +11987,18 @@
                 ]
               },
               "flag": {
+                "default": "prefer",
                 "type": "string",
                 "enum": [
                   "must",
                   "prefer"
                 ]
               }
-            }
+            },
+            "required": [
+              "countries"
+            ],
+            "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
           }
         },
         "additionalProperties": true

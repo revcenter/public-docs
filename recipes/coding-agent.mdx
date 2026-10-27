@@ -41,7 +41,7 @@ revcenter reference | jq '{fields: (.fields | length), example: (.example | keys
 
 {/* expect */}
 ```json
-{ "fields": 32, "example": ["current_industries", "geo_radius_mi", "metro", "must_have", "title_variants", "years_experience"] }
+{ "fields": 39, "example": ["current_industries", "geo_radius_mi", "metro", "must_have", "title_variants", "years_experience"] }
 ```
 
 {/* run */}
@@ -58,7 +58,9 @@ revcenter search "$PROJECT" --criteria criteria.json --key "agent-$PROJECT"
   "reused": false,
   "compiled_by": "caller",
   "criteria": { "metro": "Lancaster, PA", "title_variants": ["Plant Maintenance Manager", "Maintenance Manager"] },
-  "database_only": false
+  "review": { "changes": [], "warnings": [] },
+  "database_only": false,
+  "credits_reserved": 1000
 }
 ```
 

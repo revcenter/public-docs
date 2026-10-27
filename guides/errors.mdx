@@ -36,6 +36,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |
+| `400` | `invalid_fields` · `invalid_view` | A list's `fields` names a profile slice that doesn't exist, or `get_search`'s `view` is not `full` or `status` | Use the slices the message lists; leave `view` out or send `status` |
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
 | `400` | `proposal_required` | `publish_shortlist` or `send_shortlist_email` called on its own route: it reaches the client, so it runs only from an applied proposal. Nothing was sent | Preview it with `preview_action`, show the person, then `apply_proposal` once they agree |
@@ -65,6 +66,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `409` | `empty_shortlist` · `shortlist_not_publishable` | Nothing on the shortlist to publish or send, or no one on it came from a search in the project | Add people, or run a search in the project first |
 | `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (`preview_shortlist_email`) and send the name it shows |
 | `409` | `webhook_limit` · `webhook_disabled` | The workspace already has 10 webhook endpoints, or a redelivery to an endpoint that is turned off | Delete one; turn the endpoint on first |
+| `413` | `response_too_large` | `get_shortlist` with `fields` would be more than one answer holds (about 100 KB); nothing was cut | Ask for fewer fields, or page through `list_people` with `fields` |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or use `database_only` |
 | `429` | `rate_limited` · `network_busy` · `launch_in_progress` | Too many requests, the network is briefly full (only with the search queue off), or the same Idempotency-Key is still being started; nothing ran | Wait for `Retry-After` (the CLI and MCP retry for you); see [rate limits](/guides/rate-limits) |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff |
