@@ -2742,8 +2742,12 @@
                       },
                       "signals": [
                         {
-                          "key": "cpa",
-                          "label": "CPA"
+                          "key": "open_to_work",
+                          "label": "Open to work"
+                        },
+                        {
+                          "key": "move_ready",
+                          "label": "Move-ready"
                         }
                       ],
                       "on_shortlist": true,
@@ -4916,7 +4920,7 @@
                   "type": "string",
                   "description": "format=jsonl: one JSON object per line."
                 },
-                "example": "{\"id\":\"3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99\",\"name\":\"Dana Whitfield\",\"first_name\":\"Dana\",\"last_name\":\"Whitfield\",\"title\":\"Plant Controller\",\"company\":\"Garden State Foods\",\"location\":\"Cherry Hill, NJ\",\"headline\":\"Plant Controller · CPA · Food manufacturing\",\"linkedin_url\":\"https://www.linkedin.com/in/example\",\"score\":91,\"fit\":{\"title_match\":1,\"geo_fit\":1,\"years_fit\":1,\"must_have_coverage\":1,\"qualified\":true},\"signals\":[{\"key\":\"cpa\",\"label\":\"CPA\"}],\"on_shortlist\":true,\"profile\":null}\n"
+                "example": "{\"id\":\"3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99\",\"name\":\"Dana Whitfield\",\"first_name\":\"Dana\",\"last_name\":\"Whitfield\",\"title\":\"Plant Controller\",\"company\":\"Garden State Foods\",\"location\":\"Cherry Hill, NJ\",\"headline\":\"Plant Controller · CPA · Food manufacturing\",\"linkedin_url\":\"https://www.linkedin.com/in/example\",\"score\":91,\"fit\":{\"title_match\":1,\"geo_fit\":1,\"years_fit\":1,\"must_have_coverage\":1,\"qualified\":true},\"signals\":[{\"key\":\"open_to_work\",\"label\":\"Open to work\"},{\"key\":\"move_ready\",\"label\":\"Move-ready\"}],\"on_shortlist\":true,\"profile\":null}\n"
               }
             }
           },
@@ -5055,8 +5059,12 @@
                       },
                       "signals": [
                         {
-                          "key": "cpa",
-                          "label": "CPA"
+                          "key": "open_to_work",
+                          "label": "Open to work"
+                        },
+                        {
+                          "key": "move_ready",
+                          "label": "Move-ready"
                         }
                       ],
                       "on_shortlist": true,
@@ -11206,6 +11214,7 @@
           },
           "signals": {
             "type": "array",
+            "description": "The signals the app's Signals column shows: open_to_work, open_to_relocate (the move in the label), move_ready, job_hopper, very_senior, out_of_area, needs_sponsorship.",
             "items": {
               "type": "object",
               "properties": {
