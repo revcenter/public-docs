@@ -848,7 +848,7 @@
                         ]
                       },
                       "compiled_query": {
-                        "policyVersion": "lead-query-policy.v1",
+                        "policyVersion": "lead-query-policy.v2",
                         "titles": [
                           "Plant Controller",
                           "Controller"
