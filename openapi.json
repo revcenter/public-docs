@@ -5682,6 +5682,182 @@
         }
       }
     },
+    "/companies": {
+      "get": {
+        "operationId": "list_companies",
+        "summary": "List the companies database",
+        "description": "The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "tags": [
+          "Candidates"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Company name contains this",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "description": "Only the employers of people a search in this project found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry contains this",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "description": "Location contains this",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hiring",
+            "in": "query",
+            "required": false,
+            "description": "Only companies with recent job postings",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 500 per page (default 100; 150 for list_people; 50 for projects and candidates). A page also stops at about 100 KB of JSON: follow cursor for the rest.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Company"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "c1b2a3d4-0000-4000-8000-000000000001",
+                      "name": "Garden State Foods",
+                      "industry": "Food and Beverage Manufacturing",
+                      "location": "Camden, NJ",
+                      "employee_count": 1200,
+                      "employee_count_range": "1001-5000",
+                      "website": "https://example.com",
+                      "linkedin_url": "https://www.linkedin.com/company/example",
+                      "people": 4,
+                      "recent_jobs": 2,
+                      "latest_job": "2026-10-20"
+                    }
+                  ],
+                  "cursor": null,
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/candidates.csv": {
       "get": {
         "operationId": "export_candidates",
@@ -10515,6 +10691,65 @@
           },
           "meta": {
             "request_id": "req_01JABCDEF"
+          }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "industry": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "employee_count": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "employee_count_range": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linkedin_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "people": {
+            "type": "integer"
+          },
+          "recent_jobs": {
+            "type": "integer"
+          },
+          "latest_job": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },

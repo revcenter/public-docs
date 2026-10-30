@@ -142,6 +142,7 @@
           "POST /projects/{projectId}/shortlist/email/send",
           "GET /projects/{projectId}/client-feedback",
           "GET /candidates",
+          "GET /companies",
           "GET /candidates.csv",
           "GET /webhooks",
           "POST /webhooks",
