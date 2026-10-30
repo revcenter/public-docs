@@ -39,6 +39,7 @@ field and its allowed values.
 | `keyword_boolean` | `"\"data center\" AND (construction OR \"mission critical\")"` | A keyword rule over the whole profile, applied before any profile is read. At most 245 characters and 12 phrases, no commas. Reaches people whose titles do not name the specialty. |
 | `title_requires` | `[["data center"], ["manager", "director"]]` | A title rule: every group must appear in the current title, any phrase within a group. This one reads "data center" AND (manager OR director). Sent with the title search, and checked again on each listed person's title before any profile is read. |
 | `exclude_locations` | `["New York, NY"]` | Places to leave out. |
+| `company_hq_locations` | `["Michigan"]` | Where the current employer is headquartered. |
 | `recently_changed_jobs` | `true` | Changed jobs in the last 90 days. |
 | `profile_languages` | `["es"]` | The language the profile is written in, not a language spoken. |
 

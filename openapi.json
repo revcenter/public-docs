@@ -3803,6 +3803,14 @@
                         },
                         "description": "Filter, sent before any profile is bought: places candidates must not be in."
                       },
+                      "company_hq_locations": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: where a candidate's current employer is headquartered (\"Michigan\", \"Denmark\")."
+                      },
                       "degree_country": {
                         "type": "object",
                         "properties": {
@@ -4376,6 +4384,14 @@
                           "type": "string"
                         },
                         "description": "Filter, sent before any profile is bought: places candidates must not be in."
+                      },
+                      "company_hq_locations": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Filter, sent before any profile is bought: where a candidate's current employer is headquartered (\"Michigan\", \"Denmark\")."
                       },
                       "degree_country": {
                         "type": "object",
@@ -12002,6 +12018,14 @@
               "type": "string"
             },
             "description": "Filter, sent before any profile is bought: places candidates must not be in."
+          },
+          "company_hq_locations": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter, sent before any profile is bought: where a candidate's current employer is headquartered (\"Michigan\", \"Denmark\")."
           },
           "degree_country": {
             "type": "object",
