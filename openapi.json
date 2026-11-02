@@ -3725,6 +3725,10 @@
                         "type": "boolean",
                         "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
                       },
+                      "market_coverage": {
+                        "type": "boolean",
+                        "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
+                      },
                       "current_industries": {
                         "maxItems": 20,
                         "type": "array",
@@ -4306,6 +4310,10 @@
                       "recently_changed_jobs": {
                         "type": "boolean",
                         "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
+                      },
+                      "market_coverage": {
+                        "type": "boolean",
+                        "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
                       },
                       "current_industries": {
                         "maxItems": 20,
@@ -12175,6 +12183,10 @@
           "recently_changed_jobs": {
             "type": "boolean",
             "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
+          },
+          "market_coverage": {
+            "type": "boolean",
+            "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
           },
           "current_industries": {
             "maxItems": 20,
