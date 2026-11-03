@@ -443,7 +443,7 @@
       "get": {
         "operationId": "get_usage",
         "summary": "Today's usage",
-        "description": "Today's requests and searches, and credits remaining. Does not use credits.\n\nAny valid key.",
+        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a results page and a profile read cost. Does not use credits.\n\nAny valid key.",
         "tags": [
           "Account"
         ],
@@ -490,110 +490,14 @@
                       "today": 2,
                       "running": 1
                     },
-                    "credits_remaining": 37000
-                  },
-                  "meta": {
-                    "request_id": "req_01JABCDEF"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error"
-          },
-          "402": {
-            "$ref": "#/components/responses/Error"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error"
-          },
-          "413": {
-            "$ref": "#/components/responses/Error"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error"
-          },
-          "500": {
-            "$ref": "#/components/responses/Error"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
-      }
-    },
-    "/capacity": {
-      "get": {
-        "operationId": "get_capacity",
-        "summary": "Live capacity",
-        "description": "How busy Revcenter is right now: searches running and waiting across the platform and in this workspace, and about when a search launched now would start. Launches are never refused for being busy: a search past the platform's limit waits its turn (status queued) and starts as one finishes. Workspaces take turns, so a workspace with many searches waiting does not hold up another's first one. Use this to tell the person what to expect before launching many searches at once. Does not use credits.\n\nNeeds scope `searches:read`.",
-        "tags": [
-          "Searches"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Requests left this minute.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "When the minute resets, in Unix seconds.",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Capacity"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/Meta"
-                    }
-                  }
-                },
-                "example": {
-                  "data": {
-                    "queue_enabled": true,
-                    "platform": {
-                      "search_slots": 20,
-                      "running": 20,
-                      "waiting": 14,
-                      "typical_search_seconds": 300,
-                      "searches_per_hour": 240
-                    },
-                    "workspace": {
-                      "running": 6,
-                      "waiting": 9
-                    },
-                    "new_search": {
-                      "position": 15,
-                      "ahead": 14,
-                      "starts_in_seconds": 420
+                    "credits_remaining": 37000,
+                    "credit_terms": {
+                      "tier": "paid",
+                      "max_credits_per_search": 5000,
+                      "max_credits_per_project": 15000,
+                      "results_page_credits": 25,
+                      "profile_read_credits": 2,
+                      "people_per_page": 25
                     }
                   },
                   "meta": {
@@ -1883,143 +1787,6 @@
             "$ref": "#/components/responses/Error"
           }
         }
-      },
-      "delete": {
-        "operationId": "delete_project",
-        "summary": "Delete a project",
-        "description": "Delete a project for good, sending its exact name as confirm_name. Its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Cannot be undone. confirm_name must be the project's name exactly as get_project returns it, or nothing is deleted (400 confirmation_required). The share link stops showing the list, so a client holding it sees nothing: to keep it, archive instead (update_project with archived true). A project with delivered work behind it is kept (409 project_in_use). Preview it with preview_action first to show the person what goes. Does not use credits. It can't be undone, so the MCP server asks the person first, naming what goes.\n\nNeeds scope `projects:write`.",
-        "tags": [
-          "Projects"
-        ],
-        "x-revcenter-confirm": "destructive",
-        "parameters": [
-          {
-            "name": "projectId",
-            "in": "path",
-            "required": true,
-            "description": "A project id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "confirm_name"
-                ],
-                "properties": {
-                  "confirm_name": {
-                    "type": "string",
-                    "description": "The project's exact name."
-                  }
-                }
-              },
-              "example": {
-                "confirm_name": "Plant Controller, Camden NJ"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Requests left this minute.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "When the minute resets, in Unix seconds.",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "deleted": {
-                          "type": "boolean"
-                        },
-                        "project_id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "searches_kept": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/Meta"
-                    }
-                  }
-                },
-                "example": {
-                  "data": {
-                    "deleted": true,
-                    "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
-                    "name": "Plant Controller, Camden NJ",
-                    "searches_kept": 1
-                  },
-                  "meta": {
-                    "request_id": "req_01JABCDEF"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error"
-          },
-          "402": {
-            "$ref": "#/components/responses/Error"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error"
-          },
-          "413": {
-            "$ref": "#/components/responses/Error"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error"
-          },
-          "500": {
-            "$ref": "#/components/responses/Error"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
       }
     },
     "/projects/{projectId}/searches": {
@@ -2163,7 +1930,7 @@
       "post": {
         "operationId": "launch_search",
         "summary": "Launch a search",
-        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's most per search; held to 1,000 on a trial, to the workspace's most per search on a plan (5,000 unless its admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the results pages and profile reads it bought (on a plan 25 credits a page of up to 25 people and 2 a profile read; on a trial 50 and 5; lookups, AI screening, people already in the workspace and cached results are free), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's limit per search; held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the results pages and profile reads it bought (25 credits a results page of up to 25 people and 2 a profile read on a plan; 50 and 5 on a trial; lookups, AI screening, people already in the workspace and cached results are free), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -2220,7 +1987,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
+                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
                   }
                 }
               },
@@ -4758,7 +4525,7 @@
       "post": {
         "operationId": "expand_search",
         "summary": "Expand or continue a search",
-        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. Without search_id: a new pass on the project's first search's criteria, once it has finished. With search_id: the same search's criteria from where it stopped, when it was stopped, interrupted or used its credits and LinkedIn still has people (pages it already read are reused at no cost); a search LinkedIn ran out of is refused with 409 cannot_continue, so expand without search_id instead. A project's searches share a credit limit of three searches' worth at the workspace's per-search limit (3,000 on a trial, 15,000 on a plan at the default 5,000 per search): a cap above what the project has left is held to it, and 409 project_credit_limit is returned when less than 250 is left. One pass at a time per project (409 search_running). Send an Idempotency-Key: a retry with the same key returns the same pass. Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. Without search_id: a new pass on the project's first search's criteria, once it has finished. With search_id: the same search's criteria from where it stopped, when it was stopped, interrupted or used its credits and LinkedIn still has people (pages it already read are reused at no cost); a search LinkedIn ran out of is refused with 409 cannot_continue, so expand without search_id instead. A project's searches share a credit limit of 3 searches' worth at the workspace's per-search limit (3,000 on a trial, 15,000 on a plan at the default 5,000 per search): a cap above what the project has left is held to it, and 409 project_credit_limit is returned when less than 250 is left. One pass at a time per project (409 search_running). Send an Idempotency-Key: a retry with the same key returns the same pass. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -4784,7 +4551,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's most per search. Held to that most (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
+                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
                   },
                   "search_id": {
                     "type": "string",
@@ -11046,60 +10813,35 @@
               "integer",
               "null"
             ]
-          }
-        }
-      },
-      "Capacity": {
-        "type": "object",
-        "properties": {
-          "queue_enabled": {
-            "type": "boolean"
           },
-          "platform": {
+          "credit_terms": {
             "type": "object",
+            "description": "What a search may hold and is charged in this workspace: quote these, not fixed numbers.",
             "properties": {
-              "search_slots": {
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "paid",
+                  "trial"
+                ]
+              },
+              "max_credits_per_search": {
                 "type": "integer",
-                "description": "Searches that run at once across the platform."
+                "description": "The most one search or expansion reserves, and what it reserves when it names no max_credits."
               },
-              "running": {
-                "type": "integer"
-              },
-              "waiting": {
-                "type": "integer"
-              },
-              "typical_search_seconds": {
+              "max_credits_per_project": {
                 "type": "integer",
-                "description": "Median time from start to finish of a recent search."
+                "description": "The most a project's searches and expansions use together."
               },
-              "searches_per_hour": {
+              "results_page_credits": {
                 "type": "integer",
-                "description": "About how many searches the platform finishes an hour at that pace."
-              }
-            }
-          },
-          "workspace": {
-            "type": "object",
-            "properties": {
-              "running": {
-                "type": "integer"
+                "description": "Charged per results page bought."
               },
-              "waiting": {
-                "type": "integer"
-              }
-            }
-          },
-          "new_search": {
-            "type": "object",
-            "description": "Where a search launched now would stand: 0 seconds when it would start at once.",
-            "properties": {
-              "position": {
-                "type": "integer"
+              "profile_read_credits": {
+                "type": "integer",
+                "description": "Charged per profile read bought."
               },
-              "ahead": {
-                "type": "integer"
-              },
-              "starts_in_seconds": {
+              "people_per_page": {
                 "type": "integer"
               }
             }
@@ -11232,7 +10974,7 @@
           },
           "credits_note": {
             "type": "string",
-            "description": "Present when the cap asked for was held lower: the trial's 1,000 per search, the workspace's most per search, or the credits left."
+            "description": "Present when the cap asked for was held lower: to the workspace's limit per search, the project's credit limit, or the credits left."
           }
         }
       },
@@ -11371,16 +11113,11 @@
               "object",
               "null"
             ],
-            "description": "While the search waits its turn (status queued): its place in line and about how many seconds until it starts. Null otherwise.",
+            "description": "While the search waits its turn (status queued): about how many seconds until it starts. Null otherwise.",
             "properties": {
-              "position": {
-                "type": "integer"
-              },
-              "ahead": {
-                "type": "integer"
-              },
               "eta_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "About how many seconds until it starts."
               }
             }
           },

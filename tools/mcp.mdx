@@ -86,7 +86,6 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | --- | --- | --- |
 | `get_me` | The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. | Does not use credits. |
 | `get_usage` | Today's requests and searches, and credits remaining. | Does not use credits. |
-| `get_capacity` | How busy Revcenter is right now: searches running and waiting across the platform and in this workspace, and about when a search launched now would start. | Does not use credits. |
 | `list_actions` | Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. | Does not use credits. |
 | `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use credits. |
 | `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. |
@@ -97,7 +96,6 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `create_project` | Make a project: one role, one shortlist. | Does not use credits. |
 | `get_project` | One project, with its search and shortlist counts. | Does not use credits. |
 | `update_project` | Rename a project, or archive it (or bring it back): an archived project leaves `list_projects` but keeps its searches, shortlist and share link. | Does not use credits. |
-| `delete_project` | Delete a project for good, sending its exact name as `confirm_name`: its shortlist, share link and do-not-contact list go with it; its searches and the people they found stay. Asks you first, naming the project. | Does not use credits. |
 | `get_project_insights` | The talent picture across a project's searches, as the app's Insights tab shows it: totals, verdict counts, and where the people are, who employs them, their titles, schools and skills. | Does not use credits. |
 | `get_shortlist_stats` | Everyone a project's searches scored, in aggregate: analyzed, qualified, the score spread, how many are on the shortlist, and the most common rejection reasons. | Does not use credits. |
 | `get_spend` | The credits a project's searches used: what each reserved and was charged, what running searches still hold, and the total. `search_id` narrows it to one search. | Does not use credits. |
@@ -105,7 +103,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `add_dnc` | Add people to the project's do-not-contact list by LinkedIn address; its searches skip them from now on. | Does not use credits. |
 | `add_dnc_from_search` | Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. | Does not use credits. |
 | `list_searches` | The searches a project has run, oldest first. | Does not use credits. |
-| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. `max_credits` caps it (default: the workspace's most per search; at least 250). | Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded. |
+| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. `max_credits` caps it (default: the workspace's most per search; at least 250). | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and `credits_reserved` / `credits_charged`; `view: "status"` is the light read. To wait for a search, use `wait_for_search` instead of calling this in a loop | Does not use credits. |
 | `cancel_search` | Stop a running search: it buys nothing more, scores what it already read, and keeps them. | Does not use credits. |
 | `list_people` | Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The hosted connector's tool returns profiles only when fields asks. | Does not use credits. |
@@ -121,7 +119,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `discard_scoring` | Discard the scoring change the app's assistant left pending on a search, keeping the criteria in force. | Does not use credits. |
 | `rescore_search` | Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search that stopped before it scored everyone it read. | Re-scores the people already found. Does not use credits. |
 | `get_search_thread` | The project's assistant conversation in the app, oldest first, and any scoring change it proposed for the search that nobody has applied yet, with the shortlist before and after. | Does not use credits. |
-| `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; with `search_id`, that search continued from where it stopped. A project's passes share its credit limit. Takes `max_credits` like a launch. | Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded. |
+| `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; with `search_id`, that search continued from where it stopped. A project's passes share its credit limit. Takes `max_credits` like a launch. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): fit readings and why, every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead. | Does not use credits. |
 | `get_share_link` | The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. | Does not use credits. |
 | `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). | Does not use credits. |
@@ -138,7 +136,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `preview_shortlist_email` | The shortlist email as it would go: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing. In testing, for developer keys. | Does not use credits. |
 | `send_shortlist_email` | Email the shortlist to the client. Reaches the client, so it asks you first, showing who would get what; nothing is sent unless you accept. | Does not use credits. |
 | `list_client_feedback` | What the client said about the people on the shortlist: Accept and Not a fit on their portal, and verdicts on a published version, with reasons and notes. | Does not use credits. |
-| `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded. |
+| `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `wait_for_scoring` | Wait until a scoring job (a job_id from preview_scoring or apply_scoring) finishes, or the timeout passes, and return its status and result. | Does not use credits. |
 | `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
@@ -181,12 +179,11 @@ prompt is open is asked next, together. For a batch the agent has already drafte
 to 25 launches in one call and returns each one's outcome: `launched` (with its search), `declined`,
 `pending_approval` (with its `proposal_id`) or `failed` (with the error; the others still run).
 
-## Approval before reaching the client or deleting
+## Approval before reaching the client
 
-`publish_shortlist` and `send_shortlist_email` reach the client, and `delete_project` can't be undone. None
+`publish_shortlist` and `send_shortlist_email` reach the client. Neither
 uses credits, but each is asked the same way, in its own words: who the client will see (publishing), the
-client workspace, where the email goes, its subject, link and people (emailing), or the project's name and
-what goes with it (deleting). Accept applies exactly what was previewed, once; Decline runs nothing. A client
+client workspace, where the email goes, its subject, link and people (emailing). Accept applies exactly what was previewed, once; Decline runs nothing. A client
 that can't ask gets `status: "pending_approval"` with the proposal and `show_the_person`, the text to show you
 before `apply_proposal`. `list_actions` (`GET /v1/actions`) marks these with `confirm` (`client` or
 `destructive`). Called directly, publishing and emailing are refused with `proposal_required`.

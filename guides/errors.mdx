@@ -41,7 +41,6 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
 | `400` | `proposal_required` | `publish_shortlist` or `send_shortlist_email` called on its own route: it reaches the client, so it runs only from an applied proposal. Nothing was sent | Preview it with `preview_action`, show the person, then `apply_proposal` once they agree |
-| `400` | `confirmation_required` | Deleting a project without its exact name as `confirm_name`; nothing was deleted | Send the name `get_project` returns, or archive it instead |
 | `400` | `invalid_verdict` · `invalid_reason` · `invalid_dnc` · `invalid_project_update` · `invalid_expected_count` | A verdict, decline reason, do-not-contact entry, project change or expected count that isn't valid | Fix the field named in the message |
 | `400` | `client_workspace_required` | No client workspace to email: `client_workspace_id` isn't a workspace id, or the project isn't assigned to a client portal | Send `client_workspace_id` |
 | `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount in range |
@@ -67,7 +66,6 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `409` | `project_credit_limit` | The project's searches have used its credit limit (three searches' worth at the workspace's per-search limit) | Start a new project for a different role or place |
 | `409` | `cannot_continue` | `expand_search` with `search_id` on a search that can't go on as it was (LinkedIn had no one left, or it failed on its criteria) | Call `expand_search` without `search_id`, or launch a new search with the criteria changed |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview again |
-| `409` | `project_in_use` | The project has delivered work that keeps it; nothing was deleted | Archive it instead (`update_project` with `archived` true) |
 | `409` | `shortlist_changed` | The shortlist holds a different number of people than the person was shown (`details` has `expected` and `actual`); nothing was sent | Preview again and show the person the new list |
 | `409` | `empty_shortlist` · `shortlist_not_publishable` | Nothing on the shortlist to publish or send, or no one on it came from a search in the project | Add people, or run a search in the project first |
 | `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (`preview_shortlist_email`) and send the name it shows |

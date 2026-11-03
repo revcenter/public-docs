@@ -195,19 +195,32 @@ way: the URL, transport `streamable_http` (or `http`), and the header `Authoriza
 server is stateless: POST JSON-RPC and each request is answered on its own, as JSON; there is no session id
 and no GET stream.
 
-Paid actions still ask first: a launch returns `pending_approval` with a proposal and runs only when your agent
-calls `apply_proposal`, so have it show the proposal to a person before it does.
+Your agent runs each tool when it calls it. A launch spends credits, so have it confirm the criteria and
+the cap with a person first.
 
 ## What it can do
 
-The same tools as the [local MCP server](/tools/mcp), with two differences:
+A chat gets the tools for work done in a conversation, named for what they do. File exports, webhooks, raw
+result records and published-version history stay in the [API](/api-reference/introduction), the
+[CLI](/tools/cli) and the [local MCP server](/tools/mcp).
 
-- **No file exports.** A chat can't save files, so the export tools are left out. Page through people with
-  `list_people`, `list_search_records` and `list_candidates`, and send a client `get_share_link`.
-- **Spending asks first.** `launch_search`, `launch_searches` and `expand_search` reserve credits;
-  `publish_shortlist` and `send_shortlist_email` reach the client; `delete_project` can't be undone. Each one
-  runs nothing at first: it returns `pending_approval` with a proposal and what to show you. The app runs it
-  with `apply_proposal` only after you agree. Repeating a launch returns the same search and never pays twice.
+| For | Tools |
+| --- | --- |
+| Account | `get_account`, `get_credits` (credits left, and the workspace's limit per search and prices) |
+| Criteria | `draft_search_criteria`, `list_criteria_fields`, `find_industries` |
+| Projects | `list_projects`, `create_project`, `get_project` |
+| Searches | `launch_search`, `launch_searches`, `wait_for_search`, `get_search`, `list_searches`, `find_more_candidates`, `cancel_search` |
+| Results | `list_search_candidates`, `preview_scoring_change`, `apply_scoring_change`, `wait_for_scoring_change`, `get_shortlist_summary` |
+| Shortlist | `get_shortlist`, `add_to_shortlist`, `remove_from_shortlist` |
+| Decisions | `record_candidate_decision`, `get_candidate_decisions`, `list_decision_reasons` |
+| Do not contact | `list_do_not_contact`, `add_to_do_not_contact` |
+| Client | `get_client_share_link`, `preview_client_email`, `send_client_email`, `list_client_feedback` |
+| Candidate database | `search_candidate_database` |
+
+The app asks you before any tool that changes something: a launch (it uses credits), a shortlist change (the
+client's link shows it) or an email to the client. Reads run without asking. A decision you record is private
+to your team and doesn't change the shortlist. Repeating a launch returns the same search and never pays twice.
+Projects are archived from a chat, never deleted: deleting one is done in the app.
 
 Searches take minutes. Ask the app to wait for the search (`wait_for_search` waits up to three minutes a
 call), then to list everyone scoring 80 or more.

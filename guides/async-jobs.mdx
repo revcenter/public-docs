@@ -15,10 +15,9 @@ further back it waits.
 
 ## Many searches at once
 
-Launch as many as you have credits for, from as many agents as you like: none is refused for being busy. Past the
-platform's limit a search waits its turn and starts as one finishes, and workspaces take turns. Before a big batch,
-`GET /v1/capacity` (MCP `get_capacity`, CLI `revcenter capacity`) gives searches running and waiting, the platform's
-pace, and `new_search.starts_in_seconds`, so you can tell the person when to expect results.
+Launch as many as you have credits for, from as many agents as you like: none is refused for being busy. When many
+run at once, a new search waits its turn with `status: queued` and `queue.eta_seconds`, about how long until it
+starts, so you can tell the person when to expect results. Workspaces take turns.
 
 | `status` | Meaning | Done? |
 | --- | --- | --- |
