@@ -4752,7 +4752,7 @@
       "get": {
         "operationId": "get_shortlist",
         "summary": "Get the shortlist",
-        "description": "Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). Send limit (up to 500) or cursor for a page, best first, with a cursor for the rest and meta.total, the shortlist's size; a page also stops at the page size budget. Without either, the whole shortlist in one answer. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Shortlists"
         ],
@@ -4786,6 +4786,24 @@
                 "true",
                 "false"
               ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "People per page, up to 500 (default 50 when paging). Leave limit and cursor out for the whole shortlist.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4822,6 +4840,13 @@
                       "items": {
                         "$ref": "#/components/schemas/Person"
                       }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
                     },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
@@ -4862,6 +4887,7 @@
                       "profile": null
                     }
                   ],
+                  "cursor": null,
                   "meta": {
                     "request_id": "req_01JABCDEF"
                   }
