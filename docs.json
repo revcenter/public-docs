@@ -105,6 +105,7 @@
           "GET /projects/{projectId}/dnc",
           "POST /projects/{projectId}/dnc",
           "POST /projects/{projectId}/dnc/from-search/{searchId}",
+          "DELETE /projects/{projectId}/dnc/{entryId}",
           "GET /projects/{projectId}/searches",
           "GET /projects/{projectId}/records",
           "GET /projects/{projectId}/records.csv",
