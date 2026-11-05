@@ -2269,7 +2269,7 @@
       "post": {
         "operationId": "cancel_search",
         "summary": "Cancel a search",
-        "description": "Stop a running search: it buys nothing more, scores what it already read, and keeps them. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Stop a running search: it starts no new purchases (one already under way can still finish and be charged), scores what it already read, and keeps them. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -3129,7 +3129,7 @@
       "post": {
         "operationId": "preview_scoring",
         "summary": "Preview a scoring change",
-        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlistAfter you previewed, and expected_shortlist_hash with the shortlistAfterHash, to be refused rather than get a different number or different people. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Scoring"
         ],
@@ -3715,7 +3715,7 @@
       "post": {
         "operationId": "apply_scoring",
         "summary": "Apply a scoring change",
-        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. An apply runs once: repeating it with the same Idempotency-Key (or applying the same proposal again) returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlistAfter you previewed, and expected_shortlist_hash with the shortlistAfterHash, to be refused rather than get a different number or different people. An apply runs once: repeating it with the same Idempotency-Key (or applying the same proposal again) returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
@@ -4207,6 +4207,15 @@
                         "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
                       }
                     }
+                  },
+                  "expected_shortlist_after": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "The shortlistAfter you previewed. If this change would now leave a different number, nothing is applied and the answer is 409 scoring_state_moved."
+                  },
+                  "expected_shortlist_hash": {
+                    "type": "string",
+                    "description": "The shortlistAfterHash you previewed. If this change would now leave different people, even the same number, nothing is applied and the answer is 409 scoring_state_moved."
                   }
                 }
               },
