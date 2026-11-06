@@ -3458,6 +3458,11 @@
                                 "prefer",
                                 "exclude"
                               ]
+                            },
+                            "url": {
+                              "type": "string",
+                              "maxLength": 300,
+                              "pattern": "^https:\\/\\/(?:[a-z0-9-]+\\.)?linkedin\\.com\\/company\\/[^/?#\\s]+\\/?$"
                             }
                           },
                           "required": [
@@ -4044,6 +4049,11 @@
                                 "prefer",
                                 "exclude"
                               ]
+                            },
+                            "url": {
+                              "type": "string",
+                              "maxLength": 300,
+                              "pattern": "^https:\\/\\/(?:[a-z0-9-]+\\.)?linkedin\\.com\\/company\\/[^/?#\\s]+\\/?$"
                             }
                           },
                           "required": [
@@ -12080,6 +12090,11 @@
                     "prefer",
                     "exclude"
                   ]
+                },
+                "url": {
+                  "type": "string",
+                  "maxLength": 300,
+                  "pattern": "^https:\\/\\/(?:[a-z0-9-]+\\.)?linkedin\\.com\\/company\\/[^/?#\\s]+\\/?$"
                 }
               },
               "required": [
