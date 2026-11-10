@@ -1310,6 +1310,151 @@
         }
       }
     },
+    "/reference/export-columns": {
+      "get": {
+        "operationId": "get_export_columns",
+        "summary": "Export columns",
+        "description": "Every column a person CSV export can carry, by key, with its group and plain name, and the groups a JSON Lines export's fields takes. Pass keys as columns on any CSV export. roles and schools stand for numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be asked for on its own (experience_3_company). aliases are older names still taken. No column carries contact details. Does not use credits.\n\nAny valid key.",
+        "tags": [
+          "Reference"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "groups": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "columns": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "numbered": {
+                          "type": "object"
+                        },
+                        "aliases": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "groups": [
+                      {
+                        "key": "person",
+                        "label": "Person"
+                      }
+                    ],
+                    "columns": [
+                      {
+                        "key": "name",
+                        "group": "person",
+                        "label": "Name"
+                      },
+                      {
+                        "key": "roles",
+                        "group": "career",
+                        "label": "Every role, one column per fact"
+                      }
+                    ],
+                    "numbered": {
+                      "roles": "experience_<n>_<title|company|location|start|end|months|description>",
+                      "schools": "education_<n>_<school|degree|field|start|end>"
+                    },
+                    "aliases": {
+                      "metro": [
+                        "location"
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
     "/projects": {
       "get": {
         "operationId": "list_projects",
@@ -2750,7 +2895,7 @@
       "get": {
         "operationId": "export_search_records",
         "summary": "Download every record a search returned as CSV",
-        "description": "Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address, summary and headline, and the read profile's experience, education and skills as text columns and as numbered columns; or as JSON Lines with format=jsonl. Columns after candidate_id: headline, about, experience_history, education, skills, certifications, languages, projects, connections, then the career as numbered columns (experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … experience_10_*, education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end … education_5_*, total_experience_months, current_role_months). UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line with the whole read profile, lossless; for an AI agent, JSONL; CSV is for spreadsheets. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address, summary and headline, and the read profile's experience, education and skills as text columns and as numbered columns; or as JSON Lines with format=jsonl. Columns after do_not_contact: headline, signals, about, experience_history, education, skills, certifications, languages, projects, connections, then the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then first_seen_at, last_seen_at, profile_as_of, rationale, score_breakdown, the six criteria (criteria_title … criteria_move_readiness), verdict and the latest decision (decision, decision_reasons, decision_notes, decision_by, decided_at), listing_json (the search result row) and profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Searches"
         ],
@@ -2775,6 +2920,24 @@
                 "csv",
                 "jsonl"
               ]
+            }
+          },
+          {
+            "name": "columns",
+            "in": "query",
+            "required": false,
+            "description": "CSV only: the columns to include, comma-separated, in the order given (get_export_columns lists them). Keys: candidate_id, name, first_name, last_name, headline, location, linkedin_url, about, open_to_work, connections, do_not_contact, status, page, summary, open_profile, premium, search_id, first_search_id, search_ids, project_id, found_in_projects, first_seen_at, last_seen_at, added, profile_as_of, profile_json, listing_json, title, company, current_role_start, current_role_months, current_role_location, current_role_description, tenure, experience_years, total_experience_months, experience_history, roles, projects, school, education, schools, skills, certifications, languages, rank, score, tier, on_shortlist, signals, criteria_title, criteria_location, criteria_experience, criteria_industry, criteria_skills, criteria_move_readiness, title_match, geo_fit, years_fit, seniority_fit, industry_match, skills_match, must_have_coverage, reject_code, score_breakdown, why, rationale, gaps, evidence, shortlist_version, subscores_json, verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, decisions_json. roles and schools expand to numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be named on its own (experience_3_company). Left out, the export's own columns. An unknown key is refused with 400 invalid_columns naming it.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "JSON Lines only: the groups to include, comma-separated: person, current_role, career, education, skills, scoring, decisions. Each line keeps candidate_id and name. Left out, everything. An unknown group is refused with 400 invalid_fields.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -3025,7 +3188,7 @@
       "get": {
         "operationId": "export_project_records",
         "summary": "Download every record a project's searches returned as CSV",
-        "description": "Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;); or as JSON Lines with format=jsonl. UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line with the whole read profile, lossless; for an AI agent, JSONL; CSV is for spreadsheets. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;); or as JSON Lines with format=jsonl. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Projects"
         ],
@@ -3050,6 +3213,24 @@
                 "csv",
                 "jsonl"
               ]
+            }
+          },
+          {
+            "name": "columns",
+            "in": "query",
+            "required": false,
+            "description": "CSV only: the columns to include, comma-separated, in the order given (get_export_columns lists them). Keys: candidate_id, name, first_name, last_name, headline, location, linkedin_url, about, open_to_work, connections, do_not_contact, status, page, summary, open_profile, premium, search_id, first_search_id, search_ids, project_id, found_in_projects, first_seen_at, last_seen_at, added, profile_as_of, profile_json, listing_json, title, company, current_role_start, current_role_months, current_role_location, current_role_description, tenure, experience_years, total_experience_months, experience_history, roles, projects, school, education, schools, skills, certifications, languages, rank, score, tier, on_shortlist, signals, criteria_title, criteria_location, criteria_experience, criteria_industry, criteria_skills, criteria_move_readiness, title_match, geo_fit, years_fit, seniority_fit, industry_match, skills_match, must_have_coverage, reject_code, score_breakdown, why, rationale, gaps, evidence, shortlist_version, subscores_json, verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, decisions_json. roles and schools expand to numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be named on its own (experience_3_company). Left out, the export's own columns. An unknown key is refused with 400 invalid_columns naming it.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "JSON Lines only: the groups to include, comma-separated: person, current_role, career, education, skills, scoring, decisions. Each line keeps candidate_id and name. Left out, everything. An unknown group is refused with 400 invalid_fields.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4671,7 +4852,7 @@
       "get": {
         "operationId": "export_shortlist",
         "summary": "Download the shortlist CSV",
-        "description": "The shortlist as CSV: score, fit readings (score_breakdown) and why, every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. Columns: rank, score, first_name, last_name, title, company, metro, linkedin_url, open_to_work, tenure, signals, title_match, geo_fit, industry_match, skills_match, tier, reject_code, score_breakdown (each fit reading as `criterion: reading`, joined by ; ), why (the readings that matched in full, then signals), headline, shortlist_version, about, experience_history, education, skills, certifications, languages, projects, connections, the career as numbered columns (experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … experience_10_*, education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end … education_5_*, total_experience_months, current_role_months), profile_json. UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line with the whole read profile, lossless; for an AI agent, JSONL; CSV is for spreadsheets. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The shortlist as CSV: score, fit readings (score_breakdown) and why, every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. Columns: rank, score, first_name, last_name, title, company, metro, linkedin_url, open_to_work, tenure, signals, title_match, geo_fit, industry_match, skills_match, tier, reject_code, score_breakdown (each fit reading as `criterion: reading`, joined by ; ), why (the readings that matched in full, then signals), headline, shortlist_version, about, experience_history, education, skills, certifications, languages, projects, connections, the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then candidate_id, search_id, project_id, first_seen_at, last_seen_at, profile_as_of, rationale, the six criteria (criteria_title … criteria_move_readiness), verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Shortlists"
         ],
@@ -4696,6 +4877,24 @@
                 "csv",
                 "jsonl"
               ]
+            }
+          },
+          {
+            "name": "columns",
+            "in": "query",
+            "required": false,
+            "description": "CSV only: the columns to include, comma-separated, in the order given (get_export_columns lists them). Keys: candidate_id, name, first_name, last_name, headline, location, linkedin_url, about, open_to_work, connections, do_not_contact, status, page, summary, open_profile, premium, search_id, first_search_id, search_ids, project_id, found_in_projects, first_seen_at, last_seen_at, added, profile_as_of, profile_json, listing_json, title, company, current_role_start, current_role_months, current_role_location, current_role_description, tenure, experience_years, total_experience_months, experience_history, roles, projects, school, education, schools, skills, certifications, languages, rank, score, tier, on_shortlist, signals, criteria_title, criteria_location, criteria_experience, criteria_industry, criteria_skills, criteria_move_readiness, title_match, geo_fit, years_fit, seniority_fit, industry_match, skills_match, must_have_coverage, reject_code, score_breakdown, why, rationale, gaps, evidence, shortlist_version, subscores_json, verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, decisions_json. roles and schools expand to numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be named on its own (experience_3_company). Left out, the export's own columns. An unknown key is refused with 400 invalid_columns naming it.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "JSON Lines only: the groups to include, comma-separated: person, current_role, career, education, skills, scoring, decisions. Each line keeps candidate_id and name. Left out, everything. An unknown group is refused with 400 invalid_fields.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -5689,7 +5888,7 @@
       "get": {
         "operationId": "export_candidates",
         "summary": "Download the candidate database CSV",
-        "description": "The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. The career columns follow Languages: the career as numbered columns (experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … experience_10_*, education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end … education_5_*, total_experience_months, current_role_months). UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line with the whole read profile, lossless; for an AI agent, JSONL; CSV is for spreadsheets. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. The career columns follow Languages: the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Candidates"
         ],
@@ -5750,6 +5949,24 @@
                 "csv",
                 "jsonl"
               ]
+            }
+          },
+          {
+            "name": "columns",
+            "in": "query",
+            "required": false,
+            "description": "CSV only: the columns to include, comma-separated, in the order given (get_export_columns lists them). Keys: candidate_id, name, first_name, last_name, headline, location, linkedin_url, about, open_to_work, connections, do_not_contact, status, page, summary, open_profile, premium, search_id, first_search_id, search_ids, project_id, found_in_projects, first_seen_at, last_seen_at, added, profile_as_of, profile_json, listing_json, title, company, current_role_start, current_role_months, current_role_location, current_role_description, tenure, experience_years, total_experience_months, experience_history, roles, projects, school, education, schools, skills, certifications, languages, rank, score, tier, on_shortlist, signals, criteria_title, criteria_location, criteria_experience, criteria_industry, criteria_skills, criteria_move_readiness, title_match, geo_fit, years_fit, seniority_fit, industry_match, skills_match, must_have_coverage, reject_code, score_breakdown, why, rationale, gaps, evidence, shortlist_version, subscores_json, verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, decisions_json. roles and schools expand to numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be named on its own (experience_3_company). Left out, the export's own columns. An unknown key is refused with 400 invalid_columns naming it.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "JSON Lines only: the groups to include, comma-separated: person, current_role, career, education, skills, scoring, decisions. Each line keeps candidate_id and name. Left out, everything. An unknown group is refused with 400 invalid_fields.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9444,7 +9661,7 @@
       "get": {
         "operationId": "export_shortlist_version",
         "summary": "Download a published version as CSV",
-        "description": "A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. Columns: rank, tier, gaps, name, title, company, location, profile_url, evidence, snapshot_id, snapshot_version, snapshot_hash, canonical_shortlist_hash, generated_at. UTF-8 with a byte order mark, so Excel reads it as written. ?format=jsonl returns JSON Lines instead: one person per line, as get_shortlist_version lists them, with version_id and version. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. Columns: rank, tier, gaps, name, title, company, location, profile_url, evidence, snapshot_id, snapshot_version, snapshot_hash, canonical_shortlist_hash, generated_at. UTF-8 with a byte order mark, so Excel reads it as written. columns gives any person columns instead (get_export_columns), read from the people behind the version. ?format=jsonl returns JSON Lines instead: one person per line, as get_shortlist_version lists them, with version_id and version, and every documented export key (the whole read profile, scoring, decisions); fields picks groups. Does not use credits.\n\nNeeds scope `shortlists:read`.",
         "tags": [
           "Shortlists"
         ],
@@ -9478,6 +9695,24 @@
                 "csv",
                 "jsonl"
               ]
+            }
+          },
+          {
+            "name": "columns",
+            "in": "query",
+            "required": false,
+            "description": "CSV only: the columns to include, comma-separated, in the order given (get_export_columns lists them). Keys: candidate_id, name, first_name, last_name, headline, location, linkedin_url, about, open_to_work, connections, do_not_contact, status, page, summary, open_profile, premium, search_id, first_search_id, search_ids, project_id, found_in_projects, first_seen_at, last_seen_at, added, profile_as_of, profile_json, listing_json, title, company, current_role_start, current_role_months, current_role_location, current_role_description, tenure, experience_years, total_experience_months, experience_history, roles, projects, school, education, schools, skills, certifications, languages, rank, score, tier, on_shortlist, signals, criteria_title, criteria_location, criteria_experience, criteria_industry, criteria_skills, criteria_move_readiness, title_match, geo_fit, years_fit, seniority_fit, industry_match, skills_match, must_have_coverage, reject_code, score_breakdown, why, rationale, gaps, evidence, shortlist_version, subscores_json, verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, decisions_json. roles and schools expand to numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be named on its own (experience_3_company). Left out, the export's own columns. An unknown key is refused with 400 invalid_columns naming it.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "JSON Lines only: the groups to include, comma-separated: person, current_role, career, education, skills, scoring, decisions. Each line keeps candidate_id and name. Left out, everything. An unknown group is refused with 400 invalid_fields.",
+            "schema": {
+              "type": "string"
             }
           }
         ],

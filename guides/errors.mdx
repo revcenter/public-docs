@@ -32,12 +32,13 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `400` | `max_credits_too_low` | `max_credits` is under 250, too small to buy one page of results and read its profiles (`details.minimum` is 250) | Send 250 or more: the amount the person names, up to the workspace's most per search, or leave it out for that most |
 | `400` | `invalid_max_credits` | `max_credits` is not a whole number from 250 to 20,000 | Send the amount the person names as a whole number, or leave it out for the workspace's most per search |
 | `400` | `invalid_format` | An export's `format` is not `csv` or `jsonl` | Leave it out for CSV, or send `format=jsonl` |
+| `400` | `invalid_columns` | A CSV export's `columns` names a key that isn't a column (the message names each one), or `columns` was sent with `format=jsonl` | Use keys from `GET /v1/reference/export-columns`; on JSON Lines use `fields` |
 | `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search |
 | `400` | `weights_in_settings` | A scoring change sent `rubric_weights`: weights are a workspace setting | Ask a workspace admin to change them in Settings, Scoring |
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send the ids |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Fix the name |
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start without it |
-| `400` | `invalid_fields` · `invalid_view` | A list's `fields` names a profile slice that doesn't exist, or `get_search`'s `view` is not `full` or `status` | Use the slices the message lists; leave `view` out or send `status` |
+| `400` | `invalid_fields` · `invalid_view` | A list's `fields` names a profile slice that doesn't exist, a JSON Lines export's `fields` names a group that doesn't exist, or `get_search`'s `view` is not `full` or `status` | Use the slices or groups the message lists; leave `view` out or send `status` |
 | `400` | `not_proposable` | This action can't be previewed | Call it directly |
 | `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview again |
 | `400` | `proposal_required` | `publish_shortlist`, `send_shortlist_email`, `add_dnc_from_search`, or `add_dnc` with more than 25 people, called on its own route: it runs only from an applied proposal. Nothing happened | Preview it with `preview_action`, show the person, then `apply_proposal` once they agree |
