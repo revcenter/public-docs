@@ -3439,7 +3439,7 @@
                         "items": {
                           "type": "string"
                         },
-                        "description": "Filter, sent before any profile is bought: current titles to leave out."
+                        "description": "Current titles to leave out, sent as a filter before any profile is bought. A title that often shares one title with the role (Partner beside Principal) is not filtered: those people rank lower instead."
                       },
                       "exclude_industries": {
                         "type": "array",
@@ -4030,7 +4030,7 @@
                         "items": {
                           "type": "string"
                         },
-                        "description": "Filter, sent before any profile is bought: current titles to leave out."
+                        "description": "Current titles to leave out, sent as a filter before any profile is bought. A title that often shares one title with the role (Partner beside Principal) is not filtered: those people rank lower instead."
                       },
                       "exclude_industries": {
                         "type": "array",
@@ -11493,7 +11493,7 @@
               "string",
               "null"
             ],
-            "description": "Why it stopped. A search runs until one of these: budget_exhausted (used its cap), discovery_exhausted (LinkedIn had no more), page_cap (the most pages LinkedIn serves for one query), cap_too_small (its cap could not buy one page of results and read it: nothing bought, every credit refunded), cancelled, failed. Searches that ran before 2026-10-26 may also show target_reached or low_yield."
+            "description": "Why it stopped. A search runs until one of these: budget_exhausted (used its cap), discovery_exhausted (LinkedIn had no more), page_cap (the most pages LinkedIn serves for one query), cap_too_small (its cap could not buy one page of results and read it: nothing bought, every credit refunded), few_matches (several results pages in a row listed nobody who fits: widen the title or place), cancelled, failed. Searches that ran before 2026-10-26 may also show target_reached or low_yield."
           },
           "outcome": {
             "type": [
@@ -12101,7 +12101,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Filter, sent before any profile is bought: current titles to leave out."
+            "description": "Current titles to leave out, sent as a filter before any profile is bought. A title that often shares one title with the role (Partner beside Principal) is not filtered: those people rank lower instead."
           },
           "exclude_industries": {
             "type": "array",
