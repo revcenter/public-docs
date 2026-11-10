@@ -11,7 +11,7 @@ description: "Request and search limits, the 429 response, and how to retry."
 | Requests per workspace | 3,000 a minute |
 | Launching a search or an expansion | Not counted |
 | Searches running at once | 3 per workspace; the rest wait their turn (`queued`, with `queue.eta_seconds`) and start as one finishes |
-| Active keys | 5 |
+| Active keys made in Settings | 5 (CLI sign-ins and connected apps don't count) |
 
 There is no daily cap: how many searches you run is set by your [credits](/guides/billing). Launch as
 many as you like at once; a waiting search is never refused or charged twice, and its

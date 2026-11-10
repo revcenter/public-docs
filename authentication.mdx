@@ -22,7 +22,13 @@ Keys look like `rvc_live_…`. A key acts for one workspace, as the person who m
 | **Claude, ChatGPT** | Any member connects the app ([Connectors](/tools/connectors)); the connection holds its own key. |
 
 Admins and Editors both make their own keys, unless the workspace's admins turned Editors' keys off. The workspace
-needs an active plan or credits. Keys expire after 30, 90 or 365 days. A workspace can have 5 active keys.
+needs an active plan or credits. Keys expire after 30, 90 or 365 days.
+
+A workspace can have 5 active keys made in **Settings**. Signing in never counts toward that and is never refused
+for it: `revcenter auth login` replaces your earlier key for the same machine, and connecting Claude or ChatGPT
+again replaces your earlier connection of that app. Past 5 signed-in machines (or 5 connected apps), signing in
+retires your least recently used one and says which. Every key, however it was made, is listed in
+**Settings → Integrations → API**, where it can be revoked.
 
 ## What a key can do
 

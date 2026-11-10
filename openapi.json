@@ -215,7 +215,7 @@
       "post": {
         "operationId": "finish_login",
         "summary": "Finish a login",
-        "description": "Trade a sign-in for a key, returned once. A browser sign-in sends grant_type authorization_code with the code from the loopback redirect, its PKCE code_verifier and the same redirect_uri. A device login polls with device_code: authorization_pending (or slow_down) until someone authorizes it at /oauth/device. Errors: access_denied, expired_token, invalid_grant. No key needed. Does not use credits.",
+        "description": "Trade a sign-in for a key, returned once. A browser sign-in sends grant_type authorization_code with the code from the loopback redirect, its PKCE code_verifier and the same redirect_uri. A device login polls with device_code: authorization_pending (or slow_down) until someone authorizes it at /oauth/device. Signing in is never refused for the workspace's key limit, which counts only keys made in Settings: it replaces your earlier key for the same machine, and past 5 signed-in machines retires your least recently used one (replaced_keys and notice say which). Errors: access_denied, expired_token, invalid_grant. No key needed. Does not use credits.",
         "tags": [
           "Login"
         ],
@@ -290,7 +290,16 @@
                     "workspace": {
                       "id": "org_2xAmpLe",
                       "name": "Acme Search Partners"
-                    }
+                    },
+                    "replaced_keys": [
+                      {
+                        "id": "3c1d2e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f",
+                        "name": "revcenter CLI on laptop",
+                        "machine": "laptop",
+                        "reason": "replaced"
+                      }
+                    ],
+                    "notice": "Replaced your previous key for laptop."
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -11105,6 +11114,38 @@
                 ]
               }
             }
+          },
+          "replaced_keys": {
+            "type": "array",
+            "description": "Your earlier CLI keys this sign-in revoked: the one for the same machine (replaced), or, past 5 signed-in machines, your least recently used (retired).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "machine": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "replaced",
+                    "retired"
+                  ]
+                }
+              }
+            }
+          },
+          "notice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Says which earlier key was replaced or retired, to show the person. Null when none was."
           }
         }
       },
