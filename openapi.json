@@ -443,7 +443,7 @@
       "get": {
         "operationId": "get_usage",
         "summary": "Today's usage",
-        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a results page and a profile read cost. Does not use credits.\n\nAny valid key.",
+        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. Does not use credits.\n\nAny valid key.",
         "tags": [
           "Account"
         ],
@@ -495,8 +495,9 @@
                       "tier": "paid",
                       "max_credits_per_search": 5000,
                       "max_credits_per_project": 15000,
-                      "results_page_credits": 25,
-                      "profile_read_credits": 2,
+                      "credits_per_profile": 3,
+                      "results_page_credits": 0,
+                      "profile_read_credits": 3,
                       "people_per_page": 25
                     }
                   },
@@ -2075,7 +2076,7 @@
       "post": {
         "operationId": "launch_search",
         "summary": "Launch a search",
-        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's limit per search; held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low, as a smaller cap cannot buy one page of results and read it) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it; when the search finishes it is charged for the results pages and profile reads it bought (25 credits a results page of up to 25 people and 2 a profile read on a plan; 50 and 5 on a trial; lookups, AI screening, people already in the workspace and cached results are free), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's limit per search; held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it (402 trial_used_up once a free trial is used up); when the search finishes it is charged 3 credits for each profile it delivered (people the workspace already has are free; results pages, lookups and AI screening cost nothing), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Searches"
         ],
@@ -2121,7 +2122,7 @@
                   },
                   "database_only": {
                     "type": "boolean",
-                    "description": "Search only the workspace's candidates on file. Uses no credits."
+                    "description": "Buy no new results pages. Reserves max_credits like any search; 3 credits for each profile delivered, and people the workspace already has are free."
                   },
                   "target_count": {
                     "type": "integer",
@@ -2132,7 +2133,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
+                    "description": "The most this search may use, in credits: reserved now, charged 3 credits for each profile it delivers (people the workspace already has are free), and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250. Send the amount the person names; any whole number in range works."
                   }
                 }
               },
@@ -2355,18 +2356,18 @@
                     "closed_at": "2026-10-17T14:19:40.000Z",
                     "queue": null,
                     "credits_reserved": 1000,
-                    "credits_charged": 412,
+                    "credits_charged": 243,
                     "credits_breakdown": {
                       "prices": "paid",
                       "pages": 10,
-                      "credits_per_page": 25,
+                      "credits_per_page": 0,
                       "reads": 81,
-                      "credits_per_read": 2,
+                      "credits_per_read": 3,
                       "other_credits": 0,
-                      "total": 412,
+                      "total": 243,
                       "cap": 1000,
                       "capped": false,
-                      "line": "10 pages × 25 + 81 reads × 2 = 412 credits"
+                      "line": "81 profiles × 3 = 243 credits"
                     },
                     "advice": []
                   },
@@ -4630,7 +4631,7 @@
       "post": {
         "operationId": "run_database_pass",
         "summary": "Search your database again",
-        "description": "Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. 3 credits for each profile delivered, on the search's reservation; people the workspace already has are free. A search that has finished and settled its credits can't add people this way: it is refused with 402 database_pass_needs_credits; expand the search instead. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
         "tags": [
           "Scoring"
         ],
@@ -4755,7 +4756,7 @@
                     "type": "integer",
                     "minimum": 250,
                     "maximum": 20000,
-                    "description": "The most this search may use, in credits: reserved now, charged for the results pages and profile reads it buys, and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250: a smaller cap can't buy one page of results and read it. Send the amount the person names; any whole number in range works."
+                    "description": "The most this search may use, in credits: reserved now, charged 3 credits for each profile it delivers (people the workspace already has are free), and the rest refunded when it finishes. Leave it out to use the workspace's limit per search. Held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another; get_usage shows the workspace's own) and to the credits left; credits_reserved and credits_note say when it was held. At least 250. Send the amount the person names; any whole number in range works."
                   },
                   "search_id": {
                     "type": "string",
@@ -8837,7 +8838,7 @@
       "get": {
         "operationId": "get_spend",
         "summary": "Credits a project used",
-        "description": "The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. credits_state per search: held (running; its cap is reserved), charged (finished; charged for the pages and profile reads it bought, the rest refunded; credits_breakdown shows the arithmetic), refunded (its whole reservation came back: it failed or never started), none (database only, or no plan). Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. credits_state per search: held (running; its cap is reserved), charged (finished; 3 credits for each profile it delivered, the rest refunded; credits_breakdown shows the arithmetic), refunded (its whole reservation came back: it failed or never started), none (database only, or no plan). Does not use credits.\n\nNeeds scope `searches:read`.",
         "tags": [
           "Projects"
         ],
@@ -8946,7 +8947,7 @@
                 "example": {
                   "data": {
                     "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
-                    "credits_charged": 412,
+                    "credits_charged": 243,
                     "credits_held": 1000,
                     "searches": [
                       {
@@ -8955,18 +8956,18 @@
                         "created_at": "2026-10-17T14:03:02.000Z",
                         "credits_state": "charged",
                         "credits_reserved": 1000,
-                        "credits_charged": 412,
+                        "credits_charged": 243,
                         "credits_breakdown": {
                           "prices": "paid",
                           "pages": 10,
-                          "credits_per_page": 25,
+                          "credits_per_page": 0,
                           "reads": 81,
-                          "credits_per_read": 2,
+                          "credits_per_read": 3,
                           "other_credits": 0,
-                          "total": 412,
+                          "total": 243,
                           "cap": 1000,
                           "capped": false,
-                          "line": "10 pages × 25 + 81 reads × 2 = 412 credits"
+                          "line": "81 profiles × 3 = 243 credits"
                         }
                       },
                       {
@@ -8979,14 +8980,14 @@
                         "credits_breakdown": {
                           "prices": "paid",
                           "pages": 4,
-                          "credits_per_page": 25,
+                          "credits_per_page": 0,
                           "reads": 30,
-                          "credits_per_read": 2,
+                          "credits_per_read": 3,
                           "other_credits": 0,
-                          "total": 160,
+                          "total": 90,
                           "cap": 1000,
                           "capped": false,
-                          "line": "4 pages × 25 + 30 reads × 2 = 160 credits"
+                          "line": "30 profiles × 3 = 90 credits"
                         }
                       }
                     ]
@@ -11266,13 +11267,17 @@
                 "type": "integer",
                 "description": "The most a project's searches and expansions use together."
               },
+              "credits_per_profile": {
+                "type": "integer",
+                "description": "Charged for each profile delivered to the workspace. People it already has are free."
+              },
               "results_page_credits": {
                 "type": "integer",
-                "description": "Charged per results page bought."
+                "description": "Charged per results page: 0."
               },
               "profile_read_credits": {
                 "type": "integer",
-                "description": "Charged per profile read bought."
+                "description": "The same as credits_per_profile, kept for older clients."
               },
               "people_per_page": {
                 "type": "integer"
@@ -11416,7 +11421,7 @@
           "object",
           "null"
         ],
-        "description": "A search's charge line by line: results pages and profile reads at the price table it reserved under (paid plan: 25 a page, 2 a read; trial: 50 and 5), held to its cap. So far while it runs. Null for a refunded search, a database-only one, or one charged before round prices.",
+        "description": "A search's charge line by line at the price it reserved under, held to its cap: 3 credits for each profile delivered (credits_per_read), results pages free (credits_per_page 0). Searches reserved before 2026-11-10 show their own price (pages and reads). So far while it runs. Null for a refunded search, a database-only one, or one charged before round prices.",
         "properties": {
           "prices": {
             "type": "string",
@@ -11427,14 +11432,14 @@
           },
           "pages": {
             "type": "integer",
-            "description": "Results pages bought, up to 25 people each. A short last page is still a page."
+            "description": "Results pages searched, up to 25 people each."
           },
           "credits_per_page": {
             "type": "integer"
           },
           "reads": {
             "type": "integer",
-            "description": "Profiles read and paid for in this search. People already in the workspace and cached profiles are not counted."
+            "description": "Profiles delivered and charged in this search. People the workspace already has are not counted."
           },
           "credits_per_read": {
             "type": "integer"
@@ -11458,7 +11463,7 @@
           },
           "line": {
             "type": "string",
-            "description": "The arithmetic in words, e.g. \"10 pages × 25 + 81 reads × 2 = 412 credits\"."
+            "description": "The arithmetic in words, e.g. \"81 profiles × 3 = 243 credits\"."
           }
         }
       },
@@ -11556,7 +11561,7 @@
           },
           "credits_reserved": {
             "type": "integer",
-            "description": "Credits held at launch (max_credits); 0 for a database-only search."
+            "description": "Credits held at launch (max_credits), a database-only search's included."
           },
           "credits_charged": {
             "type": [

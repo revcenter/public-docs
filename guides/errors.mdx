@@ -52,7 +52,7 @@ Every error has one shape. Branch on `error.code`; the message can change.
 | `401` | `invalid_api_key` | Key invalid, expired or revoked | Use a current key |
 | `400` | `member_api_search_cap` | `max_credits` is above the most your workspace's admins allow you per search through the API | Send a smaller `max_credits`, or ask an admin to raise it in **Settings → Integrations → API** |
 | `402` | `plan_required` | No active plan | Choose a plan in **Settings → Plan & billing** |
-| `402` | `no_active_plan` · `shortlist_allocation_exhausted` | No plan, or not enough credits for the search's `max_credits`. `details` has `billing_url` and `top_up` | A smaller `max_credits`, `revcenter topup`, or see [billing](/guides/billing) |
+| `402` | `no_active_plan` · `shortlist_allocation_exhausted` · `trial_used_up` | No plan, not enough credits for the search's `max_credits`, or the free trial is used up. `details` has `billing_url` and `top_up` | A smaller `max_credits`, `revcenter topup`, a plan, or see [billing](/guides/billing) |
 | `402` | `member_api_budget_reached` | Your monthly API budget, set by your workspace's admins, doesn't cover this search | A smaller `max_credits`, wait for the 1st (UTC), or ask an admin to raise it in **Settings → Integrations → API** |
 | `403` | `admin_required` | Only a workspace admin can do this, and your key acts as you, an Editor | Ask an admin, or use an admin's key |
 | `403` | `api_access_disabled` | API access is off for this workspace | Ask your Revcenter contact |

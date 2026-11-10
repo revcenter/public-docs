@@ -23,7 +23,7 @@ safe to hand to an agent.
 3. Create a project and launch one search (`launch_search`). It asks you first: up to 1,000 credits, unused credits refunded.
 4. Wait (`wait_for_search`), then read people scoring 80+ (`list_people`).
 5. Refine for free: preview and apply scoring changes, or run a database pass.
-6. Expand only if needed (`expand_search`): 1 more credit.
+6. Expand only if needed (`expand_search`): it reserves up to its cap; 3 credits per profile delivered.
 7. Export the shortlist (`export_shortlist`).
 
 ## A prompt to start from
@@ -39,7 +39,7 @@ approve. 5. Save the shortlist CSV.
 
 ## Good practice
 
-- Approve before spending. Only launching (unless `database_only`) and expanding use credits.
+- Approve before spending. Only launching (a `database_only` one too) and expanding use credits.
 - Retry with the same idempotency key, and honor `Retry-After` on `429`.
 - Never put the key in a prompt or a file the agent writes.
 

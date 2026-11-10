@@ -41,7 +41,7 @@ A `429` has a `Retry-After` header and the same number in `error.details.retry_a
 A launch is never refused for being busy. A paid launch (`launch_search`, `expand_search`) is not counted
 against the request limits: each one reserves credits, and when many run at once a search waits its
 turn with `status: queued` and a `queue.eta_seconds`. Workspaces take turns, so many searches waiting in one
-workspace don't hold up another workspace's first one. A database-only launch uses no credits and is counted like any request.
+workspace don't hold up another workspace's first one. A database-only launch reserves credits like any search and is counted like any request.
 
 A `429` means nothing ran and no credits were reserved. The CLI and MCP server wait out `Retry-After` and retry for
 you, with the same `Idempotency-Key`, for up to three minutes (`REVCENTER_RETRY_SECONDS` changes it).

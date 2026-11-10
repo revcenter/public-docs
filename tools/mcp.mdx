@@ -106,7 +106,7 @@ signed POSTs, so a search launched by an agent reaches your ATS or pipeline afte
 | `add_dnc_from_search` | Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. It asks you first, saying how many it would add and how many would leave the live shortlist. | Does not use credits. |
 | `remove_dnc` | Take one person off the do-not-contact list, by the id `list_dnc` gives; they return to any shortlist they still qualify for. Workspace admins only. | Does not use credits. |
 | `list_searches` | The searches a project has run, oldest first. | Does not use credits. |
-| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it scores the workspace's candidates on file and uses no credits. `max_credits` caps it (default: the workspace's most per search; at least 250). | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
+| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). `max_credits` caps it (default: the workspace's most per search; at least 250). | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and `credits_reserved` / `credits_charged`; `view: "status"` is the light read. To wait for a search, use `wait_for_search` instead of calling this in a loop | Does not use credits. |
 | `cancel_search` | Stop a running search: it starts no new purchases (one already under way can still finish and be charged), scores what it already read, and keeps them. | Does not use credits. |
 | `list_people` | Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The hosted connector's tool returns profiles only when fields asks. | Does not use credits. |
@@ -159,7 +159,7 @@ Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `
 
 ## Approval before reserving credits
 
-`launch_search` (unless `database_only`) and `expand_search` ask first:
+`launch_search` and `expand_search` ask first:
 
 1. The server previews the action: what it does, the credits it reserves, and credits left.
 2. If the client supports MCP elicitation, it asks you in one sentence, with Accept and Decline and nothing to
