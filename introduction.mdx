@@ -1,44 +1,49 @@
 ---
 title: "Overview"
-description: "Run candidate searches, read scored profiles and build shortlists from your agent, terminal or apps."
+description: "What Revcenter does, what it costs, and where to start: in Claude or ChatGPT, or from your own code."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-Revcenter finds candidates on LinkedIn, scores each against your role, and keeps those who fit on a project's
-shortlist. Use it three ways:
+Revcenter finds candidates on LinkedIn for a role, scores each one against what you asked for, and keeps the
+people who fit on the project's shortlist. You send your client one link that always shows the live list.
 
-<CardGroup cols={3}>
-  <Card title="MCP" icon="robot" href="/tools/mcp">
-    Tools for Claude Code, Codex, Cursor and other agents.
+**3 credits per profile delivered. People you already have are free.** See [Pricing and credits](/pricing).
+
+## Start here
+
+<CardGroup cols={2}>
+  <Card title="Use it in Claude or ChatGPT" icon="comments" href="/tools/connectors">
+    Add Revcenter to your chat app and ask for the people you need. Nothing to install.
   </Card>
-  <Card title="CLI" icon="terminal" href="/tools/cli">
-    `revcenter` in your terminal and scripts.
-  </Card>
-  <Card title="API" icon="code" href="/api-reference/introduction">
-    `https://api.revcenter.ai/v1` from any language.
+  <Card title="Use it from your code" icon="code" href="/guides/api-essentials">
+    The API, the `revcenter` CLI and an MCP server for coding agents. One key, the same data.
   </Card>
 </CardGroup>
 
-All three use the same key and data. Start with the [quickstart](/quickstart).
+## For recruiters
 
-## What you can do
-
-| | |
+| Page | What it covers |
 | --- | --- |
-| **Projects** | One role, one shortlist. |
-| **Searches** | Run your [criteria](/guides/criteria), or a job description Revcenter reads. |
-| **People** | Everyone a search scored, best first, with full profiles. |
-| **Scoring** | Change the cut-off or requirements and preview the effect. |
-| **Shortlists** | Read, edit and export as JSON or CSV. |
+| [Pricing and credits](/pricing) | What a search costs, what is free, and where to see your balance |
+| [Writing a search](/guides/writing-a-search) | How to ask for the people you want: **Must match**, **Ranks higher**, **Left out** |
+| [Results and your shortlist](/guides/searches) | What a finished search tells you, getting more people, and sending the list to your client |
+| [Use Revcenter in Claude or ChatGPT](/tools/connectors) | Connect your chat app in three steps |
+| [Authentication and keys](/authentication) | Signing in, keys, and who can do what |
+
+## For developers
+
+| Page | What it covers |
+| --- | --- |
+| [Agents and MCP](/tools/mcp) | Claude Code, Codex, Cursor and other agents, and every tool |
+| [CLI](/tools/cli) | Every `revcenter` command |
+| [API essentials](/guides/api-essentials) | Your first search with curl, waiting, paging, limits, retries and common errors |
+| [Criteria reference](/guides/criteria) | Every field a search takes |
+| [Exports reference](/guides/exports) | CSV columns and JSON Lines groups |
+| [Webhooks](/guides/webhooks) | Results delivered to your own systems |
+| [API reference](/api-reference/introduction) | Every endpoint, and every error code |
 
 ## What you need
 
-1. A Revcenter workspace with an active plan.
-2. API access for the workspace (ask your Revcenter contact).
-3. A key: `revcenter auth login`, or **Settings → Integrations → API**.
-
-3 credits per profile delivered. People you already have are free. Each new search or expansion reserves up to its cap
-in credits (by default the workspace's most per search) from your plan, is charged 3 credits for each profile it delivers,
-and refunds the rest. Everything else is free. See
-[billing](/guides/billing).
+1. A Revcenter workspace, on a free trial or a plan.
+2. To sign in: connect your chat app, run `revcenter auth login`, or make a key under **Settings → Integrations → API**.

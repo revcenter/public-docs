@@ -1,11 +1,14 @@
 ---
-title: "Authentication"
-description: "API keys, the CLI's browser login, and how to give an agent access safely."
+title: "Authentication and keys"
+description: "Signing in, API keys and the workspace's key limit, what a key can do, limits for members, and how to give an agent access safely."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-Every request sends an API key as a bearer token:
+You sign in to Revcenter's API one of three ways: connect Claude or ChatGPT, sign in with the CLI, or make a key in
+**Settings**. Whichever you use acts for one workspace, as you, with your role there.
+
+For developers: every request sends an API key as a bearer token:
 
 ```bash
 curl https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
@@ -17,18 +20,38 @@ Keys look like `rvc_live_…`. A key acts for one workspace, as the person who m
 
 | Way | How |
 | --- | --- |
-| **Browser login** (CLI, MCP) | Run `revcenter auth login`, pick a workspace and authorize in your browser. The key is saved on that machine. |
+| **Browser login** (CLI, MCP) | Run `revcenter auth login`, pick a workspace and authorize in your browser. The CLI gets its own short-lived tokens, kept in the computer's keychain; no key is made for you to handle. |
 | **Settings** | Any member creates one under **Settings → Integrations → API**. It is shown once; copy it or download it as `revcenter.env`. |
-| **Claude, ChatGPT** | Any member connects the app ([Connectors](/tools/connectors)); the connection holds its own key. |
+| **Claude, ChatGPT** | Any member connects the app ([setup](/tools/connectors)); the connection holds its own key. |
 
 Admins and Editors both make their own keys, unless the workspace's admins turned Editors' keys off. The workspace
-needs an active plan or credits. Keys expire after 30, 90 or 365 days.
+needs a trial or a plan. Keys expire after 30, 90 or 365 days.
 
-A workspace can have 5 active keys made in **Settings**. Signing in never counts toward that and is never refused
-for it: `revcenter auth login` replaces your earlier key for the same machine, and connecting Claude or ChatGPT
+A workspace can have 5 active keys made in **Settings** (Revcenter support can raise it, up to 50); making one
+past the limit is refused with `409 key_limit`. Signing in never counts toward that and is never refused
+for it: `revcenter auth login` replaces your earlier sign-in on the same machine, and connecting Claude or ChatGPT
 again replaces your earlier connection of that app. Past 5 signed-in machines (or 5 connected apps), signing in
-retires your least recently used one and says which. Every key, however it was made, is listed in
-**Settings → Integrations → API**, where it can be revoked.
+retires your least recently used one and says which. Keys made in Settings are listed under **API keys**; signed-in
+computers and connected apps under **Connected apps and devices**, with when each was last used. Both are in
+**Settings → Integrations → API**, where any of them can be revoked.
+
+## How the CLI stays signed in
+
+`revcenter auth login` ends with two tokens for that computer, not a key:
+
+- an **access token** (`rvc_cli_…`) that works for an hour, and
+- a **refresh token** that the CLI trades for a new pair before the hour is up. Each refresh token works once.
+  A computer that hasn't been used for 90 days is signed out; a workspace's admins can shorten that under
+  **Connected apps and devices**. However often it is used, a computer signs in again after a year.
+
+The tokens are kept in the macOS Keychain, Windows Credential Manager or the Linux Secret Service. Where there is
+none (a container, a server), they go in `credentials.json`, readable by you only, and the CLI says so.
+
+Signing in again on the same computer replaces its earlier sign-in. `revcenter auth logout` signs the computer out
+on the server and removes the tokens. Removing someone from the workspace signs out every computer and app they
+connected. A refresh token used twice signs that computer out: it means someone else has a copy.
+
+A key from an older CLI keeps working until it expires. Signing in with a current CLI on that computer replaces it.
 
 ## What a key can do
 
@@ -72,8 +95,8 @@ budget. Editors see their own limits and this month's use on the same page.
 Keep the key out of prompts, transcripts and config files:
 
 1. **Browser login.** The agent runs `revcenter auth login --start`, you open the link and approve, then it runs
-   `revcenter auth login --finish`. The key goes straight to the credentials file; the agent never sees it.
-2. **MCP.** The [MCP server](/tools/mcp) reads the saved key, so your client config holds no key.
+   `revcenter auth login --finish`. The tokens go straight to the computer's keychain; the agent never sees them.
+2. **MCP.** The [MCP server](/tools/mcp) uses the CLI's sign-in, so your client config holds no key.
 3. **Servers and CI.** Put the key in a secret manager and expose it as `REVCENTER_API_KEY`.
 
 Give each machine or system its own key, so you can revoke one without touching the others.
@@ -87,33 +110,42 @@ deploy it, then revoke the old one. Revcenter stores only a hash and can't show 
 
 ## Browser login API
 
-How `revcenter auth login` gets a key. Neither endpoint needs one.
+How `revcenter auth login` signs in. None of these endpoints needs a key. The CLI is the public client
+`revcenter-cli` of the authorization server at `https://api.revcenter.ai` (no secret; PKCE required).
 
 **With a browser** ([OAuth authorization code with PKCE](https://www.rfc-editor.org/rfc/rfc7636)), as Claude Code
 and other CLIs sign in:
 
 1. Listen on `http://127.0.0.1:<port>/callback` and open
-   `https://app.revcenter.ai/oauth/authorize?client_id=revcenter-cli&response_type=code&redirect_uri=…&code_challenge=…&code_challenge_method=S256&state=…`.
+   `https://app.revcenter.ai/oauth/authorize?client_id=revcenter-cli&response_type=code&redirect_uri=…&code_challenge=…&code_challenge_method=S256&state=…&token_format=oauth`.
 2. The person signs in, picks a workspace and authorizes. The browser returns to your callback with `code` and
    `state` (or `error=access_denied`).
-3. `POST /v1/auth/token` with `grant_type: "authorization_code"`, the `code`, your `code_verifier` and the same
-   `redirect_uri`. The answer is `api_key` (shown once), `key` and `workspace`. A code works once, for two minutes.
+3. `POST /oauth/token` (form) with `grant_type=authorization_code`, `client_id=revcenter-cli`, the `code`, your
+   `code_verifier`, the same `redirect_uri` and a `device_id` that stays the same on that computer. The answer is
+   `access_token`, `refresh_token`, `expires_in`, `refresh_token_expires_in`, `workspace` and `device`. A code
+   works once, for two minutes.
 
 **Without a browser** ([device flow](https://www.rfc-editor.org/rfc/rfc8628)), for SSH and agents' shells:
 
-1. `POST /v1/auth/device` returns `device_code` (secret), `user_code` (e.g. `BCDF-GHJK`),
-   `verification_uri_complete`, `expires_in` (600) and `interval` (5).
+1. `POST /v1/auth/device` with `{"token_format": "oauth"}` returns `device_code` (secret), `user_code` (e.g.
+   `BCDF-GHJK`), `verification_uri_complete`, `expires_in` (600) and `interval` (5).
 2. Show the person the link and code. They authorize at `https://app.revcenter.ai/oauth/device/<code>`.
-3. Poll `POST /v1/auth/token` with `{"device_code": "…"}` every `interval` seconds:
+3. Poll `POST /oauth/token` (form) with `grant_type=urn:ietf:params:oauth:grant-type:device_code`,
+   `client_id=revcenter-cli`, the `device_code` and your `device_id`, every `interval` seconds:
 
 | Answer | Meaning |
 | --- | --- |
 | `400 authorization_pending` | Not approved yet. Keep polling. |
 | `400 slow_down` | Polling too fast. Add 5 seconds. |
-| `200` | Approved: `api_key` (shown once), `key` and `workspace`. |
+| `200` | Approved: the tokens, `workspace` and `device`. |
 | `403 access_denied` | Declined. |
 | `400 expired_token` | Not approved within 10 minutes. Start again. |
-| `400 invalid_grant` | Unknown, or already used. A login yields one key. |
+| `400 invalid_grant` | Unknown, or already used. A login is redeemed once. |
+
+Refresh with `POST /oauth/token`, `grant_type=refresh_token`, `client_id=revcenter-cli` and the `refresh_token`;
+sign out with `POST /oauth/revoke`, the `refresh_token` and `client_id=revcenter-cli`.
+
+Older CLIs post to `POST /v1/auth/token` without `token_format` and still get a key, until they upgrade.
 
 ## Errors
 
@@ -121,7 +153,9 @@ and other CLIs sign in:
 | --- | --- | --- |
 | `401` | `missing_api_key` · `invalid_api_key` | No key, or it is wrong, expired or revoked |
 | `402` | `plan_required` | No active plan |
-| `403` | `api_access_disabled` | API access isn't on for this workspace |
+| `403` | `api_access_disabled` | API access is off for this workspace; contact support |
+| `403` | `member_keys_disabled` | Your workspace's admins turned off keys for your seat |
+| `409` | `key_limit` | A key made in **Settings** past the workspace's limit; revoke one you no longer use |
 | `403` | `insufficient_scope` | The key can't make this call |
 | `403` | `admin_required` | Only an admin can do this; the key acts as an Editor |
 | `403` | `key_owner_removed` | The person who made the key is no longer in the workspace |

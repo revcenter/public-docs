@@ -1,131 +1,76 @@
 ---
-title: "Searches and shortlists"
-description: "How a search runs, what its outcome means, and how to get more people without starting over."
+title: "Results and your shortlist"
+description: "What a finished search tells you, why it stopped, what to check before sending the list, getting more people, and sending the shortlist to your client."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-## How a search runs
-
-1. **Your workspace's candidates first.** If they meet the target, the search stops there.
-2. **LinkedIn**, with your filters.
-3. **Scoring** of each profile read.
-4. **Shortlist**: everyone at or above the cut-off (80 by default).
-
-Each search has a spending ceiling and stops early when it stops finding people who fit.
+A search takes a few minutes. It finds people for your titles and place, reads and scores each profile against
+your role, and puts everyone at or above the cut-off (80 by default) on the project's shortlist.
 
 <Frame caption="In the app, a project shows the brief and the search plan Revcenter ran from it.">
   <img src="/images/search-plan.webp" alt="A Revcenter project: the brief, then the search plan with titles, location, employers, experience and must-haves" />
 </Frame>
 
-| Outcome | Delivered |
+## The outcome
+
+| Outcome | On the shortlist when the search finished |
 | --- | --- |
 | Shortlist ready | 6 or more |
 | Poor yield | 1 to 5 |
 | No results | 0 |
 
-The outcome is fixed when the search finishes. Later changes move the shortlist, not the outcome.
+The outcome is fixed when the search finishes. Later changes move the shortlist, not the outcome. The shortlist
+counts the whole project, including people earlier searches found.
 
 <Frame caption="The shortlist in the app: how the search ran, then everyone at or above the cut-off with their grade.">
   <img src="/images/shortlist.webp" alt="A Revcenter shortlist: how we searched, then candidates with title, company, location, signals and match grade" />
 </Frame>
 
+## Why a search stopped
+
+| Reason | What it means | What to do |
+| --- | --- | --- |
+| Few matches (`few_matches`) | Several results pages in a row had nobody who fits. Running more of the same search won't help. | Widen the title or the place, then search again. |
+| Everyone found (`discovery_exhausted`) | There was no one left for these titles and places. | Widen the titles or the place for more. |
+| Cap used (`budget_exhausted`) | It used the credits you gave it. There may be more people. | Expand the search for more. |
+| Most a search can list (`page_cap`) | It reached the most one search can list. | Narrow it, for example to one metro, to reach the closest matches. |
+| Cap too small (`cap_too_small`) | The cap was too small to cover a page of people. Nothing was charged. | Start it again with a bigger cap. |
+| Stopped (`cancelled`) | You stopped it. It keeps everyone it already read. | Continue it, or leave it. |
+| Failed (`failed`) | Something went wrong. Every credit came back. | Start it again; if it fails again, contact support. |
+
+## Before you send the list
+
+When a search finishes, Revcenter says what to check before the list goes to your client: for example that
+only a few people were read, that you stopped the search early, or that the place is wider than the role's city.
+Read it first. Developers find these sentences in `advice` on the search, and the plan's warnings in
+`review.warnings` at launch.
+
 ## Getting more people
 
 | Option | What it does | Credits |
 | --- | --- | --- |
-| **Rescore** | New cut-off or requirements for everyone already read. Preview first. | Does not use credits. |
-| **Database pass** | Score your workspace's candidates on file against the search. | 3 credits per profile delivered, on the search's credits. People you already have are free. A search that has finished and settled its credits is expanded instead. |
-| **Expand** | A new live pass, skipping everyone already found; with `search_id`, that search continued from where it stopped. A project's searches share a credit limit of three searches' worth. | Reserves up to its `max_credits` (by default the workspace's most per search) per expansion; unused credits are refunded. |
-| **Database-only search** | A new search that buys no results pages (`database_only: true`). | Reserves its `max_credits` like any search; 3 credits per profile delivered. People you already have are free. |
+| **Change the cut-off or requirements** | Scores everyone already found again. You see the before and after first. | Free |
+| **Search my database again** | Scores the people your workspace already has against this search. | 3 per new profile, from the search's own cap, while it holds one |
+| **Expand** | A new pass for more people on the same role, skipping everyone already found, or the same search continued from where it stopped. | Reserves a new cap; unused credits come back |
 
-Titles and places can't be rescored; changing them needs a new search.
+Titles and places can't be changed on a finished search: change them in a new search.
 
-## Scored people and the shortlist
+## Send the list to your client
 
-`GET /v1/searches/{id}/people` returns everyone scored, best first. Each person has a `score` (0 to 100) and
-`fit`, the readings behind it (`title_match`, `geo_fit`, `years_fit`, `seniority_fit`, `skills_match`,
-`industry_match`, `must_have_coverage`, `tier`, `qualified`, `reject_code`).
+Every project has one share link. It always shows the live shortlist, so after a change you send the same link
+again. Anyone with the link can open it, so remove anyone who shouldn't be seen first.
 
-`GET /v1/projects/{id}/shortlist` returns the shortlist with full profiles (`fields=experience,education` for slices, held to one answer's size; `profile=false` for none); `/shortlist.csv` is the same as a
-spreadsheet. Contact details are not included.
-
-## Every record a search returned
-
-The people list and the shortlist hold the people a search scored. A search's result pages list more than
-that: people already in your workspace, people screened out before reading, people left when the search
-stopped. `GET /v1/searches/{id}/records` returns all of them, one record per person in the order they were
-returned (a person listed twice keeps the first page), so you or your agent can work every profile yourself.
-
-| `status` | Meaning | `score` | `profile` |
-| --- | --- | --- | --- |
-| `scored` | Read and scored by this search. | Its score | The read profile |
-| `known` | Already in your workspace from another search, so not read again. | `null` | The read profile |
-| `not_read` | Listed, never read. | `null` | `null` |
-
-Each record also carries the name, title, company, location, LinkedIn address, summary and the page that
-listed them. `/records.csv` is the same as a spreadsheet, one row per record, with read profiles as text
-columns. Pages take `limit` (up to 500) and `cursor` ([Pagination](/guides/pagination)); `fields` picks profile slices (`profile` for the whole read profile, or `about`, `experience`, `education`, `skills`, `certifications`, `languages`, `projects`) and `profile=false` leaves profiles out; with neither, the API returns whole profiles, as it always has. A page stops at about 100 KB with a `cursor` for the rest. The MCP connector's tools (Claude, ChatGPT and other chat apps) leave profiles out unless `fields` asks, since a page of whole profiles outgrows what a chat app reads.
-A database-only search has none. Both are free, and contact details are not included.
-
-### Per search, per project, or the whole workspace
-
-| You want | API | MCP | CLI |
-| --- | --- | --- | --- |
-| Everyone one search returned | `/searches/{id}/records`, `/records.csv` | `list_search_records`, `export_search_records` | `revcenter records <search_id>` |
-| Everyone any of a project's searches returned, expansions included | `/projects/{id}/records`, `/records.csv` | `list_project_records`, `export_project_records` | `revcenter records --project <project_id>` |
-| Everyone across the workspace, from every project | `/candidates`, `/candidates.csv` | `list_candidates`, `export_candidates` | `revcenter candidates` |
-
-A project's records hold one record per person across all of its searches (the earliest listing wins). The
-`status` rolls up: `scored` by any of the project's searches beats `known`, which beats `not_read`, and `score`
-is the best any of them gave. Each record adds `first_search_id`, the search that listed them first, and
-`search_ids`, every search in the project that returned them (joined by `;` in the CSV). The workspace's
-candidate database holds the people its searches have read, across every project.
-
-<Frame caption="The workspace's candidate database in the app, under Candidates.">
-  <img src="/images/candidates.webp" alt="The Revcenter Candidates page: people with company, title, location and LinkedIn, with search, filters and sort" />
-</Frame>
-
-## Exports: CSV or JSON Lines
-
-Every export (`/shortlist.csv`, `/records.csv`, `/candidates.csv`, a published version's `.csv`) answers in two
-formats. For an AI agent, JSONL is lossless; CSV is for spreadsheets. Nothing is cut off in either.
-
-| Format | Ask for it | What you get |
+| You want to | In the app | In Claude or ChatGPT |
 | --- | --- | --- |
-| CSV | the default (`format=csv`) | One row per person. UTF-8 with a byte order mark, so Excel shows "·" and "–" as written. A cell a spreadsheet would run as a formula is written as text. `columns` picks the columns, in the order you list them. |
-| JSON Lines | `format=jsonl` (MCP `format: "jsonl"`, CLI `--jsonl`) | One JSON object per line: the matching list call's fields (`get_shortlist`, `list_search_records`, `list_candidates`) plus `person`, `listing`, `current_role`, `career`, `education`, `scoring`, `decisions` and the whole read `profile`, every role, school and section. `fields` keeps only the groups you list. |
+| Get the link | **Share** on the project | "Give me the client link" |
+| Publish the list to the client's portal | **Publish** | Not in chat |
+| Email the list to the client | **Email** | "Email the list to the client": it shows you who gets what and asks first |
 
-### Choosing columns
+Anything that reaches your client is always shown to you first, and only sent when you say yes. Your team's
+decisions and notes on a person stay private; the client's own feedback comes back to the project.
 
-`GET /v1/reference/export-columns` (MCP `get_export_columns`, CLI `revcenter columns`) lists every column
-key with its group: Person, Current role, Career, Education, Skills, Scoring, Decisions. Send them as
-`columns=name,title,company,roles,score` on any CSV export; the file has those columns in that order. A key that
-isn't a column is refused with `400 invalid_columns`, naming it. In the candidate database's file, `projects`
-is the projects that found someone; the projects on a profile are `profile_projects` there.
+## Exports
 
-### The career as columns
-
-Besides the readable text columns (`experience_history`, `education`), every CSV carries the career one
-column per fact, so a spreadsheet can filter on it and an agent can read it without parsing text:
-
-- `total_experience_months` (overlapping roles counted once) and `current_role_months`
-- `experience_1_title`, `experience_1_company`, `experience_1_location`, `experience_1_start`, `experience_1_end`,
-  `experience_1_months`, `experience_1_description`, and so on for every role (current role first)
-- `education_1_school`, `education_1_degree`, `education_1_field`, `education_1_start`, `education_1_end`, and so
-  on for every school
-
-A file has as many numbered columns as the most roles (or schools) anyone in it has: someone with 14 roles gives
-the file `experience_14_*`. The `roles` and `schools` keys stand for these blocks; one numbered column can be
-named on its own (`experience_3_company`).
-
-Dates are `YYYY-MM` (`YYYY` when the profile gives only a year), and a role still held ends `present`. The
-shortlist CSV adds `score_breakdown`, each fit reading as `criterion: reading` joined by `;` (for example
-`title: 1; location: 0.75; must-haves: 0.5`), and `why`, the readings that matched in full followed by the
-person's signals. Every person file can carry the six criteria (`criteria_title`, `criteria_location`,
-`criteria_experience`, `criteria_industry`, `criteria_skills`, `criteria_move_readiness`: `Verified` or
-`Missing`, empty when the search didn't ask), the scorer's `rationale`, when someone was first and last found
-and when their profile was read (`profile_as_of`), and the latest decision. The team's own notes and reasons
-on a decision stay in Revcenter; the client's own feedback is included. A profile can only hold what was read,
-so a profile read in its short form has fewer roles and skills than the person's full page. Contact details are
-never included in either format.
+Download the shortlist, every person a search returned, or your whole candidate database as a spreadsheet (CSV),
+with the columns you pick. Details are in the [Exports reference](/guides/exports).

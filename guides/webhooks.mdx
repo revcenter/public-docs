@@ -9,7 +9,7 @@ A webhook endpoint is a URL of yours that Revcenter POSTs to when a search is qu
 and when a project's shortlist changes. Your ATS, pipeline or job runner learns that results are ready without
 polling and without an agent running.
 
-Events carry ids, counts and links, never profiles or contact details. Read the people through the links, with an
+Events carry ids, counts and links, never profiles. Read the people through the links, with an
 API key, as you would any other time.
 
 ## Add an endpoint
@@ -53,10 +53,15 @@ Omit `events` (or send `["*"]`) to receive every event, including types added la
 | --- | --- | --- |
 | `search.queued` | A search is waiting its turn to start | `search_id`, `project_id`, `status`, `links` |
 | `search.started` | A search started running | `search_id`, `project_id`, `status`, `links` |
-| `search.completed` | A search finished | `search_id`, `project_id`, `status`, `outcome` (`Shortlist ready`, `Poor yield`, `No results`), `stop_reason`, `profiles_read`, `delivered`, `shortlisted`, `closed_at`, `links` |
+| `search.completed` | A search finished | `search_id`, `project_id`, `status`, `outcome` (`Shortlist ready`, `Poor yield`, `No results`), `stop_reason`, `profiles_read`, `profiles_delivered`, `shortlisted`, `delivered` (deprecated), `closed_at`, `links` |
 | `search.failed` | A search stopped on an error before it could finish; a launch that fails gives its credit back | as `search.completed`, with `outcome` null |
 | `shortlist.changed` | Who is on a project's shortlist changed: people added or removed, a re-score, a search pass | `project_id`, `search_id` (when a search made the change), `kind`, `source`, `list_before`, `list_after`, `links` |
 | `webhook.test` | You sent a test (`test_webhook`, **Send test**); goes to that endpoint only | `webhook_id`, `message` |
+
+On `search.completed`: `profiles_read` is the profiles the search read; `profiles_delivered` the new ones, the count
+it is charged for (3 credits each; `null` for a search not priced per profile); `shortlisted` the project's whole
+shortlist when the event was sent; `delivered` is deprecated, the shortlist when the search closed. `stop_reason` is
+one of those in [API essentials](/guides/api-essentials#stop-reasons-and-advice).
 
 `links` on search events: `search` (`GET /v1/searches/{id}`), `records` and `records_csv` (every person the search
 returned), and `shortlist` and `shortlist_csv` (the project's live shortlist).
@@ -77,10 +82,11 @@ Every delivery is a `POST` with a JSON body:
     "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
     "status": "complete",
     "outcome": "Shortlist ready",
-    "stop_reason": "target_reached",
+    "stop_reason": "few_matches",
     "profiles_read": 212,
-    "delivered": 14,
+    "profiles_delivered": 81,
     "shortlisted": 14,
+    "delivered": 14,
     "closed_at": "2026-10-17T14:19:40.000Z",
     "links": {
       "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",

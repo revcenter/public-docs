@@ -1,0 +1,49 @@
+---
+title: "Pricing and credits"
+description: "3 credits per profile delivered. People you already have are free. How a search's cap works, what is free, and where to see your balance."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+**3 credits per profile delivered. People you already have are free.**
+
+A search is charged for each new person it delivers to your workspace, whatever their score. Once your
+workspace has someone, every later search and the candidate database use them again for free.
+
+## What is free
+
+- People your workspace already has
+- Results pages, company and place lookups, AI screening and scoring
+- Re-scoring: a new cut-off or new requirements for everyone already found
+- Reading, projects, shortlist changes, sharing the list with your client, and exports
+
+## How a search's cap works
+
+1. **Reserved.** When a search starts, its cap is held from your credits. The cap is your workspace's limit per
+   search unless you name less ("only use 2,500 credits"). On a plan the limit is 5,000 unless your admins set
+   another under **Settings → Workspace → Credits per search**.
+2. **Charged.** When it finishes, it is charged 3 credits for each new profile it delivered, never more than the
+   cap. A search that found 81 new people is charged 243 credits; 1,000 credits covers up to 333 profiles.
+3. **Refunded.** The rest of the cap comes back. A search that fails or never starts is refunded in full.
+
+A bigger cap lets a search read further. It never costs more than the cap, and it stops early when few people
+match. "Search my database again" on a search (the database pass) is charged the same way, from that search's
+own cap, while the search still holds it; once a search has finished, expand it instead.
+
+A project's searches share a limit of three searches' worth. For a different role or place, start a new project.
+
+## Free trial
+
+A free trial is 500 credits, at plan prices: 3 credits per new profile, the same as on a plan. Each search can
+reserve up to what you have left. When the trial is used up, choose a plan to keep searching.
+
+## Your balance
+
+Credits left are under **Settings → Usage**. Credits held by searches still running come back into your balance
+as they finish. A plan grants its credits each period; a top-up (**Settings → Plan & billing**) buys more at your
+plan's own rate.
+
+Developers: `GET /v1/me/usage` (CLI `revcenter usage`, MCP `get_usage`) returns `credits_remaining` and your
+workspace's own limits and price in `credit_terms`. Each search's charge is in `credits_charged`,
+`profiles_delivered` and `credits_breakdown` on `GET /v1/searches/{id}`, and for a whole project in
+`GET /v1/projects/{id}/spend`.

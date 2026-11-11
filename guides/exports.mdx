@@ -1,0 +1,138 @@
+---
+title: "Exports reference"
+description: "Every export, CSV or JSON Lines, every column a CSV can carry and every JSON Lines group, and the per-search, per-project and workspace record lists."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+Exports are free and nothing in them is cut off. Use CSV for a spreadsheet and JSON Lines for an agent: JSON Lines
+is lossless.
+
+## What you can export
+
+| You want | API | MCP | CLI |
+| --- | --- | --- | --- |
+| The project's shortlist | `/projects/{id}/shortlist.csv` | `export_shortlist` | `revcenter shortlist <project_id> --csv` |
+| Everyone one search returned, read or not | `/searches/{id}/records.csv` | `export_search_records` | `revcenter records <search_id> --csv` |
+| Everyone a project's searches returned | `/projects/{id}/records.csv` | `export_project_records` | `revcenter records --project <project_id> --csv` |
+| The workspace's candidate database | `/candidates.csv` | `export_candidates` | `revcenter candidates --csv` |
+| A version published to the client | `/projects/{id}/shortlist/versions/{versionId}.csv` | `export_shortlist_version` | `revcenter client version <project_id> <version_id> --csv` |
+
+The same lists page as JSON without `.csv`: `GET /searches/{id}/records`, `GET /projects/{id}/records`,
+`GET /candidates`, `GET /projects/{id}/shortlist`. Each record has a `status`:
+
+| `status` | Meaning | `score` | `profile` |
+| --- | --- | --- | --- |
+| `scored` | Read and scored by this search | Its score | The read profile |
+| `known` | Already in your workspace from another search | `null` | The profile on file |
+| `not_read` | Listed, never read | `null` | `null` |
+
+A project's records hold one record per person across all its searches: `scored` by any search beats `known`,
+which beats `not_read`, `score` is the best any gave, `first_search_id` is the search that listed them first and
+`search_ids` every search that returned them (joined by `;` in a CSV).
+
+## Formats
+
+| Format | Ask for it | What you get |
+| --- | --- | --- |
+| CSV | the default (`format=csv`) | One row per person, UTF-8 with a byte order mark so Excel shows "·" and "–" as written. A cell a spreadsheet would run as a formula is written as text. `columns` picks the columns, in the order you list them. |
+| JSON Lines | `format=jsonl` (MCP `format: "jsonl"`, CLI `--jsonl`) | One JSON object per line: the list call's fields plus the groups below and the whole read `profile`. `fields` keeps only the groups you list. |
+
+## Columns
+
+`GET /v1/reference/export-columns` (MCP `get_export_columns`, CLI `revcenter columns`) lists them. Send keys as
+`columns=name,title,company,roles,score`; a key that isn't a column is refused with `400 invalid_columns`, naming it.
+
+`roles` and `schools` stand for numbered columns, one block for every role (current role first) and every school
+(listed under the table). A file has as many as the most anyone in it has; one numbered column can be named on its
+own (`experience_3_company`). Dates are `YYYY-MM` (`YYYY` when the profile gives only a year), and a role
+still held ends `present`.
+
+{/* generated:export-columns (node scripts/docs/build-tables.mjs; do not edit by hand) */}
+| Group (JSON Lines `fields`) | Column | Name |
+| --- | --- | --- |
+| Person (`person`) | `candidate_id` | Revcenter id |
+| Person (`person`) | `name` | Name |
+| Person (`person`) | `first_name` | First name |
+| Person (`person`) | `last_name` | Last name |
+| Person (`person`) | `headline` | Headline |
+| Person (`person`) | `location` | Location |
+| Person (`person`) | `linkedin_url` | LinkedIn |
+| Person (`person`) | `about` | About |
+| Person (`person`) | `open_to_work` | Open to work |
+| Person (`person`) | `connections` | Connections |
+| Person (`person`) | `do_not_contact` | Do not contact |
+| Person (`person`) | `status` | Read or not (scored, known, not_read) |
+| Person (`person`) | `page` | Results page |
+| Person (`person`) | `summary` | Search result summary |
+| Person (`person`) | `open_profile` | Open profile |
+| Person (`person`) | `premium` | Premium |
+| Person (`person`) | `search_id` | Search id |
+| Person (`person`) | `first_search_id` | First search id |
+| Person (`person`) | `search_ids` | Every search id |
+| Person (`person`) | `project_id` | Project id |
+| Person (`person`) | `found_in_projects` | Found in projects |
+| Person (`person`) | `first_seen_at` | First found |
+| Person (`person`) | `last_seen_at` | Last found |
+| Person (`person`) | `added` | Added (date) |
+| Person (`person`) | `profile_as_of` | Profile read on |
+| Person (`person`) | `profile_json` | Whole profile (JSON) |
+| Person (`person`) | `listing_json` | Search result (JSON) |
+| Current role (`current_role`) | `title` | Title |
+| Current role (`current_role`) | `company` | Company |
+| Current role (`current_role`) | `current_role_start` | Started (current role) |
+| Current role (`current_role`) | `current_role_months` | Months in current role |
+| Current role (`current_role`) | `current_role_location` | Current role location |
+| Current role (`current_role`) | `current_role_description` | Current role description |
+| Current role (`current_role`) | `tenure` | Tenure |
+| Career (`career`) | `experience_years` | Years of experience |
+| Career (`career`) | `total_experience_months` | Months of experience |
+| Career (`career`) | `experience_history` | Full experience (text) |
+| Career (`career`) | `roles` | Every role, one column per fact |
+| Career (`career`) | `projects` | Projects on the profile |
+| Education (`education`) | `school` | School |
+| Education (`education`) | `education` | Education (text) |
+| Education (`education`) | `schools` | Every school, one column per fact |
+| Skills (`skills`) | `skills` | Skills |
+| Skills (`skills`) | `certifications` | Certifications |
+| Skills (`skills`) | `languages` | Languages |
+| Scoring (`scoring`) | `rank` | Rank |
+| Scoring (`scoring`) | `score` | Score |
+| Scoring (`scoring`) | `tier` | Tier |
+| Scoring (`scoring`) | `on_shortlist` | On the shortlist |
+| Scoring (`scoring`) | `signals` | Signals |
+| Scoring (`scoring`) | `criteria_title` | Title (Verified or Missing) |
+| Scoring (`scoring`) | `criteria_location` | Location (Verified or Missing) |
+| Scoring (`scoring`) | `criteria_experience` | Experience (Verified or Missing) |
+| Scoring (`scoring`) | `criteria_industry` | Industry (Verified or Missing) |
+| Scoring (`scoring`) | `criteria_skills` | Skills (Verified or Missing) |
+| Scoring (`scoring`) | `criteria_move_readiness` | Move readiness (Verified or Missing) |
+| Scoring (`scoring`) | `title_match` | Title reading |
+| Scoring (`scoring`) | `geo_fit` | Location reading |
+| Scoring (`scoring`) | `years_fit` | Years reading |
+| Scoring (`scoring`) | `seniority_fit` | Seniority reading |
+| Scoring (`scoring`) | `industry_match` | Industry reading |
+| Scoring (`scoring`) | `skills_match` | Skills reading |
+| Scoring (`scoring`) | `must_have_coverage` | Must-haves reading |
+| Scoring (`scoring`) | `reject_code` | Reject reason |
+| Scoring (`scoring`) | `score_breakdown` | Score breakdown |
+| Scoring (`scoring`) | `why` | Why |
+| Scoring (`scoring`) | `rationale` | Rationale |
+| Scoring (`scoring`) | `gaps` | Gaps |
+| Scoring (`scoring`) | `evidence` | Evidence |
+| Scoring (`scoring`) | `shortlist_version` | Shortlist version |
+| Scoring (`scoring`) | `subscores_json` | Every reading (JSON) |
+| Decisions (`decisions`) | `verdict` | Verdict |
+| Decisions (`decisions`) | `decision` | Latest decision |
+| Decisions (`decisions`) | `decision_reasons` | Decision reasons |
+| Decisions (`decisions`) | `decision_notes` | Decision notes |
+| Decisions (`decisions`) | `decision_by` | Decided by (team or client) |
+| Decisions (`decisions`) | `decided_at` | Decided on |
+| Decisions (`decisions`) | `decisions_json` | Every decision (JSON) |
+
+Numbered blocks: `roles` is `experience_<n>_<title|company|location|start|end|months|description>`; `schools` is `education_<n>_<school|degree|field|start|end>`.
+Older names still taken: `metro` (`location`), `linkedin` (`linkedin_url`), `experience` (`experience_years`), `career` (`total_experience_months`, `current_role_months`, `roles`, `schools`), `profile_projects` (`projects`).
+{/* end generated */}
+
+The team's own notes and reasons on a decision stay in Revcenter; the client's feedback is included. A profile
+holds only what was read: one read in its short form has fewer roles and skills than the person's full page.

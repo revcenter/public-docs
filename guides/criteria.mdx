@@ -1,61 +1,81 @@
 ---
-title: "Criteria"
-description: "What a search looks for: which fields filter LinkedIn before anything is read, and which score after."
+title: "Criteria reference"
+description: "Every field a search takes, which ones narrow who is listed and which ones score, and how the app's Must match, Ranks higher and Left out map to the fields."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-A search runs exactly the criteria you send. Each field either:
+A search runs the criteria you send. Each field either **filters** (narrows who is listed, before anyone is
+read) or **scores** (ranks people once their profiles are read). `GET /v1/reference/criteria` (CLI
+`revcenter reference`, MCP `get_criteria_reference`) returns every field with its allowed values; the launch's
+`review.changes` says what Revcenter corrected and `review.warnings` what to check. The easiest way to get
+criteria right is `POST /v1/criteria/draft` (`draft_criteria`): Revcenter's own reading of a job description, as
+the app drafts a search.
 
-- **Filters**: applied to the LinkedIn search before any profile is read, or
-- **Scores**: checked on each profile after it is read.
+## The minimum
 
-Put hard requirements in filter fields. `GET /v1/reference/criteria` (or `revcenter reference`) lists every
-field and its allowed values.
+`title_variants` (the role and its closest synonyms) and a place: `metro` with `geo_radius_mi`, `allowed_metros`, or
+`remote_ok: true`. A search with no place is refused with `400 location_required`. For a role at a named site, send
+that city and a radius, never a state or a country.
 
-## Minimum
+## The app's words
 
-`title_variants` (the role and its common synonyms) and a place: `metro`, `allowed_metros`, or `remote_ok: true`.
+| In the app | In criteria |
+| --- | --- |
+| **Must match** | `flag: "must"` on `employers` or `degree_country`; `enforcement: "hard"` on `years_experience`; any filter field (`title_variants`, `metro`, `seniority`, `current_industries`…); `must_have` terms |
+| **Ranks higher** | `flag: "prefer"`; `enforcement: "preferred"`; `preferred_employers`, `skills`, `keywords`, `must_have_context` |
+| **Left out** | `flag: "exclude"`; `exclude_titles`, `exclude_companies`, `exclude_industries`, `exclude_functions`, `exclude_schools`, `exclude_locations` |
+| **Suggested** | A value Revcenter added that the request didn't state (a level read from the title). It is sent like any other; change or remove it. |
 
-## Filters
+## Fields
 
-| Field | Example | Notes |
+{/* generated:criteria-fields (node scripts/docs/build-tables.mjs; do not edit by hand) */}
+| Field | Filters or scores | What it is |
 | --- | --- | --- |
-| `title_variants` | `["Controller", "Financial Controller"]` | Current job titles. Up to 10 are searched together. |
-| `metro`, `allowed_metros` | `"Lancaster, PA"`, `["Harrisburg, PA"]` | A city, a state, or a country. |
-| `seniority`, `allowed_seniority` | `"director"` | `c_suite`, `vp`, `director`, `manager`, `ic`. Searched with one level either side. |
-| `years_experience` | `{ "min": 8, "enforcement": "hard" }` | Hard ranges filter; `"preferred"` only ranks. |
-| `years_at_current_company` | `{ "min": 3 }` | Time at the current employer. |
-| `past_titles` | `["CFO"]` | Titles held before the current one. |
-| `current_industries` | `["Food and Beverage Manufacturing"]` | The current employer's LinkedIn industry, and its sub-industries. See `GET /v1/reference/industries`. |
-| `exclude_industries` | `["Staffing and Recruiting"]` | Current employers in these industries are left out. |
-| `functions`, `exclude_functions` | `["Finance"]` | LinkedIn job functions. |
-| `company_headcount` | `["E", "F", "G"]` | Current employer size: `A` self-employed, `B` 1–10, `C` 11–50, `D` 51–200, `E` 201–500, `F` 501–1,000, `G` 1,001–5,000, `H` 5,001–10,000, `I` 10,001+. |
-| `employers` | `[{ "name": "Deloitte", "temporal": "either", "flag": "must" }]` | `temporal`: `current`, `past` or `either`. `flag`: `must` filters, `exclude` leaves out, `prefer` only ranks. |
-| `exclude_companies` | `["Acme Staffing"]` | Current employers to leave out. |
-| `schools`, `exclude_schools` | `["University of Michigan"]` | Schools attended. |
-| `exclude_titles` | `["Intern"]` | Current titles to leave out. |
-| `title_boolean` | `"\"data center\" AND (manager OR director)"` | The title rule as written, at most 400 characters. Shown and edited in the app's plan; `title_requires` and `exclude_titles` carry what it means. |
-| `keyword_boolean` | `"\"data center\" AND (construction OR \"mission critical\")"` | A keyword rule over the whole profile, applied before any profile is read. At most 245 characters and 12 phrases, no commas. Reaches people whose titles do not name the specialty. |
-| `title_requires` | `[["data center"], ["manager", "director"]]` | A title rule: every group must appear in the current title, any phrase within a group. This one reads "data center" AND (manager OR director). Sent with the title search, and checked again on each listed person's title before any profile is read. |
-| `exclude_locations` | `["New York, NY"]` | Places to leave out. |
-| `company_hq_locations` | `["Michigan"]` | Where the current employer is headquartered. |
-| `recently_changed_jobs` | `true` | Changed jobs in the last 90 days. |
-| `profile_languages` | `["es"]` | The language the profile is written in, not a language spoken. |
+| `title_variants` | Filters | Current job titles, literal, OR'd. The first is the role; it and its closest synonyms are sent (5 at most). Optional when an employer is a current must. |
+| `seniority` | Filters | The level, sent with one level either side. |
+| `allowed_seniority` | Filters | Levels to accept, instead of seniority's one either side. |
+| `search_titles` | Filters | The exact titles to send instead of title_variants (at most 10), when the person edited the list. |
+| `title_requires` | Filters | A title rule as groups that must all appear in the current title, any phrase per group: [["data center"], ["manager", "director"]] reads "data center" AND (manager OR director). |
+| `title_boolean` | Filters | The title rule as written, at most 400 characters: AND, OR, NOT in capitals, brackets, "quoted phrases". |
+| `keyword_boolean` | Filters | A keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, "quoted phrases"; at most 245 characters and 12 phrases, no commas. |
+| `metro` | Filters | The role's own place: 'City, ST', a state or a country. |
+| `allowed_metros` | Filters | More places, OR'd with metro. |
+| `exclude_titles` | Filters | Current titles to leave out, sent as a filter before any profile is bought. A title that often shares one title with the role (Partner beside Principal) is not filtered: those people rank lower instead. |
+| `exclude_industries` | Filters | Current employer industries to leave out (LinkedIn industry names). |
+| `exclude_companies` | Filters | Current employers to leave out. |
+| `years_experience` | Filters | \{min, max, ideal, basis: total\|relevant, enforcement: hard\|preferred\}. Hard bands are sent; preferred only ranks. |
+| `employers` | Filters | Named employers: \{name, temporal: current\|past\|either, flag: must\|prefer\|exclude\}. must and exclude filter; prefer only ranks. |
+| `past_titles` | Filters | Titles held before the current one. |
+| `company_headcount` | Filters | Current employer size bands, A (self-employed) to I (10,001+). |
+| `recently_changed_jobs` | Filters | Only people who changed jobs in the last 90 days. |
+| `current_industries` | Filters | Industries the current employer must be in (LinkedIn names, search_industries). |
+| `functions` | Filters | LinkedIn job functions to include. |
+| `exclude_functions` | Filters | LinkedIn job functions to leave out. |
+| `years_at_current_company` | Filters | \{min, max\} years at the current employer. |
+| `schools` | Filters | Schools attended, by name. |
+| `exclude_schools` | Filters | Schools to leave out. |
+| `profile_languages` | Filters | The language the profile is written in, not a spoken language. |
+| `exclude_locations` | Filters | Places candidates must not be in. |
+| `company_hq_locations` | Filters | Where a candidate's current employer is headquartered ("Michigan", "Denmark"). |
+| `must_have` | Scores | Short literal terms a profile must show, matched as text: at most 5 terms of at most 6 words each, like "CPA" or "PE license". Prose goes in must_have_context. |
+| `must_have_context` | Scores | Requirements as prose, at most 10 items: context for screening, never matched as text. |
+| `location_anchor_zips` | Scores | 5-digit ZIP codes the radius is measured from, at most 25. |
+| `geo_radius_mi` | Scores | Commute radius around metro, in miles. |
+| `remote_ok` | Scores | True when the role is remote: location then doesn't gate. |
+| `skills` | Scores | Skills that rank. |
+| `skills_required` | Scores | Hard skills; 'A or B' matches either. |
+| `languages_required` | Scores | Spoken languages the role needs. |
+| `signal_options` | Scores | Optional signals; needs_sponsorship true when the role can't sponsor a visa. |
+| `shortlist_min_score` | Scores | The shortlist cut-off (default 80); a scoring change takes 50 to 85. |
+| `preferred_employers` | Scores | Employers that rank up (current +8, past +5); never a gate. |
+| `keywords` | Scores | Words anywhere on the profile, scored after reading; to filter by words before reading, use keyword_boolean. |
+| `degree_country` | Scores | Where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria. |
+{/* end generated */}
 
-## Scoring
-
-| Field | Example | Notes |
-| --- | --- | --- |
-| `must_have` | `["CPA", "PE license"]` | Each must be evidenced on the profile. Keep each to a short term; a sentence rarely matches anyone. |
-| `skills`, `skills_required` | `["NetSuite"]`, `["CPA or Enrolled Agent"]` | `"A or B"` matches either. |
-| `keywords` | `["SAP S/4HANA"]` | Words anywhere on the profile, scored after reading. To search for them before reading, use `keyword_boolean`. |
-| `languages_required` | `["Spanish"]` | Spoken languages. |
-| `preferred_employers` | `["Big 4"]` | Ranks people there now or before higher; never excludes. |
-| `degree_country` | `{ "countries": ["US"], "level": "bachelor_or_higher", "flag": "prefer" }` | Where a degree is from, by each school's LinkedIn page and the country on file for it. ISO country codes; `level` is `bachelor_or_higher` (default) or `any`; `flag` is `prefer` (default, adds 5 points) or `must` (leaves out people whose degrees are all known to be elsewhere). A school whose country is not on file is "not verified": never a match and never a failure. Set it only when asked; it is never read from school names. |
-| `geo_radius_mi` | `50` | Distance from `metro` for the location score. |
-| `rubric_weights` | `{ "skills": 0.15 }` | How much each part counts: `title`, `geo`, `years`, `seniority`, `skills`, `industry`, each 0.02–0.5. A workspace admin's weights in Settings, Scoring replace these when set. |
-| `shortlist_min_score` | `75` | The shortlist cut-off, 50–85. The default is 80. |
+Weights (`rubric_weights`) are a workspace setting an admin changes in **Settings → Scoring**; a search or scoring
+change that sends them is refused with `400 weights_in_settings`. A few older fields are still accepted for
+existing integrations and are left out of this table: `GET /v1/reference/criteria` lists the current set.
 
 ## Example
 
@@ -63,10 +83,20 @@ field and its allowed values.
 {
   "title_variants": ["Tax Manager", "Senior Tax Manager"],
   "metro": "Dallas, TX",
+  "geo_radius_mi": 30,
   "seniority": "manager",
   "years_experience": { "min": 7, "enforcement": "hard" },
-  "employers": [{ "name": "Big 4", "temporal": "past", "flag": "must" }],
+  "employers": [
+    { "name": "Deloitte", "temporal": "past", "flag": "prefer" },
+    { "name": "PwC", "temporal": "past", "flag": "prefer" },
+    { "name": "EY", "temporal": "past", "flag": "prefer" },
+    { "name": "KPMG", "temporal": "past", "flag": "prefer" }
+  ],
   "exclude_industries": ["Staffing and Recruiting"],
-  "must_have": ["CPA"]
+  "must_have": ["CPA"],
+  "must_have_context": ["Partnership and corporate tax compliance for mid-market clients"]
 }
 ```
+
+`must_have` takes short literal terms a profile would contain (at most 5, each at most 6 words); a sentence
+there is moved to `must_have_context`, which is scored, not matched as text.

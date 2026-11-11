@@ -1,32 +1,114 @@
 ---
 title: "API reference"
-description: "The Revcenter HTTP API: base URL, request and response shape."
+description: "The Revcenter HTTP API: base URL, response shape, every endpoint, and every error code with its fix."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-**Base URL:** `https://api.revcenter.ai/v1`
-
-Send `Authorization: Bearer <your key>` ([authentication](/authentication)). Bodies are JSON. Results are wrapped
-in `data`, and every response has a `request_id`:
+**Base URL:** `https://api.revcenter.ai/v1`. Send `Authorization: Bearer <your key>` ([Authentication](/authentication)).
+Bodies are JSON. Results are wrapped in `data`, lists add a `cursor`, and every response has a `request_id`:
 
 ```json
 { "data": { "id": "6a1e…", "name": "Controller, Camden NJ" }, "meta": { "request_id": "6f1c2b7e-…" } }
 ```
 
-- Lists add a `cursor` ([pagination](/guides/pagination)).
-- Errors have one shape ([errors](/guides/errors)).
-- Rate-limit headers are on every response ([rate limits](/guides/rate-limits)).
-- Each endpoint page states its cost: free, or a launch or expansion reserving up to `max_credits` credits (unused
-  credits are refunded).
-- Any write can be previewed with `POST /actions/preview` and run with `POST /proposals/apply`.
+Each endpoint's page states its cost: free, re-scoring (free), charged on a search's own reservation, or a launch
+or expansion reserving up to `max_credits` (unused credits are refunded). Waiting, paging, limits and retries are
+in [API essentials](/guides/api-essentials). `GET /health`, `POST /auth/device` and `POST /auth/token` need no key.
 
-A typical flow:
+## Errors
 
-1. `POST /projects` → a project.
-2. `POST /projects/{projectId}/searches` with `criteria` and an `Idempotency-Key` → a `search_id`.
-3. `GET /searches/{searchId}` until `status` is `complete`.
-4. `GET /searches/{searchId}/people?min_score=80` → scored people.
-5. `GET /projects/{projectId}/shortlist.csv` → the shortlist.
+Every error has one shape, and its `request_id` is what support needs:
 
-`GET /health`, `POST /auth/device` and `POST /auth/token` need no key.
+```json
+{ "error": { "code": "search_not_found", "message": "No search with that id in this workspace.", "details": null, "request_id": "6f1c2b7e-…" } }
+```
+
+The CLI prints the code, the fix below and the `request_id` on standard error and exits with a
+[code by kind](/tools/cli#exit-codes); the MCP server returns the same lines as an error result. Retry `429` after
+`Retry-After` and `5xx` with backoff ([which calls are safe](/guides/api-essentials#retries-and-idempotency)); fix
+any other `4xx` first.
+
+{/* generated:error-codes (node scripts/docs/build-tables.mjs; do not edit by hand) */}
+| Status | Code | Meaning | Fix |
+| --- | --- | --- | --- |
+| `400` | `invalid_criteria` | Criteria failed validation | Fix the fields named in the message; see GET /v1/reference/criteria. |
+| `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters | Send criteria or a jd_text of at least 40 characters. |
+| `400` | `location_required` | The criteria name no place and don't set `remote_ok` (on a launch, its preview, or `draft_criteria`); nothing was reserved | Add a place to the criteria (metro with geo_radius_mi, or allowed_metros), or set remote_ok: true for a remote role, then launch again. |
+| `400` | `idempotency_key_required` | A launch without an `Idempotency-Key` (8 to 160 characters) | Send an Idempotency-Key header, unique to this search. |
+| `400` | `max_credits_too_low` | `max_credits` is under 250, the smallest cap Revcenter takes (`details.minimum` is 250) | Send max_credits of at least 250, the smallest cap Revcenter takes, or leave it out for the workspace's limit per search. |
+| `400` | `invalid_max_credits` | `max_credits` is not a whole number from 250 to 20,000 | Send max_credits as a whole number from 250 to 20,000: the amount the person names, held to the workspace's limit per search. |
+| `400` | `invalid_format` | An export's `format` is not `csv` or `jsonl` | Leave format out for CSV, or send format=jsonl for JSON Lines. |
+| `400` | `invalid_columns` | A CSV export's `columns` names a key that isn't a column (the message names each one), or `columns` was sent with `format=jsonl` | Send columns as comma-separated keys from get_export_columns (CSV only); roles and schools expand to numbered columns. |
+| `400` | `needs_new_search` | A scoring change tried to change titles or places | Launch a new search for title or place changes. |
+| `400` | `weights_in_settings` | A scoring change sent `rubric_weights`: weights are a workspace setting | Scoring weights are a workspace setting: ask a workspace admin to change them in Settings, Scoring. |
+| `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send candidate_ids from list_people. |
+| `400` | `invalid_name` | Project name empty or over 120 characters | Name the project in 1 to 120 characters. |
+| `400` | `invalid_cursor` | A cursor this API didn't return | Start again without a cursor. |
+| `400` | `invalid_fields` | A list's `fields` names a profile slice that doesn't exist, or a JSON Lines export's `fields` a group that doesn't exist | On a list, send fields as a comma-separated list of profile, about, experience, education, skills, certifications, languages, projects; on a JSON Lines export, as groups: person, current_role, career, education, skills, scoring, decisions. |
+| `400` | `invalid_view` | `get_search`'s `view` is not `full` or `status` | Leave view out for the whole search, or send view=status for the light read. |
+| `400` | `not_proposable` | This action can't be previewed | Call the action directly, or pick one marked proposable in list_actions. |
+| `400` | `invalid_proposal` | A `proposal_id` that is altered or not for this key | Preview the action again with preview_action and apply the new proposal_id. |
+| `400` | `proposal_required` | `publish_shortlist`, `send_shortlist_email`, `add_dnc_from_search`, or `add_dnc` with more than 25 people, called on its own route: it runs only from an applied proposal. Nothing happened | Preview it with preview_action, show the person what goes to whom, then apply_proposal once they agree. |
+| `400` | `invalid_verdict` | A verdict that isn't accept, reject, maybe or clear | Send verdict accept, reject or maybe (null clears it), reason_codes from list_decline_reasons and notes of up to 4,000 characters. |
+| `400` | `invalid_reason` | A decline reason that isn't one of the workspace's | Send label: 1 to 120 characters. |
+| `400` | `invalid_dnc` | A do-not-contact entry that isn't valid | Send people: 1 to 2,000 LinkedIn addresses or ids, and reason as text of up to 500 characters. |
+| `400` | `invalid_project_update` | A project change that isn't valid | Send name as 1 to 120 characters, archived as true or false. |
+| `400` | `invalid_expected_count` | An expected count that isn't a whole number | Send the number of people the person was shown, as a whole number. |
+| `400` | `client_workspace_required` | No client workspace to email: `client_workspace_id` isn't a workspace id, or the project isn't assigned to a client portal | Send client_workspace_id, the client workspace to email. |
+| `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount from $1,500 to $30,000. |
+| `400` | `invalid_webhook_url` | A webhook URL that isn't public HTTPS (private, loopback and link-local addresses are refused) | Use a public https:// URL; private, loopback and link-local addresses are refused. |
+| `400` | `invalid_webhook_events` | An unknown webhook event type | Use event types from the Webhooks guide, or ["*"] for all. |
+| `400` | `invalid_webhook` | A webhook `description` or `enabled` that isn't valid | Send description as text of 200 characters at most, and enabled as true or false. |
+| `400` | `member_api_search_cap` | `max_credits` is above the most your workspace's admins allow you per search through the API | Send max_credits at or under your API max per search, or ask a workspace admin to raise it in Settings. |
+| `401` | `missing_api_key` | No `Authorization: Bearer` header | Set REVCENTER_API_KEY or run `revcenter auth login`. |
+| `401` | `invalid_api_key` | The key is invalid, expired or revoked | Make a new key in Settings → Integrations → API; this one is wrong, expired or revoked. |
+| `402` | `plan_required` | No active plan | Choose a plan in Settings → Plan & billing. |
+| `402` | `no_active_plan` | No plan, and the workspace has no credits | Choose a plan in Settings → Plan & billing, or launch with database_only. |
+| `402` | `shortlist_allocation_exhausted` | Not enough credits left for the search's `max_credits`; `details` has `billing_url` and `top_up` | Not enough credits for this cap: lower max_credits, buy more in Settings → Plan & billing (or `revcenter topup`), or launch with database_only. |
+| `402` | `trial_used_up` | The free trial is used up; `details` has `billing_url` | The free trial is used up: choose a plan in Settings → Plan & billing to keep searching. |
+| `402` | `database_pass_needs_credits` | A database pass on a search that has finished and settled its credits: it has no reservation left to charge new profiles to | This search has finished and settled its credits: expand the search instead (people the workspace already has are free). |
+| `402` | `member_api_budget_reached` | Your monthly API budget, set by your workspace's admins, doesn't cover this search | Lower max_credits to what is left this month, wait for the 1st (UTC), or ask a workspace admin to raise your monthly API budget in Settings. |
+| `403` | `admin_required` | Only a workspace admin can do this, and your key acts as you, an Editor | Only a workspace admin can do this: ask one, or use an admin's key. |
+| `403` | `api_access_disabled` | API access is off for this workspace | Contact Revcenter support to turn API access back on for this workspace. |
+| `403` | `member_keys_disabled` | Your workspace's admins turned off keys for your seat | Ask a workspace admin to turn on API keys for your seat in Settings. |
+| `403` | `workspace_membership_required` | You aren't a member of the workspace you're signing in to | Sign in as a member of this workspace, or ask one of its admins to invite you. |
+| `403` | `insufficient_scope` | The key can't make this call | Use a key made in Settings → Integrations → API; it has every agent scope. |
+| `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key made in Settings → Integrations → API or by `revcenter auth login`: this action is recorded as a person. |
+| `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (get_share_link) instead. |
+| `404` | `dnc_entry_not_found` | `remove_dnc` was given an id that isn't on this project's do-not-contact list or the workspace's | Use an id from list_dnc for this project; it may already be removed. |
+| `404` | `project_not_found` | No such project in this workspace | Check the id with list_projects; ids belong to one workspace. |
+| `404` | `search_not_found` | No such search in this workspace | Check the id with list_searches; ids belong to one workspace. |
+| `404` | `candidate_not_found` | No such person in this workspace | Use an id from list_people for this project's searches. |
+| `404` | `scoring_job_not_found` | No such scoring job on this search | Use the job_id preview_scoring or apply_scoring returned for this search. |
+| `404` | `webhook_not_found` | No such webhook endpoint in this workspace | Check the id with list_webhooks; ids belong to one workspace. |
+| `404` | `delivery_not_found` | No such webhook delivery in this workspace | Use a delivery id from list_webhook_deliveries. |
+| `404` | `shortlist_version_not_found` | No such published shortlist version on the project | Check the id with list_shortlist_versions. |
+| `404` | `client_workspace_not_found` | No such client workspace | Check client_workspace_id; preview_shortlist_email shows the workspace a project defaults to. |
+| `409` | `candidate_do_not_contact` | `add_shortlist_members` was given only people on the do-not-contact list, so nobody was added | Leave this person out: people on the do-not-contact list can't go on a shortlist. |
+| `409` | `key_limit` | Making a key in **Settings** past the workspace's limit on Settings keys (5 by default). CLI sign-ins and connected apps never count and are never refused | Revoke a key you no longer use in Settings → Integrations → API, or ask Revcenter support to raise the workspace's key limit. Signing in with the CLI or connecting Claude or ChatGPT never counts toward it. |
+| `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new Idempotency-Key for a different request. |
+| `409` | `search_running` | A search on the project is still running | Wait for the search to finish (wait_for_search), then retry. |
+| `409` | `search_not_finished` | The project's search hasn't finished, so it can't be expanded yet | Wait for the project's search to finish (wait_for_search), then expand. |
+| `409` | `no_search_to_expand` | The project has no search to expand | Launch a search in the project first. |
+| `409` | `project_credit_limit` | The project's searches have used its credit limit (three searches' worth at the workspace's per-search limit) | The project has used its credit limit (three searches' worth): start a new project for a different role or place. |
+| `409` | `cannot_continue` | `expand_search` with `search_id` on a search that can't go on as it was (LinkedIn had no one left, or it failed on its criteria) | That search can't be continued as it was: call expand_search without search_id, or launch a new search with the criteria changed. |
+| `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview the action again; proposals last 30 minutes. |
+| `409` | `shortlist_changed` | The shortlist holds a different number of people than the person was shown (`details` has `expected` and `actual`); nothing was sent | Preview it again and show the person the new list; nothing was sent. |
+| `409` | `empty_shortlist` | Nothing on the shortlist to publish or send | Add people (add_shortlist_members) first. |
+| `409` | `shortlist_not_publishable` | No one on the shortlist came from a search in the project | Run a search in the project first: a version holds people its searches found. |
+| `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (preview_shortlist_email) and send the client workspace's name it shows. |
+| `409` | `webhook_limit` | The workspace already has 10 webhook endpoints | Delete an endpoint (delete_webhook) to add another; a workspace has 10 at most. |
+| `409` | `webhook_disabled` | A redelivery to an endpoint that is turned off | Turn the endpoint on (update_webhook with enabled true), then redeliver. |
+| `413` | `response_too_large` | `get_shortlist` with `fields` would be more than one answer holds (about 100 KB); nothing was cut | Ask for fewer fields, or page through list_people (min_score 80) with fields; exports carry every profile. |
+| `424` | `search_unavailable` | Live search is unavailable | Retry later, or launch with database_only. |
+| `429` | `member_rate_limited` | Your workspace's admins limit how many requests a minute you can make | Wait for the Retry-After seconds, then retry; a workspace admin can raise your request limit in Settings. |
+| `429` | `rate_limited` | Too many requests this minute; nothing ran | Wait for the Retry-After seconds, then retry. |
+| `429` | `network_busy` | Revcenter is briefly full; nothing ran | Retry after the Retry-After seconds. |
+| `429` | `launch_in_progress` | The same `Idempotency-Key` is still being started by another request | Retry after the Retry-After seconds with the same Idempotency-Key; the first request is still starting the search. |
+| `500` | `internal_error` | Something failed on our side | Retry with backoff; if it persists, send support the request_id. |
+| `503` | `access_check_unavailable` | Access couldn't be checked; nothing ran | Retry after the Retry-After seconds; nothing ran. |
+| `503` | `plan_check_unavailable` | The plan couldn't be checked; nothing ran | Retry after the Retry-After seconds; nothing ran. |
+| `503` | `busy` | Revcenter is busy. A read or preview changed nothing; `details` has `retry_after_seconds` | Nothing changed: retry after retry_after_seconds (the Retry-After header). |
+| `503` | `top_up_unavailable` | Top-ups can't be started here | Buy credits in Settings → Plan & billing instead. |
+{/* end generated */}

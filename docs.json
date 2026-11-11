@@ -23,58 +23,26 @@
   "navigation": {
     "groups": [
       {
-        "group": "Get started",
+        "group": "For recruiters",
         "pages": [
           "introduction",
-          "quickstart",
+          "pricing",
+          "guides/writing-a-search",
+          "guides/searches",
+          "tools/connectors",
           "authentication"
         ]
       },
       {
-        "group": "Concepts",
+        "group": "For developers",
         "pages": [
-          "concepts/execution-model",
-          "concepts/cli-basics"
-        ]
-      },
-      {
-        "group": "Tools",
-        "pages": [
-          "tools/connectors",
-          "tools/cli",
           "tools/mcp",
-          "tools/agents"
-        ]
-      },
-      {
-        "group": "Guides",
-        "pages": [
-          "guides/writing-a-search",
-          "guides/search-approaches",
+          "tools/cli",
+          "guides/api-essentials",
           "guides/criteria",
-          "guides/searches",
-          "guides/rate-limits",
-          "guides/errors",
-          "guides/pagination",
-          "guides/async-jobs",
+          "guides/exports",
           "guides/webhooks",
-          "guides/billing"
-        ]
-      },
-      {
-        "group": "Recipes",
-        "pages": [
-          "recipes/run-a-search",
-          "recipes/coding-agent",
           "recipes/backend-job"
-        ]
-      },
-      {
-        "group": "Use cases",
-        "pages": [
-          "use-cases/executive-search",
-          "use-cases/client-shortlists",
-          "use-cases/agent-research"
         ]
       },
       {
@@ -175,5 +143,67 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
-  "favicon": "/favicon.svg"
+  "favicon": "/favicon.svg",
+  "redirects": [
+    {
+      "source": "/quickstart",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/concepts/execution-model",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/concepts/cli-basics",
+      "destination": "/tools/cli"
+    },
+    {
+      "source": "/tools/agents",
+      "destination": "/tools/mcp"
+    },
+    {
+      "source": "/guides/search-approaches",
+      "destination": "/guides/writing-a-search"
+    },
+    {
+      "source": "/guides/billing",
+      "destination": "/pricing"
+    },
+    {
+      "source": "/guides/async-jobs",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/guides/pagination",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/guides/rate-limits",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/guides/errors",
+      "destination": "/api-reference/introduction"
+    },
+    {
+      "source": "/recipes/run-a-search",
+      "destination": "/guides/api-essentials"
+    },
+    {
+      "source": "/recipes/coding-agent",
+      "destination": "/tools/mcp"
+    },
+    {
+      "source": "/use-cases/executive-search",
+      "destination": "/guides/writing-a-search"
+    },
+    {
+      "source": "/use-cases/client-shortlists",
+      "destination": "/guides/searches"
+    },
+    {
+      "source": "/use-cases/agent-research",
+      "destination": "/tools/mcp"
+    }
+  ]
 }

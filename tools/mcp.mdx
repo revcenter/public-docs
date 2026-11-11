@@ -1,42 +1,40 @@
 ---
-title: "MCP"
-description: "Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI and other MCP clients."
+title: "Agents and MCP"
+description: "Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI, your own LLM or agent: setup, approvals, a starter prompt, and every tool with its cost."
 ---
 
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
-`revcenter mcp` runs a local MCP server. Your agent does the reasoning; Revcenter searches, scores and keeps the
-shortlist.
+Your agent does the reasoning; Revcenter searches, scores and keeps the shortlist. There are two servers:
 
-For Claude or ChatGPT in the browser, add the hosted server instead:
-`https://api.revcenter.ai/mcp`. See [Connectors](/tools/connectors).
+| Server | Where | Signs in with | Tools |
+| --- | --- | --- | --- |
+| **Local** (`revcenter mcp`) | Claude Code, Codex, Cursor, Gemini CLI, Claude Desktop | The key `revcenter auth login` saved | Every tool below, plus exports to files |
+| **Hosted** (`https://api.revcenter.ai/mcp`) | Claude and ChatGPT in the browser ([setup](/tools/connectors)), model APIs, IDEs | OAuth, or an API key as a bearer token | The chat tools: drafting, searches, results, shortlist, decisions, do-not-contact, the client link and email |
 
-## Connect
+## Connect a coding agent
 
-The quickest way: paste this into Claude Code, Codex, Cursor or any coding agent.
+Paste this into Claude Code, Codex, Cursor or any coding agent:
 
 ```text
 Set up the Revcenter plugin by following the steps in https://github.com/revcenter/agent-plugins
 ```
 
-The agent installs the CLI, signs you in (you click **Authorize** once in your browser), connects itself and
-tells you how many credits you have. In Claude Code you can also install the plugin directly:
+It installs the CLI, signs you in (you click **Authorize** once), connects itself and tells you how many credits
+you have. In Claude Code you can also install the plugin directly:
 
 ```text
 /plugin marketplace add revcenter/agent-plugins
 /plugin install revcenter@revcenter-plugins
 ```
 
-Or do it yourself: install, sign in, and let the CLI add the server to every AI tool on the machine:
+Or by hand: install, sign in, and let the CLI add the server to every AI tool on the machine.
 
 ```bash
 curl -fsSL https://revcenter.ai/install.sh | sh
 revcenter login
 revcenter setup        # Claude Code, Codex, Gemini CLI, Cursor, Claude Desktop: whichever are installed
 ```
-
-`revcenter login` offers to run `revcenter setup` for you. The server uses the key the login saved, so no key
-goes in a config file. To add it by hand instead:
 
 <Tabs>
   <Tab title="Claude Code">
@@ -61,143 +59,167 @@ goes in a config file. To add it by hand instead:
   </Tab>
 </Tabs>
 
-On a server or in CI, set `REVCENTER_API_KEY` in the client's environment instead of logging in. Restart the
-client, then ask it to "list my Revcenter projects".
+The server uses the saved key, so no key goes in a config file. On a server or in CI, set `REVCENTER_API_KEY`
+instead. Restart the client and ask it to "list my Revcenter projects".
 
-## Several searches at once
+## Your own LLM or agent
 
-There's no cap on searches running at once: only your credits. Ask the agent to run one sub-agent per role, and
-each launches its own search; a burst that finds Revcenter briefly busy is retried for you. When they finish,
-`export_shortlist` and `export_candidates` save CSVs (every profile field, plus the profile as JSON) under
-`./revcenter-exports/`, `export_search_records` and `export_project_records` save everyone a search or a whole project returned, read or not, ready for the agent to merge, filter or send on.
-Every export tool takes `format`: `csv` (the default) for a spreadsheet, or `jsonl` for JSON Lines. For an AI
-agent, JSONL is lossless; CSV is for spreadsheets. `columns` picks a CSV's columns in order (`get_export_columns`
-lists them); `fields` picks JSON Lines groups (`person`, `current_role`, `career`, `education`, `skills`, `scoring`, `decisions`). Out of credits, `create_top_up` opens
-Stripe checkout in your browser.
+Model APIs, IDEs and agent frameworks that can't sign in through a browser use the hosted server with an API key
+(**Settings → Integrations → API**, [Authentication](/authentication)) as a bearer token:
 
-## Results without an agent running
+```text
+URL:     https://api.revcenter.ai/mcp
+Header:  Authorization: Bearer rvc_live_…
+```
 
-`create_webhook` adds an endpoint of yours that receives `search.completed`, `shortlist.changed` and the rest as
-signed POSTs, so a search launched by an agent reaches your ATS or pipeline after the agent has gone. See
-[Webhooks](/guides/webhooks).
+Transport is Streamable HTTP (`streamable_http` or `http`). The server is stateless: each JSON-RPC POST is
+answered on its own. A key with fewer scopes lists only the tools its scopes reach. Send the key only in the
+header, from an environment variable or secret store, never in a prompt.
+
+<CodeGroup>
+```json Cursor (~/.cursor/mcp.json)
+{
+  "mcpServers": {
+    "revcenter": {
+      "url": "https://api.revcenter.ai/mcp",
+      "headers": { "Authorization": "Bearer ${env:REVCENTER_API_KEY}" }
+    }
+  }
+}
+```
+
+```json VS Code (.vscode/mcp.json)
+{
+  "inputs": [{ "type": "promptString", "id": "revcenter-key", "description": "Revcenter API key", "password": true }],
+  "servers": {
+    "revcenter": { "type": "http", "url": "https://api.revcenter.ai/mcp", "headers": { "Authorization": "Bearer ${input:revcenter-key}" } }
+  }
+}
+```
+</CodeGroup>
+
+Model APIs that take a remote MCP server (an `mcp` tool or `mcp_servers` entry) need the same two things: the
+URL, and the key as the server's authorization token. Your agent runs each tool when it calls it, so have it
+confirm the criteria and the cap with a person before a launch.
+
+## A starter prompt
+
+```text
+Use Revcenter. For each role below: draft criteria with draft_criteria from the job description, show me the
+criteria and any review.warnings, and change only what I ask. Then launch all of them together with
+launch_searches, wait for each with wait_for_search, read each search's advice, and list everyone scoring 80 or
+more with name, title, company and place. Export each shortlist as CSV.
+```
+
+## Approvals
+
+Nothing that spends credits or reaches the client runs without the person:
+
+1. The server previews the action: what it does, the most it reserves, and the credits left.
+2. If the client can ask, it asks in one sentence with Accept and Decline: `Launch search "Associate · Paul Weiss
+   · New York": reserves up to 5,000 credits, unused credits are refunded. 421,000 credits left.` Each review
+   warning follows on its own line, starting `Check:`.
+3. Otherwise, or after 10 minutes without an answer, the tool returns `status: "pending_approval"` with a
+   `proposal`. Nothing has run. The agent shows it and calls `apply_proposal` once the person agrees. A
+   proposal lasts 30 minutes.
+
+Launches that arrive together (parallel sub-agents, or `launch_searches` with up to 25) are asked once, with
+every search and the total listed. `publish_shortlist` and `send_shortlist_email` are asked the same way, in their
+own words (who the client sees, where the email goes), and so are `add_dnc_from_search` and `add_dnc` with more
+than 25 people. Called directly, those are refused with `proposal_required`.
+
+A launch without its own `idempotency_key` gets one from the project and the request, so repeating an identical
+launch (after a timeout, say) returns the first search and reserves nothing more. `max_credits` is any whole number
+from 250, the smallest cap Revcenter takes, up to your workspace's limit per search.
+
+## Many searches at once
+
+Launch as many as you like; up to 3 run at once per workspace, and the rest queue (`status: queued`, with
+`queue.eta_seconds`) and start in turn. Have one sub-agent per role, then merge: export tools save under
+`./revcenter-exports/`, as CSV for a spreadsheet or JSON Lines (`format: "jsonl"`) for an agent to read. See the
+[Exports reference](/guides/exports).
+
+For results to reach your own systems with no agent running, `create_webhook` adds an endpoint
+([Webhooks](/guides/webhooks)).
 
 ## Tools
 
+The local server's tools. Each returns `structuredContent` with `status` (`ok` or `pending_approval`), `data`,
+and on lists `cursor` and `total`; an error returns its [code](/api-reference/introduction#errors), a one-line
+fix and the `request_id`.
+
+{/* generated:mcp-tools (node scripts/docs/build-tables.mjs; do not edit by hand) */}
 | Tool | What it does | Cost |
 | --- | --- | --- |
 | `get_me` | The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. | Does not use credits. |
-| `get_usage` | Today's requests and searches, and credits remaining. | Does not use credits. |
+| `get_usage` | Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. | Does not use credits. |
 | `list_actions` | Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. | Does not use credits. |
 | `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use credits. |
 | `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. |
 | `get_criteria_reference` | Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. | Does not use credits. |
-| `get_export_columns` | Every column a person CSV export can carry, by key, with its group and plain name, and the groups a JSON Lines export's fields takes. Pass keys as columns on any CSV export. | Does not use credits. |
 | `draft_criteria` | Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. | Does not use credits. |
 | `search_industries` | LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. | Does not use credits. |
+| `get_export_columns` | Every column a person CSV export can carry, by key, with its group and plain name, and the groups a JSON Lines export's fields takes. Pass keys as columns on any CSV export. | Does not use credits. |
 | `list_projects` | The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. | Does not use credits. |
 | `create_project` | Make a project: one role, one shortlist. | Does not use credits. |
 | `get_project` | One project, with its search and shortlist counts. | Does not use credits. |
-| `update_project` | Rename a project, or archive it (or bring it back): an archived project leaves `list_projects` but keeps its searches, shortlist and share link. | Does not use credits. |
-| `get_project_insights` | The talent picture across a project's searches, as the app's Insights tab shows it: totals, verdict counts, and where the people are, who employs them, their titles, schools and skills. | Does not use credits. |
-| `get_shortlist_stats` | Everyone a project's searches scored, in aggregate: analyzed, qualified, the score spread, how many are on the shortlist, and the most common rejection reasons. | Does not use credits. |
-| `get_spend` | The credits a project's searches used: what each reserved and was charged, what running searches still hold, and the total. `search_id` narrows it to one search. | Does not use credits. |
-| `list_dnc` | The project's do-not-contact list, and the workspace-wide one: people its searches skip. | Does not use credits. |
-| `add_dnc` | Add people to the project's do-not-contact list by LinkedIn address; its searches skip them from now on. More than 25 at once asks you first, saying how many it would add and how many would leave the live shortlist. | Does not use credits. |
-| `add_dnc_from_search` | Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. It asks you first, saying how many it would add and how many would leave the live shortlist. | Does not use credits. |
-| `remove_dnc` | Take one person off the do-not-contact list, by the id `list_dnc` gives; they return to any shortlist they still qualify for. Workspace admins only. | Does not use credits. |
 | `list_searches` | The searches a project has run, oldest first. | Does not use credits. |
-| `launch_search` | Start a LinkedIn search in a project, on `criteria` run exactly as sent, or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). `max_credits` caps it (default: the workspace's most per search; at least 250). | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
-| `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and `credits_reserved` / `credits_charged`; `view: "status"` is the light read. To wait for a search, use `wait_for_search` instead of calling this in a loop | Does not use credits. |
+| `launch_search` | Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
+| `get_search` | A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and the credits it reserved and, once it closes, was charged. To wait for it, use wait_for_search rather than calling this in a loop; view=status is the light read for checking often. | Does not use credits. |
 | `cancel_search` | Stop a running search: it starts no new purchases (one already under way can still finish and be charged), scores what it already read, and keeps them. | Does not use credits. |
-| `list_people` | Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The hosted connector's tool returns profiles only when fields asks. | Does not use credits. |
-| `list_search_records` | Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). | Does not use credits. |
-| `export_search_records` | Every record a search returned as CSV, saved to a file (default `./revcenter-exports/<search_id>-records.csv`): one row per person, read profiles as text and numbered columns. `format: "jsonl"` saves JSON Lines instead; `columns` picks CSV columns, `fields` JSON Lines groups. | Does not use credits. |
-| `list_project_records` | Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). | Does not use credits. |
-| `export_project_records` | Every record a project's searches returned as CSV, saved to a file (default `./revcenter-exports/<project_id>-records.csv`), with `first_search_id` and `search_ids` (joined by `;`). `format: "jsonl"` saves JSON Lines instead; `columns` picks CSV columns, `fields` JSON Lines groups. | Does not use credits. |
-| `preview_scoring` | What a cut-off, weight or requirement change would do to the shortlist, before and after; changes nothing. | Re-scores the people already found. Does not use credits. |
-| `apply_scoring` | Apply a cut-off, weight or requirement change: everyone already read is re-scored and the shortlist moves. | Re-scores the people already found. Does not use credits. |
+| `list_people` | Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The MCP tools (hosted and local) return profiles only when fields asks. | Does not use credits. |
+| `list_search_records` | Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one; fields picks slices, profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). | Does not use credits. |
+| `export_search_records` | Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address, summary and headline, and the read profile's experience, education and skills as text columns and as numbered columns; or as JSON Lines with format=jsonl. | Does not use credits. |
+| `list_project_records` | Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one; fields picks slices, profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). | Does not use credits. |
+| `export_project_records` | Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;); or as JSON Lines with format=jsonl. | Does not use credits. |
+| `preview_scoring` | What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. | Re-scores the people already found. Does not use credits. |
+| `apply_scoring` | Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. | Re-scores the people already found. Does not use credits. |
 | `get_scoring_job` | A scoring preview or apply that is still re-scoring everyone (a job_id from preview_scoring or apply_scoring): its status, and its result once status is done. | Does not use credits. |
-| `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Re-scores the people already found. Does not use credits. |
-| `get_scoring_diagnostics` | Why a search's list looks as it does: the cut-off, people per score band, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. | Does not use credits. |
-| `discard_scoring` | Discard the scoring change the app's assistant left pending on a search, keeping the criteria in force. | Does not use credits. |
-| `rescore_search` | Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search that stopped before it scored everyone it read. | Re-scores the people already found. Does not use credits. |
-| `get_search_thread` | The project's assistant conversation in the app, oldest first, and any scoring change it proposed for the search that nobody has applied yet, with the shortlist before and after. | Does not use credits. |
-| `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; with `search_id`, that search continued from where it stopped. A project's passes share its credit limit. Takes `max_credits` like a launch. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
-| `export_shortlist` | The shortlist as CSV, saved to a file (default `./revcenter-exports/shortlist-<project>.csv`): fit readings and why, every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead; `columns` picks CSV columns, `fields` JSON Lines groups. | Does not use credits. |
+| `run_database_pass` | Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. | Charged on the search's own reservation: 3 credits for each new profile delivered. People you already have are free. |
+| `expand_search` | A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
+| `export_shortlist` | The shortlist as CSV: score, fit readings (score_breakdown) and why, every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. | Does not use credits. |
+| `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). | Does not use credits. |
 | `get_share_link` | The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. | Does not use credits. |
-| `get_shortlist` | Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). | Does not use credits. |
 | `add_shortlist_members` | Put people the project's searches found on its shortlist, by candidate id (from list_people). | Does not use credits. |
 | `remove_shortlist_member` | Take someone off the shortlist, with an optional reason. | Does not use credits. |
-| `set_candidate_verdict` | Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes. Never shown to the client: not on the share link, the portal, a shortlist email or any export. | Does not use credits. |
-| `get_candidate_verdicts` | The latest verdict, reason codes and private notes for each person in a search, and the client's own Accepts from the portal. | Does not use credits. |
-| `list_decline_reasons` | Your workspace's decline reasons: the keys `reason_codes` takes. | Does not use credits. |
-| `create_decline_reason` | Add a decline reason your team can use in verdicts. | Does not use credits. |
-| `list_shortlist_versions` | The shortlist versions published to the project's client, newest first, each with its version number and how many people it holds. The client's portal shows the newest. | Does not use credits. |
-| `get_shortlist_version` | One published version exactly as the client sees it: who is on it, best first, and why. | Does not use credits. |
-| `export_shortlist_version` | A published version as CSV, the file the client downloads, saved to a file (default `./revcenter-exports/shortlist-version-<version_id>.csv`). `format: "jsonl"` saves JSON Lines instead; `columns` picks CSV columns, `fields` JSON Lines groups. | Does not use credits. |
-| `publish_shortlist` | Publish the live shortlist as a new version the client's portal shows. Reaches the client, so it asks you first, showing who the client would see; nothing is published unless you accept. | Does not use credits. |
-| `preview_shortlist_email` | The shortlist email as it would go: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing. In testing, for developer keys. | Does not use credits. |
-| `send_shortlist_email` | Email the shortlist to the client. Reaches the client, so it asks you first, showing who would get what; nothing is sent unless you accept. | Does not use credits. |
-| `list_client_feedback` | What the client said about the people on the shortlist: Accept and Not a fit on their portal, and verdicts on a published version, with reasons and notes. | Does not use credits. |
+| `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
+| `list_companies` | The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. | Does not use credits. |
+| `export_candidates` | The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. | Does not use credits. |
+| `create_top_up` | A Stripe checkout link to add credits to this workspace at its plan's rate; open it to pay. Nothing is charged until someone pays on that page. | Does not use credits. |
+| `list_webhooks` | The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. | Does not use credits. |
+| `create_webhook` | Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. | Does not use credits. |
+| `update_webhook` | Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. | Does not use credits. |
+| `delete_webhook` | Remove an endpoint and its delivery history; nothing more is sent to it. | Does not use credits. |
+| `test_webhook` | Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. | Does not use credits. |
+| `list_webhook_deliveries` | What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. | Does not use credits. |
+| `redeliver_webhook` | Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. | Does not use credits. |
+| `set_candidate_verdict` | Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes, e.g. "Ask about work authorization". | Does not use credits. |
+| `get_candidate_verdicts` | The latest verdict, reason codes and private notes for each person in a search, newest first: what your team (or the client, on the portal) decided. | Does not use credits. |
+| `list_decline_reasons` | Your workspace's decline reasons: the reason_codes a verdict takes. Ten defaults, then the ones your team added, most used first. | Does not use credits. |
+| `create_decline_reason` | Add a decline reason your team can use in verdicts; returns its key. The same label again returns the one already there. | Does not use credits. |
+| `update_project` | Rename a project, or archive it (or bring it back): an archived project leaves list_projects but keeps its searches, shortlist and share link. | Does not use credits. |
+| `list_dnc` | The people this project's searches skip, newest first: the project's own do-not-contact list and the workspace-wide one. | Does not use credits. |
+| `add_dnc` | Add people to the project's do-not-contact list by LinkedIn address: its searches skip them from now on. People already on it are left as they are. More than 25 at once runs only from a proposal. | Does not use credits. |
+| `add_dnc_from_search` | Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. It runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. | Does not use credits. |
+| `remove_dnc` | Take one person off the do-not-contact list, by the id list_dnc gives. They return to any shortlist they still qualify for, with nothing re-scored or bought. Workspace admins only. | Does not use credits. |
+| `get_scoring_diagnostics` | How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. | Does not use credits. |
+| `discard_scoring` | Discard the scoring change the app's assistant proposed for a search and left pending, keeping the criteria in force; returns what was discarded, or discarded false when nothing was pending. | Does not use credits. |
+| `get_shortlist_stats` | Everyone a project's searches scored, in aggregate: how many were analyzed and qualified, the score spread, how many are on the shortlist, and the most common reasons people were rejected. | Does not use credits. |
+| `get_spend` | The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. | Does not use credits. |
+| `get_project_insights` | The talent picture across a project's searches, as the app's Insights tab shows it: totals and verdict counts, and where the people are, who employs them, their titles, schools and skills. | Does not use credits. |
+| `rescore_search` | Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. | Re-scores the people already found. Does not use credits. |
+| `get_search_thread` | The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. | Does not use credits. |
+| `list_shortlist_versions` | The shortlist versions published to the project's client, newest first: each a frozen copy of the shortlist, with its version number and how many people it holds. The client's portal shows the newest. | Does not use credits. |
+| `export_shortlist_version` | A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. | Does not use credits. |
+| `get_shortlist_version` | One published shortlist version exactly as the client sees it: who is on it, best first, with title, company, place, LinkedIn address and why each is on it. | Does not use credits. |
+| `publish_shortlist` | Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. | Does not use credits. |
+| `preview_shortlist_email` | The email send_shortlist_email would send for the project's shortlist, without sending it: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing and makes no link. | Does not use credits. |
+| `send_shortlist_email` | Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. | Does not use credits. |
+| `list_client_feedback` | What the client said about the people on the project's shortlist, newest first: Accept and Not a fit on their portal's live list, and verdicts on a published version, with their reasons and notes. | Does not use credits. |
 | `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `wait_for_scoring` | Wait until a scoring job (a job_id from preview_scoring or apply_scoring) finishes, or the timeout passes, and return its status and result. | Does not use credits. |
-| `list_candidates` | Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. | Does not use credits. |
-| `list_companies` | The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. | Does not use credits. |
-| `export_candidates` | The candidate database as CSV, saved to a file (default `./revcenter-exports/candidates.csv`): every profile field, the profile as JSON last. `format: "jsonl"` saves JSON Lines instead; `columns` picks CSV columns, `fields` JSON Lines groups. | Does not use credits. |
-| `create_top_up` | A Stripe checkout link to add credits at the plan's rate, opened in your browser; nothing is charged until someone pays. | Does not use credits. |
-| `list_webhooks` | Your [webhook](/guides/webhooks) endpoints: URL, events, whether each is on. Never the secret. | Does not use credits. |
-| `create_webhook` | Add an HTTPS endpoint that receives search and shortlist events as signed POSTs; returns the signing secret once. | Does not use credits. |
-| `update_webhook` | Change an endpoint's URL, events or description, or turn it off and on. | Does not use credits. |
-| `delete_webhook` | Remove an endpoint and its delivery history. | Does not use credits. |
-| `test_webhook` | Send a signed `webhook.test` event now and return the status code the endpoint answered. | Does not use credits. |
-| `list_webhook_deliveries` | What was sent to an endpoint, newest first: status, attempts, response code, next retry. | Does not use credits. |
-| `redeliver_webhook` | Send a delivery's event again, with the same event id. | Does not use credits. |
-
-Every tool returns `structuredContent`: `status` (`ok` or `pending_approval`), `data`, and on lists `cursor` and
-`total`. Errors return the [error code](/guides/errors), a one-line fix and the `request_id`.
-
-## Approval before reserving credits
-
-`launch_search` and `expand_search` ask first:
-
-1. The server previews the action: what it does, the credits it reserves, and credits left.
-2. If the client supports MCP elicitation, it asks you in one sentence, with Accept and Decline and nothing to
-   fill in: `Launch search "Associate · Paul Weiss · New York": reserves up to 1,000 credits, unused credits are
-   refunded. 421,000 credits left.` Accept runs exactly what was previewed; Decline (or closing the prompt) runs
-   nothing.
-3. Otherwise, or if you don't answer within 10 minutes, the tool returns `status: "pending_approval"` with a
-   `proposal`. Nothing has run. The agent shows it to you and calls `apply_proposal` after you agree. A
-   proposal lasts 30 minutes.
-
-Criteria are reviewed before they run, wherever they come from: a requirement sentence in `must_have` is
-scored as context instead of matched as literal text (`review.changes` says so), and a place wider than the
-role's own (all of the United States for a role in Mount Jackson, VA) comes back in `review.warnings`. The
-prompt shows each warning on its own line, starting `Check:`, so you see it before you accept.
-
-Approvals that arrive together are asked once. When an agent launches several searches in parallel, or
-several subagents launch at the same moment, you get one prompt that lists every search and the total it
-reserves; one Accept launches them all side by side, one Decline runs none. Anything that arrives while that
-prompt is open is asked next, together. For a batch the agent has already drafted, `launch_searches` takes up
-to 25 launches in one call and returns each one's outcome: `launched` (with its search), `declined`,
-`pending_approval` (with its `proposal_id`) or `failed` (with the error; the others still run).
-
-## Approval before reaching the client
-
-`publish_shortlist` and `send_shortlist_email` reach the client. Neither
-uses credits, but each is asked the same way, in its own words: who the client will see (publishing), the
-client workspace, where the email goes, its subject, link and people (emailing). Accept applies exactly what was previewed, once; Decline runs nothing. A client
-that can't ask gets `status: "pending_approval"` with the proposal and `show_the_person`, the text to show you
-before `apply_proposal`. `list_actions` (`GET /v1/actions`) marks these with `confirm` (`client` or
-`destructive`). Called directly, publishing and emailing are refused with `proposal_required`.
-
-`add_dnc_from_search`, and `add_dnc` with more than 25 people, are asked the same way, because they change many people at once and can take them off the client's list: you see how many it would add and how many would leave the live shortlist (`confirm: bulk`). Up to 25 people on `add_dnc` runs without asking. Since 2026-11-04 a direct call past that is refused with `proposal_required` and adds nobody; an API client previews it with `preview_action` and runs it with `apply_proposal`.
-
-A launch without its own `idempotency_key` gets one derived from the project and the request, so an agent that
-repeats an identical launch (after its tool call timed out, say) gets the first search back. It isn't asked
-again and nothing more is reserved.
-
-`max_credits` is at least 250: a smaller cap can't buy one page of results and read the profiles on it.
+{/* end generated */}
 
 ## Resources and prompts
 
@@ -206,5 +228,3 @@ again and nothing more is reserved.
 | Resource | `revcenter://reference/criteria` | The criteria reference |
 | Resource | `revcenter://actions` | Every action, its route, scope and cost |
 | Prompt | `run_role_search` | Draft criteria, confirm with you, run one search, summarize everyone scoring 80+ |
-
-Hosted (remote URL) connectors are not available yet; use a local client.

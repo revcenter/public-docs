@@ -324,7 +324,9 @@
       "get": {
         "operationId": "get_me",
         "summary": "Who am I",
-        "description": "The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. Does not use credits.\n\nAny valid key.",
+        "description": "The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Account"
         ],
@@ -442,6 +444,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -452,7 +457,9 @@
       "get": {
         "operationId": "get_usage",
         "summary": "Today's usage",
-        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. Does not use credits.\n\nAny valid key.",
+        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Account"
         ],
@@ -544,6 +551,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -554,7 +564,9 @@
       "get": {
         "operationId": "list_actions",
         "summary": "List actions",
-        "description": "Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. Does not use credits.\n\nAny valid key.",
+        "description": "Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Actions"
         ],
@@ -586,7 +598,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActionSummary"
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -600,7 +617,7 @@
                       "path": "/projects/{projectId}/searches",
                       "scope": "searches:write",
                       "cost": "credits",
-                      "cost_line": "Reserves up to max_credits credits (by default the workspace's most per search: 1,000 on a trial, 5,000 on a plan unless its admins set another); unused credits are refunded.",
+                      "cost_line": "Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.",
                       "summary": "Start a LinkedIn search in a project.",
                       "proposable": true
                     }
@@ -639,6 +656,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -649,7 +669,9 @@
       "post": {
         "operationId": "preview_action",
         "summary": "Preview an action",
-        "description": "What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. Works for every action marked proposable in GET /actions. Previewing a requirement change re-scores nothing until it is applied, except that its before/after is computed on the people already read. Previewing launch_search with criteria returns compiled_query: the exact titles, keyword terms, locations, level, years and employers the search will send. page_one_estimate is null in a preview (reading page 1 is paid); the search records it once it runs. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. Works for every action marked proposable in GET /actions. Previewing a requirement change re-scores nothing until it is applied, except that its before/after is computed on the people already read. Previewing launch_search with criteria returns compiled_query: the exact titles, keyword terms, locations, level, years and employers the search will send. page_one_estimate is null in a preview; the search records it once it runs. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Actions"
         ],
@@ -741,8 +763,8 @@
                     "expires_at": "2026-10-17T14:33:02.000Z",
                     "cost": {
                       "class": "credits",
-                      "line": "Reserves up to 1,000 credits; unused credits are refunded.",
-                      "credits_reserved": 1000
+                      "line": "Reserves up to 5,000 credits; unused credits are refunded.",
+                      "credits_reserved": 5000
                     },
                     "effect": {
                       "project_id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
@@ -762,12 +784,12 @@
                         ]
                       },
                       "compiled_query": {
-                        "policyVersion": "lead-query-policy.v2",
+                        "policy_version": "lead-query-policy.v2",
                         "titles": [
                           "Plant Controller",
                           "Controller"
                         ],
-                        "titleMode": "core",
+                        "title_mode": "core",
                         "keywords": {
                           "terms": [],
                           "sent": false
@@ -827,6 +849,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -837,7 +862,9 @@
       "post": {
         "operationId": "apply_proposal",
         "summary": "Apply a proposal",
-        "description": "Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. The key needs the scope of the action the proposal runs, too. Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free.\n\nNeeds scope `searches:read`.",
+        "description": "Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. The key needs the scope of the action the proposal runs, too. Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. Let it run up to 60 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 60,
         "tags": [
           "Actions"
         ],
@@ -890,7 +917,103 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "action",
+                        "result"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string",
+                          "description": "The action the proposal ran."
+                        },
+                        "result": {
+                          "description": "What that action answers (its own response); 202 when it is a scoring job still running."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "action": "launch_search",
+                    "result": {
+                      "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                      "reused": false,
+                      "compiled_by": "caller",
+                      "criteria": {
+                        "title_variants": [
+                          "Plant Controller",
+                          "Controller"
+                        ],
+                        "metro": "Camden, NJ",
+                        "geo_radius_mi": 40,
+                        "years_experience": {
+                          "min": 8,
+                          "enforcement": "hard"
+                        },
+                        "must_have": [
+                          "CPA"
+                        ]
+                      },
+                      "database_only": false,
+                      "credits_reserved": 1000
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted: still running (a job_id to wait on)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "action",
+                        "result"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string",
+                          "description": "The action the proposal ran."
+                        },
+                        "result": {
+                          "description": "What that action answers (its own response); 202 when it is a scoring job still running."
+                        }
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -956,6 +1079,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -966,7 +1092,9 @@
       "get": {
         "operationId": "get_criteria_reference",
         "summary": "Criteria reference",
-        "description": "Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "Every criteria field, whether it filters LinkedIn before anything is bought or scores after, its allowed values, and an example. Read it before launch_search. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Reference"
         ],
@@ -998,7 +1126,25 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "example": {
+                          "$ref": "#/components/schemas/Criteria"
+                        }
+                      },
+                      "additionalProperties": true
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -1063,6 +1209,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1073,7 +1222,9 @@
       "post": {
         "operationId": "draft_criteria",
         "summary": "Draft criteria from a job description",
-        "description": "Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. The same reading the app's composer makes: titles and their closest synonyms, the role's own place and radius, years, and requirements as short terms, with the rest as scored context. `review.warnings` names anything to check before launching (a place wider than the role's own); `compiled_query` is the exact query the criteria will send. Pass `project_id` to check the place against the project's name too. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. The same reading the app's composer makes: titles and their closest synonyms, the role's own place and radius, years, and requirements as short terms, with the rest as scored context. `review.warnings` names anything to check before launching (a place wider than the role's own); `compiled_query` is the exact query the criteria will send. Pass `project_id` to check the place against the project's name too. Does not use credits. Let it run up to 60 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 60,
         "tags": [
           "Reference"
         ],
@@ -1213,6 +1364,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1223,7 +1377,9 @@
       "get": {
         "operationId": "search_industries",
         "summary": "Find industries",
-        "description": "LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "LinkedIn industries matching a word, with their ids; use the labels in current_industries and exclude_industries. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Reference"
         ],
@@ -1266,7 +1422,26 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "hierarchy": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        }
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -1314,6 +1489,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1324,7 +1502,9 @@
       "get": {
         "operationId": "get_export_columns",
         "summary": "Export columns",
-        "description": "Every column a person CSV export can carry, by key, with its group and plain name, and the groups a JSON Lines export's fields takes. Pass keys as columns on any CSV export. roles and schools stand for numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be asked for on its own (experience_3_company). aliases are older names still taken. No column carries contact details. Does not use credits.\n\nAny valid key.",
+        "description": "Every column a person CSV export can carry, by key, with its group and plain name, and the groups a JSON Lines export's fields takes. Pass keys as columns on any CSV export. roles and schools stand for numbered columns (experience_1_title … education_1_school …), as many as the most any person in the file has; one numbered column can be asked for on its own (experience_3_company). aliases are older names still taken. No column carries contact details. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Reference"
         ],
@@ -1459,6 +1639,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1469,7 +1652,9 @@
       "get": {
         "operationId": "list_projects",
         "summary": "List projects",
-        "description": "The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "description": "The workspace's projects, newest first, with how many searches each ran and how many are on its shortlist. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -1595,6 +1780,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1603,7 +1791,9 @@
       "post": {
         "operationId": "create_project",
         "summary": "Create a project",
-        "description": "Make a project: one role, one shortlist. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "description": "Make a project: one role, one shortlist. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `projects:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -1709,6 +1899,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1719,7 +1912,9 @@
       "get": {
         "operationId": "get_project",
         "summary": "Get a project",
-        "description": "One project, with its search and shortlist counts. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "description": "One project, with its search and shortlist counts. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -1813,6 +2008,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1821,7 +2019,9 @@
       "patch": {
         "operationId": "update_project",
         "summary": "Rename or archive a project",
-        "description": "Rename a project, or archive it (or bring it back): an archived project leaves list_projects but keeps its searches, shortlist and share link. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "description": "Rename a project, or archive it (or bring it back): an archived project leaves list_projects but keeps its searches, shortlist and share link. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -1938,6 +2138,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -1948,7 +2151,9 @@
       "get": {
         "operationId": "list_searches",
         "summary": "List a project's searches",
-        "description": "The searches a project has run, oldest first. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "The searches a project has run, oldest first. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -2019,7 +2224,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Search"
+                      }
+                    },
                     "cursor": {
                       "type": [
                         "string",
@@ -2077,6 +2287,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2085,7 +2298,9 @@
       "post": {
         "operationId": "launch_search",
         "summary": "Launch a search",
-        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's limit per search; held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it (402 trial_used_up once a free trial is used up); when the search finishes it is charged 3 credits for each profile it delivered (people the workspace already has are free; results pages, lookups and AI screening cost nothing), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "Start a LinkedIn search in a project, on `criteria` as sent (a `brief` in the person's own words fills what they leave unsaid), or on a `jd_text` Revcenter reads; with database_only it buys no new results pages (3 credits per profile delivered; people the workspace already has are free). Send an Idempotency-Key: a retry with the same key, project and body returns the same search; the same key on a different request returns 409 idempotency_key_reused. max_credits (250 to 20,000; absent, the workspace's limit per search; held to that limit (1,000 on a trial; on a plan 5,000 unless the workspace's admins set another) and to the credits left, with credits_note saying so; below 250 is refused with 400 max_credits_too_low) is reserved at launch and refused with 402 shortlist_allocation_exhausted when the workspace can't cover it (402 trial_used_up once a free trial is used up); when the search finishes it is charged 3 credits for each profile it delivered (people the workspace already has are free; results pages, lookups and AI screening cost nothing), never more than max_credits, and the rest comes back (get_search credits_charged and credits_breakdown). A search that fails is refunded in full. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. Let it run up to 60 seconds. Safe to retry with the same Idempotency-Key, which returns the first result; without one a retry can run it twice.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "idempotency_key",
+        "x-revcenter-timeout-seconds": 60,
         "tags": [
           "Searches"
         ],
@@ -2168,6 +2383,71 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK: a repeat, answered with the first result",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/LaunchedSearch"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
+                    "reused": false,
+                    "compiled_by": "caller",
+                    "criteria": {
+                      "title_variants": [
+                        "Plant Controller",
+                        "Controller"
+                      ],
+                      "metro": "Camden, NJ",
+                      "geo_radius_mi": 40,
+                      "years_experience": {
+                        "min": 8,
+                        "enforcement": "hard"
+                      },
+                      "must_have": [
+                        "CPA"
+                      ]
+                    },
+                    "database_only": false,
+                    "credits_reserved": 1000
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
           "202": {
             "description": "Accepted",
             "headers": {
@@ -2260,6 +2540,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2270,7 +2553,9 @@
       "get": {
         "operationId": "get_search",
         "summary": "Get a search",
-        "description": "A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and the credits it reserved and, once it closes, was charged. To wait for it, use wait_for_search rather than calling this in a loop; view=status is the light read for checking often. view=status answers only the status, stage, counts, queue place and credits (no criteria, advice or credit breakdown) and stays fast while the search runs. A search takes minutes and status running is normal; a slow answer is not an error. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "A search's status, stage, outcome (Shortlist ready, Poor yield, No results), how many profiles it read, and the credits it reserved and, once it closes, was charged. To wait for it, use wait_for_search rather than calling this in a loop; view=status is the light read for checking often. view=status answers only the status, stage, counts, queue place and credits (no criteria, advice or credit breakdown) and stays fast while the search runs. A search takes minutes and status running is normal; a slow answer is not an error. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -2343,6 +2628,8 @@
                     "stop_reason": null,
                     "outcome": "Shortlist ready",
                     "profiles_read": 212,
+                    "profiles_delivered": 81,
+                    "shortlisted": 14,
                     "delivered": 14,
                     "database_only": false,
                     "expansion": false,
@@ -2370,6 +2657,8 @@
                       "prices": "paid",
                       "pages": 10,
                       "credits_per_page": 0,
+                      "profiles": 81,
+                      "credits_per_profile": 3,
                       "reads": 81,
                       "credits_per_read": 3,
                       "other_credits": 0,
@@ -2414,6 +2703,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2424,7 +2716,9 @@
       "post": {
         "operationId": "cancel_search",
         "summary": "Cancel a search",
-        "description": "Stop a running search: it starts no new purchases (one already under way can still finish and be charged), scores what it already read, and keeps them. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Stop a running search: it starts no new purchases (one already under way can still finish and be charged), scores what it already read, and keeps them. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -2467,7 +2761,18 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "description": "stopping (it stops after any purchase under way), or what it already was when it had stopped."
+                        }
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -2512,6 +2817,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2522,7 +2830,9 @@
       "get": {
         "operationId": "list_people",
         "summary": "List scored people",
-        "description": "Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The hosted connector's tool returns profiles only when fields asks. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone a search scored, best first: score, fit readings, signals and whether they are on the shortlist, and the whole read profile; fields picks slices (experience, education, skills…), profile=false none. The MCP tools (hosted and local) return profiles only when fields asks. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -2712,6 +3022,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2722,7 +3035,9 @@
       "get": {
         "operationId": "list_search_records",
         "summary": "List every record a search returned",
-        "description": "Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). list_people and the shortlist hold only the people a search scored; this is everyone it found, one record per person (the page that listed them first wins). scored: read and scored in this search. known: already in this workspace from another search, so not read again. not_read: listed but never read (screened out, left for a later round, or the search stopped). candidate_id and profile are null for people this workspace has not read. A database-only search returns no records. For every search in a project at once, use list_project_records; for everyone across the workspace, list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every person a search's result pages listed, read or not, in the order returned: each with what became of them (scored, known, not_read), the score if scored, and the read profile when this workspace holds one; fields picks slices, profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). list_people and the shortlist hold only the people a search scored; this is everyone it found, one record per person (the page that listed them first wins). scored: read and scored in this search. known: already in this workspace from another search, so not read again. not_read: listed but never read (screened out, left for a later round, or the search stopped). candidate_id and profile are null for people this workspace has not read. A database-only search returns no records. For every search in a project at once, use list_project_records; for everyone across the workspace, list_candidates. No contact details. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -2895,6 +3210,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -2905,7 +3223,9 @@
       "get": {
         "operationId": "export_search_records",
         "summary": "Download every record a search returned as CSV",
-        "description": "Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address, summary and headline, and the read profile's experience, education and skills as text columns and as numbered columns; or as JSON Lines with format=jsonl. Columns after do_not_contact: headline, signals, about, experience_history, education, skills, certifications, languages, projects, connections, then the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then first_seen_at, last_seen_at, profile_as_of, rationale, score_breakdown, the six criteria (criteria_title … criteria_move_readiness), verdict and the latest decision (decision, decision_reasons, decision_notes, decision_by, decided_at), listing_json (the search result row) and profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every record a search returned as CSV, one row per person in the order returned: status, score, page, name, title, company, location, LinkedIn address, summary and headline, and the read profile's experience, education and skills as text columns and as numbered columns; or as JSON Lines with format=jsonl. Columns after do_not_contact: headline, signals, about, experience_history, education, skills, certifications, languages, projects, connections, then the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then first_seen_at, last_seen_at, profile_as_of, rationale, score_breakdown, the six criteria (criteria_title … criteria_move_readiness), verdict and the latest decision (decision, decision_reasons, decision_notes, decision_by, decided_at), listing_json (the search result row) and profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits. Let it run up to 120 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 120,
         "tags": [
           "Searches"
         ],
@@ -3017,6 +3337,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -3027,7 +3350,9 @@
       "get": {
         "operationId": "list_project_records",
         "summary": "List every record a project's searches returned",
-        "description": "Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one; fields picks slices, profile=false none (the hosted connector's tool returns profiles only when fields asks). One record per person across the project (the earliest listing wins), with the same fields as list_search_records plus first_search_id (the search that listed them first) and search_ids (every search in the project that returned them). status is scored when any of the project's searches scored them, else known when this workspace already holds them, else not_read; score is the best any of the project's searches gave. For everyone across the whole workspace, use list_candidates. No contact details. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every person any of a project's searches returned, expansions included, once each in the order returned: status rolled up across the searches (scored, known, not_read), the best score, which searches returned them, and the read profile when this workspace holds one; fields picks slices, profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). One record per person across the project (the earliest listing wins), with the same fields as list_search_records plus first_search_id (the search that listed them first) and search_ids (every search in the project that returned them). status is scored when any of the project's searches scored them, else known when this workspace already holds them, else not_read; score is the best any of the project's searches gave. For everyone across the whole workspace, use list_candidates. No contact details. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -3188,6 +3513,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -3198,7 +3526,9 @@
       "get": {
         "operationId": "export_project_records",
         "summary": "Download every record a project's searches returned as CSV",
-        "description": "Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;); or as JSON Lines with format=jsonl. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Every record a project's searches returned as CSV, expansions included, one row per person: the search records' columns plus first_search_id and search_ids (joined by ;); or as JSON Lines with format=jsonl. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits. Let it run up to 120 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 120,
         "tags": [
           "Projects"
         ],
@@ -3310,6 +3640,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -3320,7 +3653,9 @@
       "post": {
         "operationId": "preview_scoring",
         "summary": "Preview a scoring change",
-        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlistAfter you previewed, and expected_shortlist_hash with the shortlistAfterHash, to be refused rather than get a different number or different people. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "What a cut-off or requirement change would do to the shortlist, before and after; changes nothing. Weights are a workspace setting an admin changes in Settings. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlist_after you previewed, and expected_shortlist_hash with the shortlist_after_hash, to be refused rather than get a different number or different people. Re-scores the people already found. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -3430,20 +3765,6 @@
                         "maxLength": 245,
                         "description": "Filter, sent before any profile is bought: a keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, \"quoted phrases\"; at most 245 characters and 12 phrases, no commas."
                       },
-                      "industries": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
-                      },
-                      "source_company_keywords": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
-                      },
                       "exclude_titles": {
                         "type": "array",
                         "items": {
@@ -3464,39 +3785,6 @@
                           "type": "string"
                         },
                         "description": "Filter, sent before any profile is bought: current employers to leave out."
-                      },
-                      "avoid_titles": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: titles to rank down, never reject."
-                      },
-                      "avoid_industries": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: industries to rank down, never reject."
-                      },
-                      "avoid_companies": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: employers to rank down, never reject."
-                      },
-                      "comp_band": {
-                        "type": "array",
-                        "prefixItems": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "number"
-                          }
-                        ],
-                        "description": "Scored after a profile is read: [low, high] annual pay, in USD."
                       },
                       "years_experience": {
                         "type": "object",
@@ -3526,22 +3814,6 @@
                           }
                         },
                         "description": "Filter, sent before any profile is bought: {min, max, ideal, basis: total|relevant, enforcement: hard|preferred}. Hard bands are sent; preferred only ranks."
-                      },
-                      "permitted_gaps": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "enum": [
-                            "preferred_experience",
-                            "preferred_background"
-                          ]
-                        },
-                        "description": "Scored after a profile is read: gaps a Tier 2 match may have."
-                      },
-                      "min_avg_tenure_years": {
-                        "type": "number",
-                        "exclusiveMinimum": 0,
-                        "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
                       },
                       "skills": {
                         "type": "array",
@@ -3584,29 +3856,6 @@
                           }
                         },
                         "description": "Scored after a profile is read: optional signals; needs_sponsorship true when the role can't sponsor a visa."
-                      },
-                      "target_company_profile": {
-                        "type": "object",
-                        "properties": {
-                          "sector": {
-                            "type": "string"
-                          },
-                          "employee_range": {
-                            "type": "array",
-                            "prefixItems": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "number"
-                              }
-                            ]
-                          },
-                          "pe_backed_preferred": {
-                            "type": "boolean"
-                          }
-                        },
-                        "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
                       },
                       "shortlist_min_score": {
                         "type": "integer",
@@ -3691,10 +3940,6 @@
                       "recently_changed_jobs": {
                         "type": "boolean",
                         "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
-                      },
-                      "market_coverage": {
-                        "type": "boolean",
-                        "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
                       },
                       "current_industries": {
                         "maxItems": 20,
@@ -3854,7 +4099,9 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "$ref": "#/components/schemas/ScoringResult"
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -3862,8 +4109,57 @@
                 },
                 "example": {
                   "data": {
-                    "shortlistBefore": 14,
-                    "shortlistAfter": 19,
+                    "shortlist_before": 14,
+                    "shortlist_after": 19,
+                    "entering": 5,
+                    "leaving": 0
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted: still running (a job_id to wait on)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ScoringResult"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "shortlist_before": 14,
+                    "shortlist_after": 19,
                     "entering": 5,
                     "leaving": 0
                   },
@@ -3901,6 +4197,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -3911,7 +4210,9 @@
       "post": {
         "operationId": "apply_scoring",
         "summary": "Apply a scoring change",
-        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlistAfter you previewed, and expected_shortlist_hash with the shortlistAfterHash, to be refused rather than get a different number or different people. An apply runs once: repeating it with the same Idempotency-Key (or applying the same proposal again) returns the same job. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Apply a cut-off or requirement change: a cut-off or signal_options.needs_sponsorship (sponsorship) change is recounted from the stored scores, a requirement change re-scores everyone already read, and the shortlist moves. A cut-off or title-rule change is counted at once. A change that re-scores everyone runs as a scoring job: the answer is its result (with job_id and status done) when it finishes within a few seconds, else 202 with job_id and status running; get_scoring_job or wait_for_scoring returns the result. Asking the same change again returns the same job. A change covers every pass of the search, up to its first pass and everything started from it, and the before and after are the project's live shortlist: each pass takes what moved on its own lists and keeps its own titles and places, and a separate search on the project is not touched. It is applied whole or not at all, and refused with 409 search_running while a pass of the search is live, or 409 scoring_state_moved if the search changed since it was asked. Send expected_shortlist_after with the shortlist_after you previewed, and expected_shortlist_hash with the shortlist_after_hash, to be refused rather than get a different number or different people. An apply runs once: repeating it with the same Idempotency-Key (or applying the same proposal again) returns the same job. Re-scores the people already found. Does not use credits. Let it run up to 30 seconds. Safe to retry with the same Idempotency-Key, which returns the first result; without one a retry can run it twice.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "idempotency_key",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -3921,6 +4222,15 @@
             "in": "path",
             "required": true,
             "description": "A search id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Optional, 8-160 printable characters: repeating the apply with the same key returns the same job instead of applying it again.",
             "schema": {
               "type": "string"
             }
@@ -4021,20 +4331,6 @@
                         "maxLength": 245,
                         "description": "Filter, sent before any profile is bought: a keyword rule over the whole profile, as written: AND, OR, NOT in capitals, brackets, \"quoted phrases\"; at most 245 characters and 12 phrases, no commas."
                       },
-                      "industries": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
-                      },
-                      "source_company_keywords": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
-                      },
                       "exclude_titles": {
                         "type": "array",
                         "items": {
@@ -4055,39 +4351,6 @@
                           "type": "string"
                         },
                         "description": "Filter, sent before any profile is bought: current employers to leave out."
-                      },
-                      "avoid_titles": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: titles to rank down, never reject."
-                      },
-                      "avoid_industries": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: industries to rank down, never reject."
-                      },
-                      "avoid_companies": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Scored after a profile is read: employers to rank down, never reject."
-                      },
-                      "comp_band": {
-                        "type": "array",
-                        "prefixItems": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "number"
-                          }
-                        ],
-                        "description": "Scored after a profile is read: [low, high] annual pay, in USD."
                       },
                       "years_experience": {
                         "type": "object",
@@ -4117,22 +4380,6 @@
                           }
                         },
                         "description": "Filter, sent before any profile is bought: {min, max, ideal, basis: total|relevant, enforcement: hard|preferred}. Hard bands are sent; preferred only ranks."
-                      },
-                      "permitted_gaps": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "enum": [
-                            "preferred_experience",
-                            "preferred_background"
-                          ]
-                        },
-                        "description": "Scored after a profile is read: gaps a Tier 2 match may have."
-                      },
-                      "min_avg_tenure_years": {
-                        "type": "number",
-                        "exclusiveMinimum": 0,
-                        "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
                       },
                       "skills": {
                         "type": "array",
@@ -4175,29 +4422,6 @@
                           }
                         },
                         "description": "Scored after a profile is read: optional signals; needs_sponsorship true when the role can't sponsor a visa."
-                      },
-                      "target_company_profile": {
-                        "type": "object",
-                        "properties": {
-                          "sector": {
-                            "type": "string"
-                          },
-                          "employee_range": {
-                            "type": "array",
-                            "prefixItems": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "number"
-                              }
-                            ]
-                          },
-                          "pe_backed_preferred": {
-                            "type": "boolean"
-                          }
-                        },
-                        "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
                       },
                       "shortlist_min_score": {
                         "type": "integer",
@@ -4282,10 +4506,6 @@
                       "recently_changed_jobs": {
                         "type": "boolean",
                         "description": "Filter, sent before any profile is bought: only people who changed jobs in the last 90 days."
-                      },
-                      "market_coverage": {
-                        "type": "boolean",
-                        "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
                       },
                       "current_industries": {
                         "maxItems": 20,
@@ -4412,11 +4632,11 @@
                   "expected_shortlist_after": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "The shortlistAfter you previewed. If this change would now leave a different number, nothing is applied and the answer is 409 scoring_state_moved."
+                    "description": "The shortlist_after you previewed. If this change would now leave a different number, nothing is applied and the answer is 409 scoring_state_moved."
                   },
                   "expected_shortlist_hash": {
                     "type": "string",
-                    "description": "The shortlistAfterHash you previewed. If this change would now leave different people, even the same number, nothing is applied and the answer is 409 scoring_state_moved."
+                    "description": "The shortlist_after_hash you previewed. If this change would now leave different people, even the same number, nothing is applied and the answer is 409 scoring_state_moved."
                   }
                 }
               },
@@ -4454,7 +4674,60 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "$ref": "#/components/schemas/ScoringResult"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "summary": {
+                      "scored": 212,
+                      "qualified": 19
+                    },
+                    "shortlisted": 19,
+                    "cutoff": 75
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted: still running (a job_id to wait on)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ScoringResult"
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -4503,6 +4776,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -4513,7 +4789,9 @@
       "get": {
         "operationId": "get_scoring_job",
         "summary": "Get a scoring job",
-        "description": "A scoring preview or apply that is still re-scoring everyone (a job_id from preview_scoring or apply_scoring): its status, and its result once status is done. status is queued, running, done or failed. result is what preview_scoring or apply_scoring would have answered; error is set when it failed, and code busy means Revcenter was busy and nothing changed: ask again. wait_seconds (0 to 25) waits for the job to finish before answering. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "A scoring preview or apply that is still re-scoring everyone (a job_id from preview_scoring or apply_scoring): its status, and its result once status is done. status is queued, running, done or failed. result is what preview_scoring or apply_scoring would have answered; error is set when it failed, and code busy means Revcenter was busy and nothing changed: ask again. wait_seconds (0 to 25) waits for the job to finish before answering. Does not use credits. Let it run up to 40 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 40,
         "tags": [
           "Scoring"
         ],
@@ -4574,7 +4852,9 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "$ref": "#/components/schemas/ScoringJob"
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -4587,8 +4867,8 @@
                     "search_id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
                     "status": "done",
                     "result": {
-                      "shortlistBefore": 14,
-                      "shortlistAfter": 19,
+                      "shortlist_before": 14,
+                      "shortlist_after": 19,
                       "added": 5,
                       "removed": 0
                     },
@@ -4630,6 +4910,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -4640,7 +4923,9 @@
       "post": {
         "operationId": "run_database_pass",
         "summary": "Search your database again",
-        "description": "Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. 3 credits for each profile delivered, on the search's reservation; people the workspace already has are free. A search that has finished and settled its credits can't add people this way: it is refused with 402 database_pass_needs_credits; expand the search instead. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Score the workspace's candidates on file against this search; those who clear the bar join the shortlist. It reserves nothing new: each new profile it delivers is charged on the search's own reservation while that search still holds one. A search that has finished and settled its credits can't add people this way: it is refused with 402 database_pass_needs_credits; expand the search instead. Charged on the search's own reservation: 3 credits for each new profile delivered. People you already have are free. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -4683,7 +4968,107 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "attached": {
+                          "type": "integer",
+                          "description": "People on file added to the search."
+                        },
+                        "before": {
+                          "type": "integer"
+                        },
+                        "after": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "The shortlist after; null while they are still being scored (status running, job_id)."
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "job_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "attached": 6,
+                    "before": 14,
+                    "after": 16
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted: still running (a job_id to wait on)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "attached": {
+                          "type": "integer",
+                          "description": "People on file added to the search."
+                        },
+                        "before": {
+                          "type": "integer"
+                        },
+                        "after": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "The shortlist after; null while they are still being scored (status running, job_id)."
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "job_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -4729,6 +5114,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -4739,7 +5127,9 @@
       "post": {
         "operationId": "expand_search",
         "summary": "Expand or continue a search",
-        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. Without search_id: a new pass on the project's first search's criteria, once it has finished. With search_id: the same search's criteria from where it stopped, when it was stopped, interrupted or used its credits and LinkedIn still has people (pages it already read are reused at no cost); a search LinkedIn ran out of is refused with 409 cannot_continue, so expand without search_id instead. A project's searches share a credit limit of 3 searches' worth at the workspace's per-search limit (3,000 on a trial, 15,000 on a plan at the default 5,000 per search): a cap above what the project has left is held to it, and 409 project_credit_limit is returned when less than 250 is left. One pass at a time per project (409 search_running). Send an Idempotency-Key: a retry with the same key returns the same pass. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded.\n\nNeeds scope `searches:write`.",
+        "description": "A live LinkedIn pass for more people on the same role, skipping everyone already found; with search_id, that search continued from where it stopped. A project's passes share its credit limit. Reserves max_credits like a launch. Without search_id: a new pass on the project's first search's criteria, once it has finished. With search_id: the same search's criteria from where it stopped, when it was stopped, interrupted or used its credits and LinkedIn still has people (pages it already read are reused at no cost); a search LinkedIn ran out of is refused with 409 cannot_continue, so expand without search_id instead. A project's searches share a credit limit of 3 searches' worth at the workspace's per-search limit (3,000 on a trial, 15,000 on a plan at the default 5,000 per search): a cap above what the project has left is held to it, and 409 project_credit_limit is returned when less than 250 is left. One pass at a time per project (409 search_running). Send an Idempotency-Key: a retry with the same key returns the same pass and never reserves twice. Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. Let it run up to 60 seconds. Safe to retry with the same Idempotency-Key, which returns the first result; without one a retry can run it twice.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "idempotency_key",
+        "x-revcenter-timeout-seconds": 60,
         "tags": [
           "Searches"
         ],
@@ -4749,6 +5139,15 @@
             "in": "path",
             "required": true,
             "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "8-160 printable characters, one per pass. A retry with the same key returns the same pass and reserves nothing more. Recommended: without it, each call that succeeds starts a pass.",
             "schema": {
               "type": "string"
             }
@@ -4780,6 +5179,65 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK: a repeat, answered with the first result",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "credits_reserved": {
+                          "type": "integer"
+                        },
+                        "credits_note": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": true
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "search_id": "7d2e4f1a-0c3b-4a5d-9e8f-6b1c2d3e4f52",
+                    "credits_reserved": 1000
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
           "202": {
             "description": "Accepted",
             "headers": {
@@ -4807,7 +5265,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "search_id": {
+                          "type": "string"
+                        },
+                        "credits_reserved": {
+                          "type": "integer"
+                        },
+                        "credits_note": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": true
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -4852,6 +5324,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -4862,7 +5337,9 @@
       "get": {
         "operationId": "export_shortlist",
         "summary": "Download the shortlist CSV",
-        "description": "The shortlist as CSV: score, fit readings (score_breakdown) and why, every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. Columns: rank, score, first_name, last_name, title, company, metro, linkedin_url, open_to_work, tenure, signals, title_match, geo_fit, industry_match, skills_match, tier, reject_code, score_breakdown (each fit reading as `criterion: reading`, joined by ; ), why (the readings that matched in full, then signals), headline, shortlist_version, about, experience_history, education, skills, certifications, languages, projects, connections, the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then candidate_id, search_id, project_id, first_seen_at, last_seen_at, profile_as_of, rationale, the six criteria (criteria_title … criteria_move_readiness), verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The shortlist as CSV: score, fit readings (score_breakdown) and why, every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. Columns: rank, score, first_name, last_name, title, company, metro, linkedin_url, open_to_work, tenure, signals, title_match, geo_fit, industry_match, skills_match, tier, reject_code, score_breakdown (each fit reading as `criterion: reading`, joined by ; ), why (the readings that matched in full, then signals), headline, shortlist_version, about, experience_history, education, skills, certifications, languages, projects, connections, the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off, then candidate_id, search_id, project_id, first_seen_at, last_seen_at, profile_as_of, rationale, the six criteria (criteria_title … criteria_move_readiness), verdict, decision, decision_reasons, decision_notes, decision_by, decided_at, profile_json. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits. Let it run up to 120 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 120,
         "tags": [
           "Shortlists"
         ],
@@ -4974,6 +5451,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -4984,7 +5464,9 @@
       "get": {
         "operationId": "get_shortlist",
         "summary": "Get the shortlist",
-        "description": "Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the hosted connector's tool returns profiles only when fields asks). Send limit (up to 500) or cursor for a page, best first, with a cursor for the rest and meta.total, the shortlist's size; a page also stops at the page size budget. Without either, the whole shortlist in one answer. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone on the project's live shortlist, best first, with full profiles; fields picks slices (held to one answer's size), profile=false none (the MCP tools, hosted and local, return profiles only when fields asks). Send limit (up to 500) or cursor for a page, best first, with a cursor for the rest and meta.total, the shortlist's size; a page also stops at the page size budget. Without either, the whole shortlist in one answer. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -5155,6 +5637,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5165,7 +5650,9 @@
       "get": {
         "operationId": "get_share_link",
         "summary": "Get the share link",
-        "description": "The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. Every project has exactly one link, made with the project, so this returns the same URL every time and never mints a second one. Anyone with the link can open the list, and it shows the shortlist as it stands: remove anyone who shouldn't be seen before sending it, and after a change send the same link again. `shortlisted` is how many people it shows now; don't send a link with 0. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The project's one public shortlist link, to paste into an email to the client; it always shows the live shortlist. Every project has exactly one link, made with the project, so this returns the same URL every time and never mints a second one. Anyone with the link can open the list, and it shows the shortlist as it stands: remove anyone who shouldn't be seen before sending it, and after a change send the same link again. `shortlisted` is how many people it shows now; don't send a link with 0. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -5267,6 +5754,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5277,7 +5767,9 @@
       "post": {
         "operationId": "add_shortlist_members",
         "summary": "Add to the shortlist",
-        "description": "Put people the project's searches found on its shortlist, by candidate id (from list_people). Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Put people the project's searches found on its shortlist, by candidate id (from list_people). Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -5347,7 +5839,34 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "added": {
+                          "type": "integer"
+                        },
+                        "already": {
+                          "type": "integer"
+                        },
+                        "unread": {
+                          "type": "integer"
+                        },
+                        "unknown": {
+                          "type": "integer"
+                        },
+                        "do_not_contact": {
+                          "type": "integer"
+                        },
+                        "not_added": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      },
+                      "additionalProperties": true
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -5396,6 +5915,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5406,7 +5928,9 @@
       "delete": {
         "operationId": "remove_shortlist_member",
         "summary": "Remove from the shortlist",
-        "description": "Take someone off the shortlist, with an optional reason. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Take someone off the shortlist, with an optional reason. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -5477,7 +6001,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "removed": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": true
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -5521,6 +6053,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5531,7 +6066,9 @@
       "get": {
         "operationId": "list_candidates",
         "summary": "List the candidate database",
-        "description": "Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone any of this workspace's searches found, newest first, as the Candidates tab lists them; filter by text, project, title, company or place. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -5712,6 +6249,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5722,7 +6262,9 @@
       "get": {
         "operationId": "list_companies",
         "summary": "List the companies database",
-        "description": "The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -5888,6 +6430,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -5898,7 +6443,9 @@
       "get": {
         "operationId": "export_candidates",
         "summary": "Download the candidate database CSV",
-        "description": "The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. The career columns follow Languages: the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. The career columns follow Languages: the career as numbered columns (total_experience_months, current_role_months, experience_1_title, experience_1_company, experience_1_location, experience_1_start, experience_1_end, experience_1_months, experience_1_description … education_1_school, education_1_degree, education_1_field, education_1_start, education_1_end …), as many as the most roles and schools anyone in the file has: nothing is cut off. UTF-8 with a byte order mark, so Excel reads it as written. columns picks the CSV's columns, in order (get_export_columns lists every key). ?format=jsonl returns JSON Lines instead: one person per line, lossless: the whole read profile (every role, school and section), the search result row for anyone never read, and Revcenter's person, current_role, career, education, scoring (score, every reading, rationale, signals, the six Verified/Missing criteria) and decisions keys; fields picks groups. For an AI agent, JSONL; CSV is for spreadsheets. No contact details on any export. Does not use credits. Let it run up to 120 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 120,
         "tags": [
           "Candidates"
         ],
@@ -6046,6 +6593,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6056,7 +6606,9 @@
       "post": {
         "operationId": "create_top_up",
         "summary": "Buy more credits",
-        "description": "A Stripe checkout link to add credits to this workspace at its plan's rate; open it to pay. Nothing is charged until someone pays on that page. Does not use credits.\n\nAny valid key.",
+        "description": "A Stripe checkout link to add credits to this workspace at its plan's rate; open it to pay. Nothing is charged until someone pays on that page. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nAny valid key.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Account"
         ],
@@ -6170,6 +6722,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6180,7 +6735,9 @@
       "get": {
         "operationId": "list_webhooks",
         "summary": "List webhook endpoints",
-        "description": "The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. Does not use credits.\n\nNeeds scope `webhooks:read`.",
+        "description": "The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `webhooks:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6275,6 +6832,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6283,7 +6843,9 @@
       "post": {
         "operationId": "create_webhook",
         "summary": "Add a webhook endpoint",
-        "description": "Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. Up to 10 endpoints a workspace. events defaults to every event ([\"*\"]). The URL must be public HTTPS; private, loopback and link-local addresses are refused, and redirects are never followed. Store secret now: it is not shown again. Does not use credits.\n\nNeeds scope `webhooks:write`.",
+        "description": "Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. Up to 10 endpoints a workspace. events defaults to every event ([\"*\"]). The URL must be public HTTPS; private, loopback and link-local addresses are refused, and redirects are never followed. Store secret now: it is not shown again. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `webhooks:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6421,6 +6983,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6431,7 +6996,9 @@
       "patch": {
         "operationId": "update_webhook",
         "summary": "Change a webhook endpoint",
-        "description": "Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. Does not use credits.\n\nNeeds scope `webhooks:write`.",
+        "description": "Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `webhooks:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6575,6 +7142,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6583,7 +7153,9 @@
       "delete": {
         "operationId": "delete_webhook",
         "summary": "Delete a webhook endpoint",
-        "description": "Remove an endpoint and its delivery history; nothing more is sent to it. Does not use credits.\n\nNeeds scope `webhooks:write`.",
+        "description": "Remove an endpoint and its delivery history; nothing more is sent to it. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `webhooks:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6626,7 +7198,14 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
                     }
@@ -6670,6 +7249,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6680,7 +7262,9 @@
       "post": {
         "operationId": "test_webhook",
         "summary": "Send a test event",
-        "description": "Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. Sent once and not retried. Works on an endpoint that is turned off, so you can check it before turning it back on. Does not use credits.\n\nNeeds scope `webhooks:write`.",
+        "description": "Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. Sent once and not retried. Works on an endpoint that is turned off, so you can check it before turning it back on. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `webhooks:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6792,6 +7376,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6802,7 +7389,9 @@
       "get": {
         "operationId": "list_webhook_deliveries",
         "summary": "List an endpoint's deliveries",
-        "description": "What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. Does not use credits.\n\nNeeds scope `webhooks:read`.",
+        "description": "What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `webhooks:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -6910,8 +7499,9 @@
                           "outcome": "Shortlist ready",
                           "stop_reason": "budget_exhausted",
                           "profiles_read": 212,
-                          "delivered": 14,
+                          "profiles_delivered": 81,
                           "shortlisted": 14,
+                          "delivered": 14,
                           "closed_at": "2026-10-17T14:19:40.000Z",
                           "links": {
                             "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
@@ -6959,6 +7549,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -6969,7 +7562,9 @@
       "post": {
         "operationId": "redeliver_webhook",
         "summary": "Redeliver an event",
-        "description": "Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. Does not use credits.\n\nNeeds scope `webhooks:write`.",
+        "description": "Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `webhooks:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Webhooks"
         ],
@@ -7048,8 +7643,9 @@
                         "outcome": "Shortlist ready",
                         "stop_reason": "budget_exhausted",
                         "profiles_read": 212,
-                        "delivered": 14,
+                        "profiles_delivered": 81,
                         "shortlisted": 14,
+                        "delivered": 14,
                         "closed_at": "2026-10-17T14:19:40.000Z",
                         "links": {
                           "search": "https://api.revcenter.ai/v1/searches/0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
@@ -7095,6 +7691,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7105,7 +7704,9 @@
       "post": {
         "operationId": "set_candidate_verdict",
         "summary": "Record a verdict and notes",
-        "description": "Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes, e.g. \"Ask about work authorization\". The same judgement the candidate panel in the app records. Verdicts, reason codes and notes are private to your workspace: they never appear on the share link, the client portal, a shortlist email or any export. Each call is kept (get_candidate_verdicts reads the latest per person) and lands with review_state pending: Revcenter reviews verdicts to calibrate scoring, so recording one does not move the shortlist; to take someone off, use remove_shortlist_member. reason_codes are keys from list_decline_reasons. Send an Idempotency-Key to make a retry safe: the same key and body return the first verdict. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes, e.g. \"Ask about work authorization\". The same judgement the candidate panel in the app records. Verdicts, reason codes and notes are private to your workspace: they never appear on the share link, the client portal, a shortlist email or any export. Each call is kept (get_candidate_verdicts reads the latest per person) and lands with review_state pending: Revcenter reviews verdicts to calibrate scoring, so recording one does not move the shortlist; to take someone off, use remove_shortlist_member. reason_codes are keys from list_decline_reasons. Send an Idempotency-Key to make a retry safe: the same key and body return the first verdict. Does not use credits. Let it run up to 30 seconds. Safe to retry with the same Idempotency-Key, which returns the first result; without one a retry can run it twice.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "idempotency_key",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -7305,6 +7906,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7315,7 +7919,9 @@
       "get": {
         "operationId": "get_candidate_verdicts",
         "summary": "Read verdicts and notes",
-        "description": "The latest verdict, reason codes and private notes for each person in a search, newest first: what your team (or the client, on the portal) decided. source is team for a verdict recorded in the app or through this API, and client for the client's own Accept on the portal's live shortlist. Pass candidate_id for one person. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The latest verdict, reason codes and private notes for each person in a search, newest first: what your team (or the client, on the portal) decided. source is team for a verdict recorded in the app or through this API, and client for the client's own Accept on the portal's live shortlist. Pass candidate_id for one person. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -7470,6 +8076,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7480,7 +8089,9 @@
       "get": {
         "operationId": "list_decline_reasons",
         "summary": "List decline reasons",
-        "description": "Your workspace's decline reasons: the reason_codes a verdict takes. Ten defaults, then the ones your team added, most used first. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Your workspace's decline reasons: the reason_codes a verdict takes. Ten defaults, then the ones your team added, most used first. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -7600,6 +8211,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7608,7 +8222,9 @@
       "post": {
         "operationId": "create_decline_reason",
         "summary": "Add a decline reason",
-        "description": "Add a decline reason your team can use in verdicts; returns its key. The same label again returns the one already there. Does not use credits.\n\nNeeds scope `shortlists:write`.",
+        "description": "Add a decline reason your team can use in verdicts; returns its key. The same label again returns the one already there. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Candidates"
         ],
@@ -7735,6 +8351,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7745,7 +8364,9 @@
       "get": {
         "operationId": "list_dnc",
         "summary": "List do-not-contact",
-        "description": "The people this project's searches skip, newest first: the project's own do-not-contact list and the workspace-wide one. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "description": "The people this project's searches skip, newest first: the project's own do-not-contact list and the workspace-wide one. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -7888,6 +8509,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -7896,7 +8520,9 @@
       "post": {
         "operationId": "add_dnc",
         "summary": "Add to do-not-contact",
-        "description": "Add people to the project's do-not-contact list by LinkedIn address: its searches skip them from now on. People already on it are left as they are. More than 25 at once runs only from a proposal. Up to 25 people runs directly. More is refused with proposal_required and nobody is added: preview_action says how many you listed (people_found), how many it would add (would_add), how many are already listed (already_listed) and how many would leave the live shortlist (would_leave_shortlist); apply_proposal runs it once the person agrees. Does not use credits. It changes many people at once and can take them off the client's list, so the MCP server asks the person first, saying how many.\n\nNeeds scope `projects:write`.",
+        "description": "Add people to the project's do-not-contact list by LinkedIn address: its searches skip them from now on. People already on it are left as they are. More than 25 at once runs only from a proposal. Up to 25 people runs directly. More is refused with proposal_required and nobody is added: preview_action says how many you listed (people_found), how many it would add (would_add), how many are already listed (already_listed) and how many would leave the live shortlist (would_leave_shortlist); apply_proposal runs it once the person agrees. Does not use credits. It changes many people at once and can take them off the client's list, so the MCP server asks the person first, saying how many. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -8043,6 +8669,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8053,7 +8682,9 @@
       "post": {
         "operationId": "add_dnc_from_search",
         "summary": "Add a whole search to do-not-contact",
-        "description": "Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. It runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nobody is added. The preview's effect says how many people the search found (people_found), how many it would add (would_add), how many are already listed (already_listed) and how many would leave the live shortlist (would_leave_shortlist). Does not use credits. It changes many people at once and can take them off the client's list, so the MCP server asks the person first, saying how many.\n\nNeeds scope `projects:write`.",
+        "description": "Add everyone a search found to the project's do-not-contact list, for when the client turned down the whole list. It runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nobody is added. The preview's effect says how many people the search found (people_found), how many it would add (would_add), how many are already listed (already_listed) and how many would leave the live shortlist (would_leave_shortlist). Does not use credits. It changes many people at once and can take them off the client's list, so the MCP server asks the person first, saying how many. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `projects:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -8181,6 +8812,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8191,7 +8825,9 @@
       "delete": {
         "operationId": "remove_dnc",
         "summary": "Remove from do-not-contact",
-        "description": "Take one person off the do-not-contact list, by the id list_dnc gives. They return to any shortlist they still qualify for, with nothing re-scored or bought. Workspace admins only. Scope follows the entry: a workspace-wide entry is removed for every project, a project's entry for that project. If another entry for the same person is still in force, still_on_list is true and they stay off. An id that isn't on this project's list or the workspace's is dnc_entry_not_found. Does not use credits.\n\nNeeds scope `projects:write`.",
+        "description": "Take one person off the do-not-contact list, by the id list_dnc gives. They return to any shortlist they still qualify for, with nothing re-scored or bought. Workspace admins only. Scope follows the entry: a workspace-wide entry is removed for every project, a project's entry for that project. If another entry for the same person is still in force, still_on_list is true and they stay off. An id that isn't on this project's list or the workspace's is dnc_entry_not_found. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -8321,6 +8957,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8331,7 +8970,9 @@
       "get": {
         "operationId": "get_scoring_diagnostics",
         "summary": "Why the list looks as it does",
-        "description": "How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. Read it before preview_scoring: it says whether the cut-off or a must-have is what keeps the list short. weights are the ones in force: the workspace's from Settings when an admin set them, else the search's own. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "How a search's people score now: the cut-off, people per score band, how many are shortlisted, why the rest were rejected, which must-haves profiles fail to show, and the best people just under the cut-off. Read it before preview_scoring: it says whether the cut-off or a must-have is what keeps the list short. weights are the ones in force: the workspace's from Settings when an admin set them, else the search's own. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -8375,54 +9016,7 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "search_id": {
-                          "type": "string"
-                        },
-                        "floors": {
-                          "type": "object"
-                        },
-                        "analyzed": {
-                          "type": "integer"
-                        },
-                        "unscored": {
-                          "type": "integer"
-                        },
-                        "enriched": {
-                          "type": "integer"
-                        },
-                        "shortlisted": {
-                          "type": "integer"
-                        },
-                        "bands": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "rejected": {
-                          "type": "integer"
-                        },
-                        "rejectReasons": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "mustHaves": {
-                          "type": "object"
-                        },
-                        "nearMisses": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "weights": {
-                          "type": "object"
-                        }
-                      }
+                      "$ref": "#/components/schemas/ScoringDiagnostics"
                     },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
@@ -8446,33 +9040,25 @@
                         "label": "85+",
                         "min": 85,
                         "max": null,
-                        "count": 9,
-                        "big4": {
-                          "current": 0,
-                          "past": 2
-                        }
+                        "count": 9
                       },
                       {
                         "label": "80–84",
                         "min": 80,
                         "max": 84,
-                        "count": 5,
-                        "big4": {
-                          "current": 0,
-                          "past": 1
-                        }
+                        "count": 5
                       }
                     ],
                     "rejected": 61,
-                    "rejectReasons": [
+                    "reject_reasons": [
                       {
                         "code": "GEO_OUT",
                         "label": "outside the target area",
                         "count": 33
                       }
                     ],
-                    "underFloorReasons": [],
-                    "penaltyReasons": [
+                    "under_floor_reasons": [],
+                    "penalty_reasons": [
                       {
                         "code": "YEARS_OVER",
                         "label": "over the experience range",
@@ -8480,7 +9066,7 @@
                         "points": 10
                       }
                     ],
-                    "mustHaves": {
+                    "must_haves": {
                       "gate": true,
                       "items": [
                         {
@@ -8490,13 +9076,13 @@
                         }
                       ]
                     },
-                    "nearMisses": [
+                    "near_misses": [
                       {
-                        "candidateId": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                        "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
                         "name": "Dana Whitfield",
-                        "roleTitle": "Plant Controller",
+                        "role_title": "Plant Controller",
                         "company": "Garden State Foods",
-                        "profileUrl": "https://www.linkedin.com/in/example",
+                        "profile_url": "https://www.linkedin.com/in/example",
                         "score": 78
                       }
                     ],
@@ -8508,14 +9094,14 @@
                       "skills": 0.15,
                       "industry": 0.1
                     },
-                    "outsideLocation": 40,
-                    "preferredEmployer": {
+                    "outside_location": 40,
+                    "preferred_employer": {
                       "current": 0,
                       "past": 3
                     },
-                    "belowCutoff": {
+                    "below_cutoff": {
                       "count": 22,
-                      "pointsLost": [
+                      "points_lost": [
                         {
                           "dimension": "skills",
                           "points": 6.2
@@ -8557,6 +9143,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8567,7 +9156,9 @@
       "post": {
         "operationId": "discard_scoring",
         "summary": "Discard a proposed scoring change",
-        "description": "Discard the scoring change the app's assistant proposed for a search and left pending, keeping the criteria in force; returns what was discarded, or discarded false when nothing was pending. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Discard the scoring change the app's assistant proposed for a search and left pending, keeping the criteria in force; returns what was discarded, or discarded false when nothing was pending. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -8701,6 +9292,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8711,7 +9305,9 @@
       "get": {
         "operationId": "get_shortlist_stats",
         "summary": "Project stats",
-        "description": "Everyone a project's searches scored, in aggregate: how many were analyzed and qualified, the score spread, how many are on the shortlist, and the most common reasons people were rejected. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "Everyone a project's searches scored, in aggregate: how many were analyzed and qualified, the score spread, how many are on the shortlist, and the most common reasons people were rejected. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -8769,14 +9365,29 @@
                         "qualified": {
                           "type": "integer"
                         },
+                        "score_bands": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer"
+                          },
+                          "description": "People per score band, by the band's label."
+                        },
+                        "top_reject_reasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
                         "scoreBands": {
-                          "type": "object"
+                          "type": "object",
+                          "deprecated": true,
+                          "description": "Deprecated: the same as score_bands, with camelCase keys inside, kept for clients written before 2026-11-10."
                         },
                         "topRejectReasons": {
                           "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
+                          "deprecated": true,
+                          "description": "Deprecated: the same as top_reject_reasons, with camelCase keys inside, kept for clients written before 2026-11-10."
                         }
                       }
                     },
@@ -8791,12 +9402,12 @@
                     "shortlisted": 14,
                     "analyzed": 212,
                     "qualified": 9,
-                    "scoreBands": {
+                    "score_bands": {
                       "85+": 9,
                       "70-84": 41,
                       "under 70": 162
                     },
-                    "topRejectReasons": [
+                    "top_reject_reasons": [
                       {
                         "reason": "GEO_OUT",
                         "count": 33
@@ -8837,6 +9448,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -8847,7 +9461,9 @@
       "get": {
         "operationId": "get_spend",
         "summary": "Credits a project used",
-        "description": "The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. credits_state per search: held (running; its cap is reserved), charged (finished; 3 credits for each profile it delivered, the rest refunded; credits_breakdown shows the arithmetic), refunded (its whole reservation came back: it failed or never started), none (database only, or no plan). Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "The credits a project's searches used: what each reserved and was charged, what is still held by searches running now, and the project's total. search_id narrows it to one search. credits_state per search: held (running; its cap is reserved, credits_charged null), charged (finished; 3 credits for each profile it delivered, the rest refunded; credits_breakdown shows the arithmetic), refunded (its whole reservation came back, credits_charged 0: it failed or never started), none (nothing was reserved, as in a workspace that isn't metered or a search from before credits: credits_charged is 0 once it finishes, null while it runs). credits_charged agrees with get_search for the same search. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -8922,6 +9538,10 @@
                               "status": {
                                 "type": "string"
                               },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
                               "credits_state": {
                                 "type": "string",
                                 "enum": [
@@ -8929,7 +9549,8 @@
                                   "charged",
                                   "refunded",
                                   "none"
-                                ]
+                                ],
+                                "description": "held: running, its cap reserved. charged: finished and charged. refunded: its whole reservation came back. none: nothing was reserved."
                               },
                               "credits_reserved": {
                                 "type": "integer"
@@ -8970,6 +9591,8 @@
                           "prices": "paid",
                           "pages": 10,
                           "credits_per_page": 0,
+                          "profiles": 81,
+                          "credits_per_profile": 3,
                           "reads": 81,
                           "credits_per_read": 3,
                           "other_credits": 0,
@@ -8990,6 +9613,8 @@
                           "prices": "paid",
                           "pages": 4,
                           "credits_per_page": 0,
+                          "profiles": 30,
+                          "credits_per_profile": 3,
                           "reads": 30,
                           "credits_per_read": 3,
                           "other_credits": 0,
@@ -9035,6 +9660,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9045,7 +9673,9 @@
       "get": {
         "operationId": "get_project_insights",
         "summary": "Project insights",
-        "description": "The talent picture across a project's searches, as the app's Insights tab shows it: totals and verdict counts, and where the people are, who employs them, their titles, schools and skills. Does not use credits.\n\nNeeds scope `projects:read`.",
+        "description": "The talent picture across a project's searches, as the app's Insights tab shows it: totals and verdict counts, and where the people are, who employs them, their titles, schools and skills. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `projects:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Projects"
         ],
@@ -9089,7 +9719,9 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "type": "object"
+                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Keys are snake_case. A camelCase key this answer shipped under before 2026-11-10 is still sent beside its snake_case name, holding the same value, and is deprecated. The insights report as the app builds it."
                     },
                     "meta": {
                       "$ref": "#/components/schemas/Meta"
@@ -9099,22 +9731,22 @@
                 "example": {
                   "data": {
                     "kind": "project_insights",
-                    "generatedAt": "2026-10-21T15:20:00.000Z",
+                    "generated_at": "2026-10-21T15:20:00.000Z",
                     "project": {
                       "id": "6f1c2a0e-3b7d-4c1e-9a52-0d4e8b7c1a11",
                       "name": "Plant Controller, Camden NJ",
-                      "clientName": null
+                      "client_name": null
                     },
                     "summary": {
                       "searches": 1,
-                      "candidateAppearances": 212,
-                      "uniqueCandidates": 212,
+                      "candidate_appearances": 212,
+                      "unique_candidates": 212,
                       "enriched": 212,
                       "qualified": 9,
                       "accepted": 0,
                       "maybe": 1,
                       "rejected": 0,
-                      "averageScore": 61.4
+                      "average_score": 61.4
                     },
                     "distributions": {
                       "locations": [
@@ -9152,7 +9784,7 @@
                       {
                         "id": "0b9e7d6c-5a4f-4e3d-8c2b-1a0f9e8d7c61",
                         "title": "Plant Controller",
-                        "createdAt": "2026-10-17T14:03:02.000Z"
+                        "created_at": "2026-10-17T14:03:02.000Z"
                       }
                     ]
                   },
@@ -9190,6 +9822,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9200,7 +9835,9 @@
       "post": {
         "operationId": "rescore_search",
         "summary": "Re-score a search",
-        "description": "Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search whose run stopped before it scored everyone it read (the profiles are bought; they only need scoring), or to bring its list up to date. Buys nothing and changes no requirement: to change the cut-off or requirements as well, use apply_scoring. Refused with 409 search_running while a pass on the search is still running. Re-scores the people already found. Does not use credits.\n\nNeeds scope `searches:write`.",
+        "description": "Score everyone a search already read again, under the requirements in force, and move the shortlist to match: the app's Re-score everyone. For a search whose run stopped before it scored everyone it read (the profiles are bought; they only need scoring), or to bring its list up to date. Buys nothing and changes no requirement: to change the cut-off or requirements as well, use apply_scoring. Refused with 409 search_running while a pass on the search is still running. Re-scores the people already found. Does not use credits. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Scoring"
         ],
@@ -9316,6 +9953,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9326,7 +9966,9 @@
       "get": {
         "operationId": "get_search_thread",
         "summary": "Read a search's conversation",
-        "description": "The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. messages is what people and the project's assistant wrote in Revcenter (the latest 200), each with its role, text and the search it was about. pending_change is null unless the assistant proposed a cut-off or requirement change for this search that would move someone and that hasn't been applied or discarded; its preview counts the shortlist before and after. To make a change yourself, use preview_scoring and apply_scoring. thread_id is null when nobody has written in the project's conversation yet. Does not use credits.\n\nNeeds scope `searches:read`.",
+        "description": "The project's assistant conversation in the app, oldest first, and any scoring change it proposed for this search that nobody has applied yet, with what applying it would do to the shortlist. messages is what people and the project's assistant wrote in Revcenter (the latest 200), each with its role, text and the search it was about. pending_change is null unless the assistant proposed a cut-off or requirement change for this search that would move someone and that hasn't been applied or discarded; its preview counts the shortlist before and after. To make a change yourself, use preview_scoring and apply_scoring. thread_id is null when nobody has written in the project's conversation yet. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Searches"
         ],
@@ -9539,6 +10181,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9549,7 +10194,9 @@
       "get": {
         "operationId": "list_shortlist_versions",
         "summary": "List published shortlist versions",
-        "description": "The shortlist versions published to the project's client, newest first: each a frozen copy of the shortlist, with its version number and how many people it holds. The client's portal shows the newest. publish_shortlist makes a version. A version that holds someone since taken off the shortlist or put on the do-not-contact list is withdrawn: the client can't open it, and it is not listed. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The shortlist versions published to the project's client, newest first: each a frozen copy of the shortlist, with its version number and how many people it holds. The client's portal shows the newest. publish_shortlist makes a version. A version that holds someone since taken off the shortlist or put on the do-not-contact list is withdrawn: the client can't open it, and it is not listed. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -9661,6 +10308,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9671,7 +10321,9 @@
       "get": {
         "operationId": "export_shortlist_version",
         "summary": "Download a published version as CSV",
-        "description": "A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. Columns: rank, tier, gaps, name, title, company, location, profile_url, evidence, snapshot_id, snapshot_version, snapshot_hash, canonical_shortlist_hash, generated_at. UTF-8 with a byte order mark, so Excel reads it as written. columns gives any person columns instead (get_export_columns), read from the people behind the version. ?format=jsonl returns JSON Lines instead: one person per line, as get_shortlist_version lists them, with version_id and version, and every documented export key (the whole read profile, scoring, decisions); fields picks groups. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "A published shortlist version as CSV, the same file the client downloads from their portal: rank, tier, name, title, company, location, LinkedIn address and why each person is on it; or as JSON Lines with format=jsonl. Columns: rank, tier, gaps, name, title, company, location, profile_url, evidence, snapshot_id, snapshot_version, snapshot_hash, canonical_shortlist_hash, generated_at. UTF-8 with a byte order mark, so Excel reads it as written. columns gives any person columns instead (get_export_columns), read from the people behind the version. ?format=jsonl returns JSON Lines instead: one person per line, as get_shortlist_version lists them, with version_id and version, and every documented export key (the whole read profile, scoring, decisions); fields picks groups. Does not use credits. Let it run up to 120 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 120,
         "tags": [
           "Shortlists"
         ],
@@ -9792,6 +10444,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -9802,7 +10457,9 @@
       "get": {
         "operationId": "get_shortlist_version",
         "summary": "Get a published version",
-        "description": "One published shortlist version exactly as the client sees it: who is on it, best first, with title, company, place, LinkedIn address and why each is on it. Frozen when it was published: later changes to the shortlist show in the next version, not this one. No scores, notes or contact details: only what the client was given. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "One published shortlist version exactly as the client sees it: who is on it, best first, with title, company, place, LinkedIn address and why each is on it. Frozen when it was published: later changes to the shortlist show in the next version, not this one. No scores, notes or contact details: only what the client was given. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -10002,6 +10659,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -10012,7 +10672,9 @@
       "post": {
         "operationId": "publish_shortlist",
         "summary": "Publish the shortlist to the client",
-        "description": "Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is published. The version freezes who is on the shortlist when the proposal is applied, best first, with each person's name, title, company, place, LinkedIn address and why they are on it (a qualified match, or selected by the recruiter); never notes, scores' workings or removal reasons. Publishing a shortlist that hasn't changed returns the version already published. Send expected_members (how many people the person was shown, get_project's shortlisted) and a shortlist that has moved since is refused with shortlist_changed. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what.\n\nNeeds scope `shortlists:write`.",
+        "description": "Publish the live shortlist as a new version the client's portal shows. It reaches the client, so it runs only from a proposal: preview_action, show the person, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is published. The version freezes who is on the shortlist when the proposal is applied, best first, with each person's name, title, company, place, LinkedIn address and why they are on it (a qualified match, or selected by the recruiter); never notes, scores' workings or removal reasons. Publishing a shortlist that hasn't changed returns the version already published. Send expected_members (how many people the person was shown, get_project's shortlisted) and a shortlist that has moved since is refused with shortlist_changed. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -10139,6 +10801,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -10149,7 +10814,9 @@
       "post": {
         "operationId": "preview_shortlist_email",
         "summary": "Preview the shortlist email",
-        "description": "The email send_shortlist_email would send for the project's shortlist, without sending it: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing and makes no link. In testing, as in the app: for keys made by a developer account only (shortlist_email_in_testing otherwise), and every email goes to Revcenter's test inbox (send_to) instead of the client workspace's members (intended_recipients). client_workspace_id defaults to the client portal the project is assigned to. url is the client's link when it already exists; otherwise it is null and sending makes it. Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "The email send_shortlist_email would send for the project's shortlist, without sending it: the client workspace, who it goes to, the subject, the text and the people it shows. Sends nothing and makes no link. In testing, as in the app: for keys made by a developer account only (shortlist_email_in_testing otherwise), and every email goes to Revcenter's test inbox (send_to) instead of the client workspace's members (intended_recipients). client_workspace_id defaults to the client portal the project is assigned to. url is the client's link when it already exists; otherwise it is null and sending makes it. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -10374,6 +11041,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -10384,7 +11054,9 @@
       "post": {
         "operationId": "send_shortlist_email",
         "summary": "Email the shortlist to the client",
-        "description": "Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is sent. confirm_workspace_name is the client workspace's name as the person saw it in preview_shortlist_email; a different name is refused with workspace_name_mismatch, so one client never gets another's list. Send expected_total (preview_shortlist_email's total) and a shortlist that has moved since is refused with shortlist_changed. In testing, as in the app: developer keys only, and it goes to Revcenter's test inbox, never the client's members. Applying the same proposal twice sends once. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what.\n\nNeeds scope `shortlists:write`.",
+        "description": "Email the project's shortlist to a client workspace, as preview_shortlist_email showed it. It reaches the client, so it runs only from a proposal: preview_action, show the person who gets what, then apply_proposal once they agree. Calling this route directly is refused with proposal_required, and nothing is sent. confirm_workspace_name is the client workspace's name as the person saw it in preview_shortlist_email; a different name is refused with workspace_name_mismatch, so one client never gets another's list. Send expected_total (preview_shortlist_email's total) and a shortlist that has moved since is refused with shortlist_changed. In testing, as in the app: developer keys only, and it goes to Revcenter's test inbox, never the client's members. Applying the same proposal twice sends once. Does not use credits. It reaches the client, so the MCP server asks the person first, showing who gets what. Let it run up to 30 seconds. Not safe to retry blindly: read the state (the matching get or list) before sending it again.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "not_safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -10560,6 +11232,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -10570,7 +11245,9 @@
       "get": {
         "operationId": "list_client_feedback",
         "summary": "List the client's feedback",
-        "description": "What the client said about the people on the project's shortlist, newest first: Accept and Not a fit on their portal's live list, and verdicts on a published version, with their reasons and notes. Each is recorded as the client gave it and waits for Revcenter's review (review_state pending, approved or rejected) before it changes any scoring. not_a_fit is true when the client passed on the person, which also takes them off the shortlist. given_on says where: the live shortlist, or a published version (version_id). Does not use credits.\n\nNeeds scope `shortlists:read`.",
+        "description": "What the client said about the people on the project's shortlist, newest first: Accept and Not a fit on their portal's live list, and verdicts on a published version, with their reasons and notes. Each is recorded as the client gave it and waits for Revcenter's review (review_state pending, approved or rejected) before it changes any scoring. not_a_fit is true when the client passed on the person, which also takes them off the shortlist. given_on says where: the live shortlist, or a published version (version_id). Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
         "tags": [
           "Shortlists"
         ],
@@ -10773,6 +11450,9 @@
           "500": {
             "$ref": "#/components/responses/Error"
           },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
           "503": {
             "$ref": "#/components/responses/Error"
           }
@@ -10853,9 +11533,415 @@
           "request_id": {
             "type": "string"
           },
+          "correlation_id": {
+            "type": "string",
+            "description": "Ties this request to the work it started, for support."
+          },
           "total": {
             "type": "integer",
             "description": "On lists that count everything that matched."
+          }
+        }
+      },
+      "ActionSummary": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "scope": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cost": {
+            "type": "string",
+            "enum": [
+              "free",
+              "rescore",
+              "reservation",
+              "credits",
+              "per_proposal"
+            ]
+          },
+          "cost_line": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "proposable": {
+            "type": "boolean"
+          },
+          "confirm": {
+            "type": "string",
+            "enum": [
+              "client",
+              "destructive",
+              "bulk"
+            ]
+          },
+          "retry": {
+            "type": "string",
+            "enum": [
+              "safe",
+              "idempotency_key",
+              "not_safe"
+            ],
+            "description": "safe: send it again after a timeout; idempotency_key: safe again with the same Idempotency-Key; not_safe: read the state before repeating it."
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "How long to let one request run before treating it as timed out."
+          }
+        }
+      },
+      "ScoringResult": {
+        "type": "object",
+        "description": "What a scoring preview or apply answers: the shortlist before and after, or a scoring job still running (202, with job_id and status). Keys are snake_case. A camelCase key this answer shipped under before 2026-11-10 is still sent beside its snake_case name, holding the same value, and is deprecated.",
+        "additionalProperties": true,
+        "properties": {
+          "shortlist_before": {
+            "type": "integer"
+          },
+          "shortlist_after": {
+            "type": "integer"
+          },
+          "shortlist_after_hash": {
+            "type": "string",
+            "description": "Send it back as expected_shortlist_hash to apply exactly these people."
+          },
+          "job_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ]
+          }
+        }
+      },
+      "ScoringJob": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "preview",
+              "apply",
+              "rescore",
+              "database_pass"
+            ]
+          },
+          "search_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ]
+          },
+          "result": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true,
+            "description": "What preview_scoring or apply_scoring would have answered, once done."
+          },
+          "error": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ],
+            "additionalProperties": true
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "finished_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "ScoringDiagnostics": {
+        "type": "object",
+        "description": "Keys are snake_case. A camelCase key this answer shipped under before 2026-11-10 is still sent beside its snake_case name, holding the same value, and is deprecated.",
+        "properties": {
+          "search_id": {
+            "type": "string"
+          },
+          "floors": {
+            "type": "object",
+            "properties": {
+              "qualified": {
+                "type": "integer"
+              },
+              "shortlist": {
+                "type": "integer"
+              },
+              "custom": {
+                "type": "boolean"
+              }
+            }
+          },
+          "analyzed": {
+            "type": "integer"
+          },
+          "unscored": {
+            "type": "integer"
+          },
+          "enriched": {
+            "type": "integer"
+          },
+          "shortlisted": {
+            "type": "integer"
+          },
+          "rejected": {
+            "type": "integer"
+          },
+          "bands": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "min": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "reject_reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "penalty_reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "points": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "under_floor_reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "must_haves": {
+            "type": "object",
+            "properties": {
+              "gate": {
+                "type": "boolean"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "requirement": {
+                      "type": "string"
+                    },
+                    "missing": {
+                      "type": "integer"
+                    },
+                    "of": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "near_misses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidate_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role_title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "company": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "profile_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "score": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "weights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "The weights in force: the workspace's from Settings when an admin set them, else the search's own."
+          },
+          "below_cutoff": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "points_lost": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dimension": {
+                      "type": "string"
+                    },
+                    "points": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "outside_location": {
+            "type": "integer"
+          },
+          "preferred_employer": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer"
+              },
+              "past": {
+                "type": "integer"
+              }
+            }
+          },
+          "rejectReasons": {
+            "type": "array",
+            "deprecated": true,
+            "description": "Deprecated: the same as reject_reasons, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "penaltyReasons": {
+            "type": "array",
+            "deprecated": true,
+            "description": "Deprecated: the same as penalty_reasons, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "underFloorReasons": {
+            "type": "array",
+            "deprecated": true,
+            "description": "Deprecated: the same as under_floor_reasons, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "mustHaves": {
+            "type": "object",
+            "deprecated": true,
+            "description": "Deprecated: the same as must_haves, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "nearMisses": {
+            "type": "array",
+            "deprecated": true,
+            "description": "Deprecated: the same as near_misses, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "belowCutoff": {
+            "type": "object",
+            "deprecated": true,
+            "description": "Deprecated: the same as below_cutoff, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "outsideLocation": {
+            "type": "integer",
+            "deprecated": true,
+            "description": "Deprecated: the same as outside_location, with camelCase keys inside, kept for clients written before 2026-11-10."
+          },
+          "preferredEmployer": {
+            "type": "object",
+            "deprecated": true,
+            "description": "Deprecated: the same as preferred_employer, with camelCase keys inside, kept for clients written before 2026-11-10."
           }
         }
       },
@@ -11348,6 +12434,7 @@
                 "enum": [
                   "free",
                   "rescore",
+                  "reservation",
                   "credits"
                 ]
               },
@@ -11357,12 +12444,18 @@
               "credits_reserved": {
                 "type": "integer",
                 "description": "What applying it reserves; unused credits are refunded when the search finishes."
+              },
+              "shortlist_credits": {
+                "type": "integer",
+                "deprecated": true,
+                "description": "Deprecated: credits_reserved in thousands, from when searches were priced in shortlists. Read credits_reserved."
               }
             }
           },
           "effect": {
             "type": "object",
-            "description": "What the action would do: the before/after for a scoring change, capacity and credits for a search."
+            "additionalProperties": true,
+            "description": "What the action would do: the before/after for a scoring change, capacity and credits for a search. Keys are snake_case. A camelCase key this answer shipped under before 2026-11-10 is still sent beside its snake_case name, holding the same value, and is deprecated."
           }
         }
       },
@@ -11449,7 +12542,7 @@
           },
           "credits_reserved": {
             "type": "integer",
-            "description": "Credits held for this search: its max_credits as held to the workspace's limit and balance, or 0 for database_only."
+            "description": "Credits held for this search: its max_credits as held to the workspace's limit and balance (a database_only search reserves like any other), or 0 in a workspace whose credits aren't metered."
           },
           "credits_note": {
             "type": "string",
@@ -11462,7 +12555,7 @@
           "object",
           "null"
         ],
-        "description": "A search's charge line by line at the price it reserved under, held to its cap: 3 credits for each profile delivered (credits_per_read), results pages free (credits_per_page 0). Searches reserved before 2026-11-10 show their own price (pages and reads). So far while it runs. Null for a refunded search, a database-only one, or one charged before round prices.",
+        "description": "A search's charge line by line at the price it reserved under, held to its cap: 3 credits for each new profile delivered (profiles × credits_per_profile), results pages free (credits_per_page 0). Searches reserved before 2026-11-10 show their own price (pages, and profiles read). So far while it runs. Null for a refunded search, a database-only one, or one charged before round prices.",
         "properties": {
           "prices": {
             "type": "string",
@@ -11478,16 +12571,27 @@
           "credits_per_page": {
             "type": "integer"
           },
+          "profiles": {
+            "type": "integer",
+            "description": "Profiles delivered and charged in this search: new to the workspace, whether read now or already held. People the workspace already has are not counted. The same as the search's profiles_delivered."
+          },
+          "credits_per_profile": {
+            "type": "integer",
+            "description": "Credits per profile delivered (3)."
+          },
           "reads": {
             "type": "integer",
-            "description": "Profiles delivered and charged in this search. People the workspace already has are not counted."
+            "deprecated": true,
+            "description": "Deprecated: the same as profiles, kept for older integrations. Not only profiles read."
           },
           "credits_per_read": {
-            "type": "integer"
+            "type": "integer",
+            "deprecated": true,
+            "description": "Deprecated: the same as credits_per_profile."
           },
           "other_credits": {
             "type": "integer",
-            "description": "Contact and other data, charged as used."
+            "description": "Other metered work, charged as used."
           },
           "total": {
             "type": "integer",
@@ -11517,6 +12621,13 @@
           "project_id": {
             "type": "string"
           },
+          "view": {
+            "type": "string",
+            "enum": [
+              "status"
+            ],
+            "description": "Present on view=status: the light read, without criteria, advice or the credit breakdown."
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -11539,7 +12650,7 @@
               "string",
               "null"
             ],
-            "description": "Why it stopped. A search runs until one of these: budget_exhausted (used its cap), discovery_exhausted (LinkedIn had no more), page_cap (the most pages LinkedIn serves for one query), cap_too_small (its cap could not buy one page of results and read it: nothing bought, every credit refunded), few_matches (several results pages in a row listed nobody who fits: widen the title or place), cancelled, failed. Searches that ran before 2026-10-26 may also show target_reached or low_yield."
+            "description": "Why it stopped. A search runs until one of these: budget_exhausted (used its cap), discovery_exhausted (LinkedIn had no more), page_cap (the most pages LinkedIn serves for one query), cap_too_small (its cap was too small to deliver a page's people: nothing charged, every credit refunded), few_matches (several results pages in a row listed nobody who fits: widen the title or place), duplicate_pages (LinkedIn kept returning people already listed, so it stopped rather than pay for repeats; the people it read may all fit), cancelled, failed. Searches that ran before 2026-10-26 may also show target_reached or low_yield."
           },
           "outcome": {
             "type": [
@@ -11554,13 +12665,30 @@
             ]
           },
           "profiles_read": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Profiles this search read, including people the workspace already had."
+          },
+          "profiles_delivered": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "People this search delivered to the workspace for the first time: the count it is charged for (3 credits each). People the workspace already had are not counted. So far while it runs; null for a search that wasn't priced per profile (one from before 2026-11-10, or one that reserved no credits)."
+          },
+          "shortlisted": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "How many people were on the project's shortlist when this search closed: the whole project's list, including people earlier searches found. Null while it runs."
           },
           "delivered": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "deprecated": true,
+            "description": "Deprecated: the same number as shortlisted, kept for older integrations. It is not the charged count; read profiles_delivered for that."
           },
           "database_only": {
             "type": "boolean"
@@ -11609,7 +12737,7 @@
               "integer",
               "null"
             ],
-            "description": "What the search was charged once it closed, never more than credits_reserved; the rest was refunded. Null while it runs."
+            "description": "What the search was charged once it closed, never more than credits_reserved; the rest was refunded. Null while it runs; 0 for a finished search that reserved nothing. get_spend says the same for each search."
           },
           "credits_breakdown": {
             "$ref": "#/components/schemas/CreditBreakdown"
@@ -11619,7 +12747,7 @@
             "items": {
               "type": "string"
             },
-            "description": "What to check before the list goes to a client, once it finishes: a thin pool (under 75 people read) or a place wider than a city. Empty when there is nothing to check."
+            "description": "What to check before the list goes to a client, once it finishes, each a sentence to read: few people read (under 75), a search you stopped early, a query that matched more people than one search can list, or a place wider than a city. Empty when there is nothing to check."
           }
         }
       },
@@ -12009,7 +13137,8 @@
       },
       "Criteria": {
         "type": "object",
-        "description": "The search's criteria: title_variants (or an employer with flag must) and a metro, allowed_metros or remote_ok at least. draft_criteria writes them from a job description; get_criteria_reference explains every field. Keep must_have to short literal terms (at most 5, each at most 6 words); prose goes in must_have_context. A single string where a list is taken is read as a one-item list.",
+        "description": "The search's criteria: title_variants (or an employer with flag must) and a metro, allowed_metros or remote_ok at least. draft_criteria writes them from a job description; get_criteria_reference explains every field. Keep must_have to short literal terms (at most 5, each at most 6 words); prose goes in must_have_context. A single string where a list is taken is read as a one-item list. A field that isn't listed here is refused with 400 invalid_criteria, naming it. Deprecated fields are accepted from older clients; current tools don't write them.",
+        "additionalProperties": false,
         "properties": {
           "family": {
             "type": "string",
@@ -12104,14 +13233,16 @@
             "items": {
               "type": "string"
             },
-            "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries."
+            "description": "Scored after a profile is read: background industries that rank; for a current-employer filter use current_industries.",
+            "deprecated": true
           },
           "source_company_keywords": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates."
+            "description": "Scored after a profile is read: kinds of company the likely candidates come from; ranks, never gates.",
+            "deprecated": true
           },
           "metro": {
             "type": "string",
@@ -12168,21 +13299,24 @@
             "items": {
               "type": "string"
             },
-            "description": "Scored after a profile is read: titles to rank down, never reject."
+            "description": "Scored after a profile is read: titles to rank down, never reject.",
+            "deprecated": true
           },
           "avoid_industries": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Scored after a profile is read: industries to rank down, never reject."
+            "description": "Scored after a profile is read: industries to rank down, never reject.",
+            "deprecated": true
           },
           "avoid_companies": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Scored after a profile is read: employers to rank down, never reject."
+            "description": "Scored after a profile is read: employers to rank down, never reject.",
+            "deprecated": true
           },
           "comp_band": {
             "type": "array",
@@ -12194,7 +13328,8 @@
                 "type": "number"
               }
             ],
-            "description": "Scored after a profile is read: [low, high] annual pay, in USD."
+            "description": "Scored after a profile is read: [low, high] annual pay, in USD.",
+            "deprecated": true
           },
           "years_experience": {
             "type": "object",
@@ -12234,12 +13369,14 @@
                 "preferred_background"
               ]
             },
-            "description": "Scored after a profile is read: gaps a Tier 2 match may have."
+            "description": "Scored after a profile is read: gaps a Tier 2 match may have.",
+            "deprecated": true
           },
           "min_avg_tenure_years": {
             "type": "number",
             "exclusiveMinimum": 0,
-            "description": "Scored after a profile is read: the shortest average tenure that scores well, in years."
+            "description": "Scored after a profile is read: the shortest average tenure that scores well, in years.",
+            "deprecated": true
           },
           "skills": {
             "type": "array",
@@ -12304,7 +13441,8 @@
                 "type": "boolean"
               }
             },
-            "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred."
+            "description": "Scored after a profile is read: the kind of employer preferred: sector, employee_range [min, max], pe_backed_preferred.",
+            "deprecated": true
           },
           "rubric_weights": {
             "type": "object",
@@ -12328,7 +13466,8 @@
                 "type": "number"
               }
             },
-            "description": "A workspace setting: refused on a search (weights_in_settings)."
+            "description": "Deprecated: scoring weights are a workspace setting an admin changes in Settings. A launch still accepts it from older clients and from criteria copied off an existing search (the workspace's weights win when an admin has set them); a scoring change that sends it is refused (weights_in_settings).",
+            "deprecated": true
           },
           "shortlist_min_score": {
             "type": "integer",
@@ -12416,7 +13555,8 @@
           },
           "market_coverage": {
             "type": "boolean",
-            "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page."
+            "description": "Reach the whole market: a query matching more than LinkedIn's 2,500 per query is split into slices (employer size, then title, then level) that each fit. Each slice's first results page is a paid page.",
+            "deprecated": true
           },
           "current_industries": {
             "maxItems": 20,
@@ -12538,8 +13678,7 @@
             ],
             "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
           }
-        },
-        "additionalProperties": true
+        }
       }
     }
   }

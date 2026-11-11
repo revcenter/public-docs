@@ -1,0 +1,187 @@
+---
+title: "API essentials"
+description: "The Revcenter API on one page: your first search with curl, how it fits together, waiting for a search, stop reasons and advice, paging, limits, retries and the common errors."
+---
+
+> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+
+**Base URL:** `https://api.revcenter.ai/v1`. Send `Authorization: Bearer <key>` ([Authentication](/authentication)).
+Bodies are JSON. Results are wrapped in `data`, and every response has a `request_id`:
+
+```json
+{ "data": { "id": "6a1e…", "name": "Controller, Camden NJ" }, "meta": { "request_id": "6f1c2b7e-…" } }
+```
+
+The [CLI](/tools/cli) and the [MCP server](/tools/mcp) call this same API with the same key, and do the waiting,
+paging and retrying below for you.
+
+## Your first search
+
+<Steps>
+  <Step title="Get a key">
+    **Settings → Integrations → API → Create key**, or `revcenter auth login`. It is shown once.
+    ```bash
+    export REVCENTER_API_KEY="rvc_live_..."
+    curl -s https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
+    ```
+  </Step>
+  <Step title="Make a project">
+    ```bash
+    curl -s -X POST https://api.revcenter.ai/v1/projects \
+      -H "Authorization: Bearer $REVCENTER_API_KEY" -H "Content-Type: application/json" \
+      -d '{"name": "Plant Maintenance Manager, Lancaster PA"}'
+    ```
+  </Step>
+  <Step title="Launch a search">
+    ```bash
+    curl -s -X POST https://api.revcenter.ai/v1/projects/<project_id>/searches \
+      -H "Authorization: Bearer $REVCENTER_API_KEY" -H "Content-Type: application/json" \
+      -H "Idempotency-Key: lancaster-maint-0001" \
+      -d '{"criteria": {"title_variants": ["Plant Maintenance Manager", "Maintenance Manager"], "metro": "Lancaster, PA", "geo_radius_mi": 30}, "max_credits": 1000}'
+    ```
+    Returns `202` with a `search_id`, `credits_reserved` and `review` (what Revcenter corrected, and warnings).
+    It reserves up to `max_credits`; left out, your workspace's limit per search (5,000 on a plan unless your
+    admins set another). Unused credits are refunded. The same `Idempotency-Key` returns the same search.
+  </Step>
+  <Step title="Wait, then read">
+    ```bash
+    curl -s "https://api.revcenter.ai/v1/searches/<search_id>?view=status" -H "Authorization: Bearer $REVCENTER_API_KEY"
+    curl -s "https://api.revcenter.ai/v1/searches/<search_id>/people?min_score=80" -H "Authorization: Bearer $REVCENTER_API_KEY"
+    curl -s https://api.revcenter.ai/v1/projects/<project_id>/shortlist.csv -H "Authorization: Bearer $REVCENTER_API_KEY" -o shortlist.csv
+    ```
+  </Step>
+</Steps>
+
+A complete job that does this safely is in the [backend job recipe](/recipes/backend-job).
+
+## How it fits together
+
+- A **project** is one role and one shortlist. Its **searches** feed that shortlist; an **expansion** is another
+  pass on the same role.
+- A search runs the criteria you send ([Criteria reference](/guides/criteria)), or a `jd_text` Revcenter reads.
+  `review.changes` at launch lists anything Revcenter corrected; `review.warnings` what to check.
+- Everyone a search reads is scored. People at or above the cut-off (80 by default) are on the shortlist.
+  Changing the cut-off or requirements re-scores them for free (`preview_scoring`, `apply_scoring`).
+- The client sees the shortlist through the project's one share link (`get_share_link`), a published version
+  (`publish_shortlist`) or an email (`send_shortlist_email`); the last two run only from an approved proposal.
+- Any write marked proposable can be previewed with `POST /actions/preview` and run with `POST /proposals/apply`.
+  `GET /actions` lists every action, its scope and its cost.
+
+## Waiting for a search
+
+A launch or expansion answers `202` at once; the search runs in the background for a few minutes. Poll
+`GET /v1/searches/{id}?view=status` every 30 seconds until `status` is no longer `queued` or `running`
+(`revcenter status <id> --wait` and MCP `wait_for_search` do it for you). While `queued`,
+`queue.eta_seconds` says about when it starts.
+
+| `status` | Meaning | Done? |
+| --- | --- | --- |
+| `queued` | Waiting to start | No |
+| `running` | Working; `stage` says where | No |
+| `stalled` | No activity for 3 minutes | Stop waiting; check later |
+| `complete` | Finished | Yes |
+| `failed` | Stopped by an error; its credits come back | Yes |
+| `stopped` | Stopped early | Yes |
+
+Treat an unknown status as done.
+
+```json
+{
+  "id": "0b9e7d6c-…",
+  "status": "complete",
+  "stop_reason": "few_matches",
+  "outcome": "Shortlist ready",
+  "profiles_read": 104,
+  "profiles_delivered": 98,
+  "shortlisted": 210,
+  "credits_reserved": 1000,
+  "credits_charged": 294,
+  "advice": ["Few people match these criteria. Widen the title or place to find more."]
+}
+```
+
+- `profiles_read`: profiles this search read. `profiles_delivered`: the new ones, the count it is charged for
+  (3 credits each). `shortlisted`: the whole project's shortlist when it closed, including earlier searches'
+  people. `delivered` is deprecated: the same number as `shortlisted`.
+- `outcome` is `Shortlist ready` (6 or more on the shortlist), `Poor yield` (1 to 5) or `No results` (0).
+- `credits_charged` is `null` while it runs; `credits_breakdown` shows the arithmetic ("98 profiles × 3 = 294 credits").
+
+### Stop reasons and advice
+
+| `stop_reason` | Meaning |
+| --- | --- |
+| `few_matches` | Several results pages in a row had nobody who fits: widen the title or place |
+| `discovery_exhausted` | No one was left for these titles and places |
+| `budget_exhausted` | It used its cap; expanding finds more |
+| `page_cap` | It reached the most one search can list; narrow it to reach the closest matches |
+| `cap_too_small` | Its cap was too small to deliver a page's people; nothing was charged |
+| `cancelled` | Someone stopped it; it keeps everyone it read |
+| `failed` | An error; every credit came back |
+
+`advice` is a list of sentences to read before the list goes to a client: few people read, a search stopped
+early, a query that matched more people than one search can list, a place wider than a city. It is empty when
+there is nothing to check. Show it to the person; don't parse it.
+
+Many at once: launch as many as you like, from as many agents as you like. Up to 3 run at once per workspace; the
+rest queue and start in turn, and none is refused for being busy. While a search on a project runs, expanding it or
+applying a scoring change answers `409 search_running`.
+
+## Paging
+
+Every list takes `limit` (up to 500) and `cursor`, and answers `data` and `cursor`; pass the cursor back for the
+next page. It is `null` on the last. A cursor the API didn't return is `400 invalid_cursor`. Lists of people stop
+at about 100 KB a page; `fields` picks profile slices and `profile=false` leaves profiles out. `offset` still works
+but is deprecated (`Sunset: Fri, 01 May 2027`). The shortlist (with no `limit`), `GET /reference/industries` and
+`GET /actions` answer everything at once.
+
+## Limits
+
+| Limit | Default |
+| --- | --- |
+| Requests per key | 600 a minute |
+| Requests per workspace | 3,000 a minute |
+| Launching a search or an expansion | Not counted |
+| Searches running at once | 3 per workspace; the rest queue |
+| Keys made in Settings | 5 per workspace (CLI sign-ins and connected apps don't count; see [Authentication](/authentication)) |
+
+Every response carries `x-ratelimit-limit`, `x-ratelimit-remaining` and `x-ratelimit-reset` (Unix seconds). A `429`
+has `Retry-After` and the same number in `error.details.retry_after_seconds`; nothing ran and nothing was
+reserved. Your workspace's admins can set lower limits for members ([Authentication](/authentication#limits-for-members)).
+
+## Retries and idempotency
+
+| Call | Safe to retry? |
+| --- | --- |
+| Any `GET` | Yes |
+| `POST /projects/{id}/searches` | Yes, with the **same `Idempotency-Key`** (required): the same search, never charged twice |
+| `POST /projects/{id}/expand` | Yes, with the same `Idempotency-Key`: the same pass, never reserved twice. Without one, each success starts a pass |
+| `POST /proposals/apply` | Yes: applying a proposal twice returns the first result |
+| `POST /searches/{id}/scoring/apply` | Yes, with the same `Idempotency-Key` |
+| `POST /projects` | No: each call makes a project |
+
+The same `Idempotency-Key` on a different request is `409 idempotency_key_reused`. A `429` or `5xx` is safe to
+retry after `Retry-After` (or with backoff) for the calls marked yes.
+
+## Common errors
+
+Errors have one shape: `{"error": {"code", "message", "details", "request_id"}}`. The ones you'll meet most:
+
+| Status | Code | What to do |
+| --- | --- | --- |
+| `400` | `invalid_criteria` | Fix the fields named; see `GET /reference/criteria` |
+| `400` | `location_required` | Add a place (`metro` with `geo_radius_mi`, or `allowed_metros`), or `remote_ok: true` |
+| `400` | `idempotency_key_required` | Add an `Idempotency-Key` header to the launch |
+| `400` | `max_credits_too_low` | Send 250 or more, or leave `max_credits` out |
+| `400` | `weights_in_settings` | Weights are a workspace setting; an admin changes them in Settings |
+| `401` | `missing_api_key` · `invalid_api_key` | Send a current key |
+| `402` | `shortlist_allocation_exhausted` · `trial_used_up` | A smaller `max_credits`, a top-up or a plan |
+| `402` | `database_pass_needs_credits` | The search has finished: expand it instead |
+| `403` | `insufficient_scope` · `admin_required` | Use a key that can make the call |
+| `404` | `project_not_found` · `search_not_found` | Check the id; ids belong to one workspace |
+| `409` | `search_running` | Wait for the search, then retry |
+| `409` | `idempotency_key_reused` | Use a new key for a different request |
+| `409` | `project_credit_limit` | Start a new project |
+| `409` | `key_limit` | Revoke a Settings key you no longer use |
+| `429` | `rate_limited` | Wait for `Retry-After` |
+
+Every code, with its fix, is in the [API reference](/api-reference/introduction#errors).
