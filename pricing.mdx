@@ -32,6 +32,26 @@ own cap, while the search still holds it; once a search has finished, expand it 
 
 A project's searches share a limit of three searches' worth. For a different role or place, start a new project.
 
+## Company searches
+
+A search for companies that are hiring is priced per company, for the data you choose on the review:
+
+| Data | Credits per company | What you get |
+|---|---|---|
+| Companies hiring now | 2 | Every company on the list: its open roles, size, industry and hiring score |
+| Hiring signals | 5 more | Senior leaders who left or joined, title moves and a new top leader, with dates |
+| Decision makers | 3 more | Who to call, up to 6 named people |
+
+All three come to 10 credits a company. Companies are scored on their open roles first; hiring signals and
+decision makers are bought for the top companies your credits cover, and charged only for a company where
+some turn up. Companies already in your results, and staffing agencies left out, are free. A list that finds any company is charged at least 100 credits, and the
+same prices apply on a trial.
+
+The review shows what your credits cover before you start: "Up to 1,000 credits: up to 40 companies with hiring
+signals and decision makers, 10 credits each." When the search finishes, the project page shows where the
+credits went, for example "Finding 60 · Hiring signals 150 · Decision makers 90". The same numbers are in
+`credits_breakdown.companies` on `GET /v1/searches/{id}`.
+
 ## Free trial
 
 A free trial is 500 credits, at plan prices: 3 credits per new profile, the same as on a plan. Each search can

@@ -2666,7 +2666,8 @@
                       "total": 243,
                       "cap": 1000,
                       "capped": false,
-                      "line": "81 profiles × 3 = 243 credits"
+                      "line": "81 profiles × 3 = 243 credits",
+                      "companies": null
                     },
                     "advice": []
                   },
@@ -9600,7 +9601,8 @@
                           "total": 243,
                           "cap": 1000,
                           "capped": false,
-                          "line": "81 profiles × 3 = 243 credits"
+                          "line": "81 profiles × 3 = 243 credits",
+                          "companies": null
                         }
                       },
                       {
@@ -9622,7 +9624,8 @@
                           "total": 90,
                           "cap": 1000,
                           "capped": false,
-                          "line": "30 profiles × 3 = 90 credits"
+                          "line": "30 profiles × 3 = 90 credits",
+                          "companies": null
                         }
                       }
                     ]
@@ -12609,7 +12612,65 @@
           },
           "line": {
             "type": "string",
-            "description": "The arithmetic in words, e.g. \"81 profiles × 3 = 243 credits\"."
+            "description": "The arithmetic in words, e.g. \"81 profiles × 3 = 243 credits\"; for a company search, per action, e.g. \"40 companies found × 2 + 20 with hiring signals × 5 = 180 credits\"."
+          },
+          "companies": {
+            "$ref": "#/components/schemas/CompanyCredits"
+          }
+        }
+      },
+      "CompanyCredits": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "description": "A company search's credits per data action, from the same rows its charge settled from: 2 credits per company found (listed, at any score), 5 more per company with hiring signals, 3 more per company with decision makers (signals and decision makers only where some turned up), and a list that delivers anything is charged at least 100. Companies already in the workspace's results, companies cut before they were read and staffing agencies removed are free. A list from before per-action prices shows only its total (pricing per_company_list). Null for a search for people.",
+        "properties": {
+          "pricing": {
+            "type": "string",
+            "enum": [
+              "per_action",
+              "per_company_list"
+            ]
+          },
+          "found": {
+            "$ref": "#/components/schemas/CompanyActionCredits"
+          },
+          "hiring_signals": {
+            "$ref": "#/components/schemas/CompanyActionCredits"
+          },
+          "decision_makers": {
+            "$ref": "#/components/schemas/CompanyActionCredits"
+          },
+          "list_minimum": {
+            "type": "integer",
+            "description": "Credits the 100-credit list minimum added; 0 when the actions came to more."
+          },
+          "total": {
+            "type": "integer",
+            "description": "Before the cap."
+          },
+          "line": {
+            "type": "string",
+            "description": "The spend per action in words, e.g. \"Finding 80 · Hiring signals 200 · Decision makers 120\"."
+          }
+        }
+      },
+      "CompanyActionCredits": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "companies": {
+            "type": "integer",
+            "description": "Companies charged for this action."
+          },
+          "credits_per_company": {
+            "type": "integer"
+          },
+          "credits": {
+            "type": "integer"
           }
         }
       },
