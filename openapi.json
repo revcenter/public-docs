@@ -2494,7 +2494,74 @@
                         }
                       ]
                     },
-                    "advice": []
+                    "advice": [],
+                    "steps": [
+                      {
+                        "kind": "searching",
+                        "text": "Searching for Plant Controller and 1 similar title within 40 miles of Camden, NJ",
+                        "detail": "Controller",
+                        "tone": "info",
+                        "counts": {
+                          "titles": 2,
+                          "places": 1
+                        },
+                        "at": "2026-10-17T14:03:05.000Z"
+                      },
+                      {
+                        "kind": "matched",
+                        "text": "640 people match these filters",
+                        "detail": null,
+                        "tone": "info",
+                        "counts": {
+                          "people": 640
+                        },
+                        "at": "2026-10-17T14:03:09.000Z"
+                      },
+                      {
+                        "kind": "read",
+                        "text": "Read 25 profiles in Camden, NJ",
+                        "detail": "1 page of results · 4 at 80+ so far",
+                        "tone": "info",
+                        "counts": {
+                          "read": 25,
+                          "pages": 1,
+                          "shortlisted": 4
+                        },
+                        "at": "2026-10-17T14:04:40.000Z"
+                      },
+                      {
+                        "kind": "outside_area",
+                        "text": "Left out 2 people who live outside the area",
+                        "detail": "The search area is within 40 miles of Camden, NJ",
+                        "tone": "warn",
+                        "counts": {
+                          "removed": 2
+                        },
+                        "at": "2026-10-17T14:04:41.000Z"
+                      },
+                      {
+                        "kind": "stopped",
+                        "text": "Stopped: used the credits set for this search",
+                        "detail": "Continue it to read more people; everyone already read is kept.",
+                        "tone": "info",
+                        "counts": {
+                          "total_pages": 10,
+                          "total_read": 212
+                        },
+                        "at": "2026-10-17T14:19:31.000Z"
+                      },
+                      {
+                        "kind": "done",
+                        "text": "Shortlist ready",
+                        "detail": "14 people at 80+ from 212 profiles read",
+                        "tone": "done",
+                        "counts": {
+                          "shortlisted": 14,
+                          "total_read": 212
+                        },
+                        "at": "2026-10-17T14:19:40.000Z"
+                      }
+                    ]
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -11725,6 +11792,63 @@
           },
           "credits_breakdown": {
             "$ref": "#/components/schemas/CreditBreakdown"
+          },
+          "steps": {
+            "type": "array",
+            "description": "What the search did, step by step, oldest first: the titles and places it searched, how many people the first page matched and any filter it widened or narrowed because of it, each round of profiles read, people left out for living outside the area, why it stopped, and the finished list. Each step is a plain sentence written from the search's own numbers, with a detail line, its counts and when it happened. The same steps the app's AI chat shows as Reasoning. Full view only; empty for searches that ran before steps were recorded.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "searching",
+                    "on_file",
+                    "matched",
+                    "widened",
+                    "narrowed",
+                    "read",
+                    "outside_area",
+                    "stopped",
+                    "done",
+                    "failed"
+                  ],
+                  "description": "What kind of step: searching (the titles and places sent), on_file (people already in the workspace who fit), matched (how many people the first page matched), widened or narrowed (a filter changed because of that count), read (a round of profiles read), outside_area (people left out for where they live), stopped (why it stopped), done (the finished list), failed."
+                },
+                "text": {
+                  "type": "string",
+                  "description": "The step in a plain sentence, e.g. \"Widened the company size because few people matched\"."
+                },
+                "detail": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "A second line with the step's numbers or reason; null when there is none."
+                },
+                "tone": {
+                  "type": "string",
+                  "enum": [
+                    "info",
+                    "warn",
+                    "done",
+                    "failed"
+                  ],
+                  "description": "warn marks a step that changed course or left people out; done the finished list; failed a search that ended without one."
+                },
+                "counts": {
+                  "type": "object",
+                  "description": "The step's numbers by name (read, pages, people, removed, shortlisted, total_read, total_pages, titles, places, screened_out); only the ones the step has.",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "at": {
+                  "type": "string",
+                  "description": "When the step happened."
+                }
+              }
+            }
           },
           "advice": {
             "type": "array",
