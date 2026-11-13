@@ -126,7 +126,7 @@ fix and the `request_id`.
 | Tool | What it does | Cost |
 | --- | --- | --- |
 | `get_me` | The key's workspace, name, scopes and expiry, the person it acts as and their role, the workspace's plan and limits, and today's usage. | Does not use credits. |
-| `get_usage` | Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. | Does not use credits. |
+| `get_usage` | Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, what a profile delivered costs, every action that spends credits at its price (and in dollars on a plan), and what is free. | Does not use credits. |
 | `list_actions` | Every action this API offers, with its route, scope and cost class: the catalog the MCP tools are built from. | Does not use credits. |
 | `preview_action` | What an action would do and spend, without doing it; returns a proposal_id that apply_proposal runs within 30 minutes. | Does not use credits. |
 | `apply_proposal` | Run an action previewed with preview_action, exactly as previewed. Applying the same proposal twice returns the first result. | Uses what its preview stated: a search or an expansion reserves up to its max_credits and refunds what it doesn't use; anything else is free. |

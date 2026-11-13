@@ -158,7 +158,8 @@
                       "tier": "growth",
                       "term": "annual",
                       "expires_at": "2027-09-01T00:00:00.000Z",
-                      "credits_remaining": 37000
+                      "credits_remaining": 37000,
+                      "dollars_per_credit": 0.0375
                     },
                     "limits": {
                       "requests_per_minute_per_key": 600,
@@ -222,7 +223,7 @@
       "get": {
         "operationId": "get_usage",
         "summary": "Today's usage",
-        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, and what a profile delivered costs. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
+        "description": "Today's requests and searches, credits remaining, and the workspace's credit terms: its limit per search and per project, what a profile delivered costs, every action that spends credits at its price (and in dollars on a plan), and what is free. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nAny valid key.",
         "x-revcenter-retry": "safe",
         "x-revcenter-timeout-seconds": 30,
         "tags": [
@@ -279,7 +280,26 @@
                       "credits_per_profile": 3,
                       "results_page_credits": 0,
                       "profile_read_credits": 3,
-                      "people_per_page": 25
+                      "people_per_page": 25,
+                      "dollars_per_credit": 0.0375,
+                      "actions": [
+                        {
+                          "key": "profile",
+                          "name": "Read and score a new LinkedIn profile",
+                          "unit": "profile",
+                          "credits": 3,
+                          "pricing": "per_unit",
+                          "charged": "For each person a search (or a database pass) delivers that your workspace doesn't have yet, whatever their score.",
+                          "free": "People your workspace already has, people a search lists but doesn't read, and anyone repeated within a search.",
+                          "dollars": 0.1125
+                        }
+                      ],
+                      "free": [
+                        {
+                          "key": "ai_chat",
+                          "name": "AI chat and tool calls"
+                        }
+                      ]
                     }
                   },
                   "meta": {
@@ -2463,7 +2483,16 @@
                       "cap": 1000,
                       "capped": false,
                       "line": "81 profiles × 3 = 243 credits",
-                      "companies": null
+                      "companies": null,
+                      "actions": [
+                        {
+                          "action": "profile",
+                          "name": "Read and score a new LinkedIn profile",
+                          "quantity": 81,
+                          "credits_per_unit": 3,
+                          "credits": 243
+                        }
+                      ]
                     },
                     "advice": []
                   },
@@ -8429,7 +8458,16 @@
                           "cap": 1000,
                           "capped": false,
                           "line": "81 profiles × 3 = 243 credits",
-                          "companies": null
+                          "companies": null,
+                          "actions": [
+                            {
+                              "action": "profile",
+                              "name": "Read and score a new LinkedIn profile",
+                              "quantity": 81,
+                              "credits_per_unit": 3,
+                              "credits": 243
+                            }
+                          ]
                         }
                       },
                       {
@@ -8452,7 +8490,16 @@
                           "cap": 1000,
                           "capped": false,
                           "line": "30 profiles × 3 = 90 credits",
-                          "companies": null
+                          "companies": null,
+                          "actions": [
+                            {
+                              "action": "profile",
+                              "name": "Read and score a new LinkedIn profile",
+                              "quantity": 30,
+                              "credits_per_unit": 3,
+                              "credits": 90
+                            }
+                          ]
                         }
                       }
                     ]
@@ -11036,6 +11083,13 @@
                   "integer",
                   "null"
                 ]
+              },
+              "dollars_per_credit": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "What one credit costs on this plan: its price divided by its credits. Null without a plan (a trial, or credits granted by hand)."
               }
             }
           },
@@ -11137,8 +11191,120 @@
               },
               "people_per_page": {
                 "type": "integer"
+              },
+              "dollars_per_credit": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "What one credit costs on the workspace's plan. Null without a plan: quote credits only."
+              },
+              "actions": {
+                "type": "array",
+                "description": "Every action that spends credits, at its price: quote these, not fixed numbers.",
+                "items": {
+                  "$ref": "#/components/schemas/CreditAction"
+                }
+              },
+              "free": {
+                "type": "array",
+                "description": "What never costs credits.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
               }
             }
+          }
+        }
+      },
+      "CreditAction": {
+        "type": "object",
+        "description": "One thing that spends credits, in the words the app uses.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Stable id: profile, company_found, company_signals, company_decision_makers, company_list_minimum."
+          },
+          "name": {
+            "type": "string",
+            "description": "e.g. \"Read and score a new LinkedIn profile\"."
+          },
+          "unit": {
+            "type": "string",
+            "description": "What one charge counts: profile, company or list."
+          },
+          "credits": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Credits per unit; null when charged as used."
+          },
+          "pricing": {
+            "type": "string",
+            "enum": [
+              "per_unit",
+              "added_per_unit",
+              "minimum",
+              "as_used"
+            ],
+            "description": "per_unit: each unit costs credits. added_per_unit: on top of finding the same company. minimum: the least a company list that finds anything is charged."
+          },
+          "charged": {
+            "type": "string",
+            "description": "When it is charged."
+          },
+          "free": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What about it costs nothing."
+          },
+          "dollars": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "credits × dollars_per_credit; null without a plan."
+          }
+        }
+      },
+      "CreditActionLine": {
+        "type": "object",
+        "description": "One action a search was charged for.",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "The action's key in credit_terms.actions; results_page_v1, profile_read_v1 and company_list_v1 name charges at earlier prices, other_data anything charged as used."
+          },
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Units charged; null for the list minimum or data charged as used."
+          },
+          "credits_per_unit": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "credits": {
+            "type": "integer",
+            "description": "Before the search's cap."
           }
         }
       },
@@ -11341,6 +11507,13 @@
           },
           "companies": {
             "$ref": "#/components/schemas/CompanyCredits"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreditActionLine"
+            },
+            "description": "The charge as named actions, before the cap: every credit counted, with the name the app shows."
           }
         }
       },

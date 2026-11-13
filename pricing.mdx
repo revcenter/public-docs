@@ -11,21 +11,33 @@ You pay for one thing: new people. A search is charged for each person it delive
 first time, whatever their score. Once your workspace has someone, every later search and the candidate database
 use them again for free.
 
-## What is billed and what is free
+## Credits per action
 
 {/* generated:credit-prices (node scripts/docs/build-tables.mjs; do not edit by hand) */}
-| What | Cost |
+| Action | Credits | In dollars, by plan | When it is charged |
+| --- | --- | --- | --- |
+| Read and score a new LinkedIn profile | 3 credits per profile | $0.06 to $0.23 | For each person a search (or a database pass) delivers that your workspace doesn't have yet, whatever their score. |
+| Find a company that is hiring | 2 credits per company | $0.04 to $0.15 | For each company on a company list, with its open roles, size, industry and hiring score. |
+| Hiring signals for a company | +5 credits per company | $0.10 to $0.38 | On top of finding the company, when you ask for senior leaders who left or joined, title moves and a new top leader, with dates. |
+| Decision makers at a company | +3 credits per company | $0.06 to $0.23 | On top of finding the company, when you ask who to call: up to 6 named people. |
+| Company list minimum | 100 credits minimum per list | $2 to $7.50 | The least a company list that finds any company is charged; only the difference is added. |
+
+One credit costs $0.02 to $0.075, depending on your plan and term: the plan's price divided by its credits. A free trial gives 500 credits at the same prices.
+
+For example, a search that reads 400 new profiles costs 1,200 credits: $24 to $90, depending on your plan.
+
+| Free | Credits |
 | --- | --- |
-| Each new person a search finds for you, whatever their score | 3 credits |
-| People your workspace already has | Free |
-| Results pages | Free |
-| AI screening, scoring and re-scoring | Free |
-| Reading, projects, shortlist changes, sharing and exports | Free |
-| Company search: each company found | 2 credits |
-| Company search: hiring signals for a company | 5 more credits |
-| Company search: decision makers for a company | 3 more credits |
-| Company search: a list that finds any company, at least | 100 credits |
-| Free trial | 500 credits, at plan prices |
+| AI chat and tool calls | 0 |
+| AI screening and scoring of the profiles a search reads | 0 |
+| Re-scoring after you change a requirement | 0 |
+| People your workspace already has, in any later search or the candidate database | 0 |
+| Results pages, and people a search lists but doesn't read | 0 |
+| Companies already in your results | 0 |
+| Shortlist changes, client links and emails to your client | 0 |
+| Exports (CSV and JSON Lines) | 0 |
+| Projects, reading results, and looking up industries or criteria | 0 |
+| Credits a search holds but doesn't use: they come back when it finishes | 0 |
 {/* end generated */}
 
 The app shows the same prices under **What you pay for**, in **Settings → Usage** and **Settings → Plan & billing**.
@@ -89,7 +101,9 @@ Credits left are under **Settings → Usage**. Credits held by searches still ru
 as they finish. A plan grants its credits each period; a top-up (**Settings → Plan & billing**) buys more at your
 plan's own rate.
 
-Developers: `GET /v1/me/usage` (MCP `get_usage`) returns `credits_remaining` and your
-workspace's own limits and price in `credit_terms`. Each search's charge is in `credits_charged`,
-`profiles_delivered` and `credits_breakdown` on `GET /v1/searches/{id}`, and for a whole project in
+Developers: `GET /v1/me/usage` (MCP `get_usage`) returns `credits_remaining` and your workspace's own limits and
+price in `credit_terms`: `credit_terms.actions` is the table above with your plan's dollars, and
+`credit_terms.dollars_per_credit` what one credit costs on your plan (null on a trial). Each search's charge is in
+`credits_charged`, `profiles_delivered` and `credits_breakdown` on `GET /v1/searches/{id}`, with
+`credits_breakdown.actions` naming each action it was charged for, and for a whole project in
 `GET /v1/projects/{id}/spend`.
