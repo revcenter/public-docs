@@ -33,7 +33,8 @@ any other `4xx` first.
 | Status | Code | Meaning | Fix |
 | --- | --- | --- | --- |
 | `400` | `invalid_criteria` | Criteria failed validation | Fix the fields named in the message; see GET /v1/reference/criteria. |
-| `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters | Send criteria or a jd_text of at least 40 characters. |
+| `400` | `criteria_required` | No `criteria` and no `jd_text` of 40+ characters (or a document that gives that much text) | Send criteria or a jd_text of at least 40 characters. |
+| `400` | `invalid_document` | `draft_criteria`'s `document_base64` is not base64, `document_type` is not pdf, docx or txt, one was sent without the other, or the notes beside it are over 2,000 characters | Send document_base64 as the file's base64 bytes with document_type pdf, docx or txt. |
 | `400` | `location_required` | The criteria name no place and don't set `remote_ok` (on a launch, its preview, or `draft_criteria`); nothing was reserved | Add a place to the criteria (metro with geo_radius_mi, or allowed_metros), or set remote_ok: true for a remote role, then launch again. |
 | `400` | `idempotency_key_required` | A launch without an `Idempotency-Key` (8 to 160 characters) | Send an Idempotency-Key header, unique to this search. |
 | `400` | `max_credits_too_low` | `max_credits` is under 250, the smallest cap Revcenter takes (`details.minimum` is 250) | Send max_credits of at least 250, the smallest cap Revcenter takes, or leave it out for the workspace's limit per search. |
@@ -100,7 +101,9 @@ any other `4xx` first.
 | `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (preview_shortlist_email) and send the client workspace's name it shows. |
 | `409` | `webhook_limit` | The workspace already has 10 webhook endpoints | Delete an endpoint (delete_webhook) to add another; a workspace has 10 at most. |
 | `409` | `webhook_disabled` | A redelivery to an endpoint that is turned off | Turn the endpoint on (update_webhook with enabled true), then redeliver. |
+| `413` | `document_too_large` | `draft_criteria`'s document is over 10 MB, over 100 pages, or gives over 200,000 characters of text | Send a file of 10 MB at most, or paste its text as jd_text. |
 | `413` | `response_too_large` | `get_shortlist` with `fields` would be more than one answer holds (about 100 KB); nothing was cut | Ask for fewer fields, or page through list_people (min_score 80) with fields; exports carry every profile. |
+| `422` | `document_unreadable` | `draft_criteria`'s document could not be read as the `document_type` sent | Paste the description as jd_text instead, or send the file as another type. |
 | `424` | `search_unavailable` | Live search is unavailable | Retry later, or launch with database_only. |
 | `429` | `member_rate_limited` | Your workspace's admins limit how many requests a minute you can make | Wait for the Retry-After seconds, then retry; a workspace admin can raise your request limit in Settings. |
 | `429` | `rate_limited` | Too many requests this minute; nothing ran | Wait for the Retry-After seconds, then retry. |

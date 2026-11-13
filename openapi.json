@@ -1222,25 +1222,36 @@
       "post": {
         "operationId": "draft_criteria",
         "summary": "Draft criteria from a job description",
-        "description": "Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. The same reading the app's composer makes: titles and their closest synonyms, the role's own place and radius, years, and requirements as short terms, with the rest as scored context. `review.warnings` names anything to check before launching (a place wider than the role's own); `compiled_query` is the exact query the criteria will send. Pass `project_id` to check the place against the project's name too. Does not use credits. Let it run up to 60 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:write`.",
+        "description": "Revcenter's reading of a job description as criteria, the way the app drafts a search: review it, change what the person asks, then launch it as criteria. Launches nothing. The same reading the app's composer makes: titles and their closest synonyms, the role's own place and radius, years, and requirements as short terms, with the rest as scored context. `review.warnings` names anything to check before launching (a place wider than the role's own); `compiled_query` is the exact query the criteria will send. Pass `project_id` to check the place against the project's name too. A PDF, Word (.docx) or text file can be sent instead of text as `document_base64` with its `document_type`: its text is read where it arrives and stored nowhere, and `document` says how much was read. Does not use credits. Let it run up to 60 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:write`.",
         "x-revcenter-retry": "safe",
         "x-revcenter-timeout-seconds": 60,
         "tags": [
           "Reference"
         ],
         "requestBody": {
-          "required": true,
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "jd_text"
-                ],
+                "required": [],
                 "properties": {
                   "jd_text": {
                     "type": "string",
-                    "description": "The job description or the client's request, at least 40 characters."
+                    "description": "The job description or the client's request, at least 40 characters. With a document, the person's own notes on it (up to 2,000 characters), read before the document."
+                  },
+                  "document_base64": {
+                    "type": "string",
+                    "description": "A job description file instead of text: its bytes, base64-encoded (10 MB at most). Read where it is sent and stored nowhere; no model reads the file itself."
+                  },
+                  "document_type": {
+                    "type": "string",
+                    "enum": [
+                      "pdf",
+                      "docx",
+                      "txt"
+                    ],
+                    "description": "The file's type, required with document_base64."
                   },
                   "project_id": {
                     "type": "string",
@@ -1291,6 +1302,24 @@
                         },
                         "compiled_query": {
                           "type": "object"
+                        },
+                        "document": {
+                          "type": "object",
+                          "description": "With a document: its type, pages (PDF only) and how many characters of text it gave.",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "pages": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            },
+                            "characters": {
+                              "type": "integer"
+                            }
+                          }
                         }
                       }
                     },
