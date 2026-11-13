@@ -101,6 +101,7 @@ any other `4xx` first.
 | `429` | `member_rate_limited` | Your workspace's admins limit how many requests a minute you can make | Wait for the Retry-After seconds, then retry; a workspace admin can raise your request limit in Settings. |
 | `429` | `rate_limited` | Too many requests this minute; nothing ran | Wait for the Retry-After seconds, then retry. |
 | `429` | `network_busy` | Revcenter is briefly full; nothing ran | Retry after the Retry-After seconds. |
+| `429` | `workspace_search_limit` | The workspace already has 50 searches running or waiting; nothing ran | Wait for some of the workspace's searches to finish, then launch again. |
 | `429` | `launch_in_progress` | The same `Idempotency-Key` is still being started by another request | Retry after the Retry-After seconds with the same Idempotency-Key; the first request is still starting the search. |
 | `500` | `internal_error` | Something failed on our side | Retry with backoff; if it persists, send support the request_id. |
 | `503` | `access_check_unavailable` | Access couldn't be checked; nothing ran | Retry after the Retry-After seconds; nothing ran. |
