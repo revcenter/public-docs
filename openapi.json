@@ -11875,10 +11875,11 @@
                     "read",
                     "outside_area",
                     "stopped",
+                    "resumed",
                     "done",
                     "failed"
                   ],
-                  "description": "What kind of step: searching (the titles and places sent), on_file (people already in the workspace who fit), matched (how many people the first page matched), widened or narrowed (a filter changed because of that count), read (a round of profiles read), outside_area (people left out for where they live), stopped (why it stopped), done (the finished list), failed."
+                  "description": "What kind of step: searching (the titles and places sent), on_file (people already in the workspace who fit), matched (how many people the first page matched), widened or narrowed (a filter changed because of that count), read (a round of profiles read), outside_area (people left out for where they live), stopped (why it stopped), resumed (it picked up again after a server restart, reusing what it already read), done (the finished list), failed."
                 },
                 "text": {
                   "type": "string",
