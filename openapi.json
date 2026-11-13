@@ -1088,6 +1088,9 @@
                         "compiled_query": {
                           "type": "object"
                         },
+                        "why": {
+                          "$ref": "#/components/schemas/FilterSources"
+                        },
                         "document": {
                           "type": "object",
                           "description": "With a document: its type, pages (PDF only) and how many characters of text it gave.",
@@ -1142,7 +1145,25 @@
                       "locations": [
                         "Camden, NJ"
                       ]
-                    }
+                    },
+                    "why": [
+                      {
+                        "field": "titles",
+                        "value": "Plant Controller",
+                        "strength": "must_match",
+                        "from": "request",
+                        "words": "Plant Controller",
+                        "why": "From the request: \"Plant Controller\""
+                      },
+                      {
+                        "field": "industries",
+                        "value": "Manufacturing",
+                        "strength": "ranks_higher",
+                        "from": "suggested",
+                        "words": null,
+                        "why": "Suggested: the request doesn't say this, so it only ranks"
+                      }
+                    ]
                   },
                   "meta": {
                     "request_id": "req_01JABCDEF"
@@ -11442,6 +11463,50 @@
           },
           "shortlisted": {
             "type": "integer"
+          }
+        }
+      },
+      "FilterSources": {
+        "type": "array",
+        "description": "Every filter the draft carries, how it counts and where it came from. A filter narrows the search (must_match) or leaves people out (left_out) only when the request's own words name it, apart from the role's titles and its place; anything Revcenter inferred only ranks (ranks_higher) and is from \"suggested\". Show the suggested ones to the person before launching.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "The criteria field (titles and place stand for title_variants and metro or allowed_metros)."
+            },
+            "value": {
+              "type": "string"
+            },
+            "strength": {
+              "type": "string",
+              "enum": [
+                "must_match",
+                "ranks_higher",
+                "left_out"
+              ],
+              "description": "must_match narrows the search; ranks_higher only ranks; left_out keeps people out."
+            },
+            "from": {
+              "type": "string",
+              "enum": [
+                "request",
+                "suggested"
+              ],
+              "description": "request: the request's words name it; suggested: Revcenter added it."
+            },
+            "words": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The request's words it came from; null when suggested."
+            },
+            "why": {
+              "type": "string",
+              "description": "A short line to show the person."
+            }
           }
         }
       },

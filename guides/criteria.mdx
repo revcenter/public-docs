@@ -25,7 +25,7 @@ that city and a radius, never a state or a country.
 | **Must match** | `flag: "must"` on `employers` or `degree_country`; `enforcement: "hard"` on `years_experience`; any filter field (`title_variants`, `metro`, `seniority`, `current_industries`…); `must_have` terms |
 | **Ranks higher** | `flag: "prefer"`; `enforcement: "preferred"`; `preferred_employers`, `skills`, `keywords`, `must_have_context` |
 | **Left out** | `flag: "exclude"`; `exclude_titles`, `exclude_companies`, `exclude_industries`, `exclude_functions`, `exclude_schools`, `exclude_locations` |
-| **Suggested** | A value Revcenter added that the request didn't state (a level read from the title). It is sent like any other; change or remove it. |
+| **Suggested** | A value Revcenter added that the request didn't state (a level, an industry, a skill). A drafted filter is Must match or Left out only when the request's own words name it (the role's titles and its place aside), so a Suggested value only ranks; `draft_criteria` lists each filter with its `why`. Make it Must match, change it, or remove it. |
 
 ## Fields
 
