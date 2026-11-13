@@ -9,58 +9,34 @@ Your agent does the reasoning; Revcenter searches, scores and keeps the shortlis
 
 | Server | Where | Signs in with | Tools |
 | --- | --- | --- | --- |
-| **Local** (`revcenter mcp`) | Claude Code, Codex, Cursor, Gemini CLI, Claude Desktop | The key `revcenter auth login` saved | Every tool below, plus exports to files |
-| **Hosted** (`https://api.revcenter.ai/mcp`) | Claude and ChatGPT in the browser ([setup](/tools/connectors)), model APIs, IDEs | OAuth, or an API key as a bearer token | The chat tools: drafting, searches, results, shortlist, decisions, do-not-contact, the client link and email |
+| **Hosted** (`https://api.revcenter.ai/mcp`) | Claude and ChatGPT ([setup](/tools/connectors)), coding agents, model APIs, IDEs | OAuth, or an API key as a bearer token | The chat tools: drafting, searches, results, shortlist, decisions, do-not-contact, the client link and email |
+| **Local** (`npx -y revcenter mcp`) | Claude Code, Codex, Cursor, Gemini CLI, Claude Desktop | An API key in `REVCENTER_API_KEY` | Every tool below, plus exports to files |
 
 ## Connect a coding agent
 
-Paste this into Claude Code, Codex, Cursor or any coding agent:
-
-```text
-Set up the Revcenter plugin by following the steps in https://github.com/revcenter/agent-plugins
-```
-
-It installs the CLI, signs you in (you click **Authorize** once), connects itself and tells you how many credits
-you have. In Claude Code you can also install the plugin directly:
-
-```text
-/plugin marketplace add revcenter/agent-plugins
-/plugin install revcenter@revcenter-plugins
-```
-
-Or by hand: install, sign in, and let the CLI add the server to every AI tool on the machine.
-
-```bash
-curl -fsSL https://revcenter.ai/install.sh | sh
-revcenter login
-revcenter setup        # Claude Code, Codex, Gemini CLI, Cursor, Claude Desktop: whichever are installed
-```
+The hosted server needs nothing installed. Add it by URL and sign in once in your browser:
 
 <Tabs>
   <Tab title="Claude Code">
     ```bash
-    claude mcp add -s user revcenter -- revcenter mcp
+    claude mcp add -s user --transport http revcenter https://api.revcenter.ai/mcp
     ```
   </Tab>
-  <Tab title="Codex">
-    ```bash
-    codex mcp add revcenter -- revcenter mcp
-    ```
-  </Tab>
-  <Tab title="Gemini CLI">
-    ```bash
-    gemini mcp add -s user revcenter revcenter mcp
-    ```
-  </Tab>
-  <Tab title="Cursor, Claude Desktop, others">
-    ```json
-    { "mcpServers": { "revcenter": { "command": "npx", "args": ["-y", "revcenter", "mcp"] } } }
-    ```
+  <Tab title="Others">
+    Add a remote (Streamable HTTP) MCP server with the URL `https://api.revcenter.ai/mcp`. Clients that support
+    MCP sign-in open your browser to authorize; the others send an API key, as below.
   </Tab>
 </Tabs>
 
-The server uses the saved key, so no key goes in a config file. On a server or in CI, set `REVCENTER_API_KEY`
-instead. Restart the client and ask it to "list my Revcenter projects".
+For every tool, including exports saved as files, run the local server. It reads an API key from **Settings →
+Integrations → API** ([Authentication](/authentication)) in `REVCENTER_API_KEY`:
+
+```json
+{ "mcpServers": { "revcenter": { "command": "npx", "args": ["-y", "revcenter", "mcp"], "env": { "REVCENTER_API_KEY": "rvc_live_…" } } } }
+```
+
+Keep the key out of prompts and shared files: where your client can read it from the environment or a secret
+store, put it there. Restart the client and ask it to "list my Revcenter projects".
 
 ## Your own LLM or agent
 
@@ -113,7 +89,8 @@ more with name, title, company and place. Export each shortlist as CSV.
 
 ## Approvals
 
-Nothing that spends credits or reaches the client runs without the person:
+Nothing that spends credits or reaches the client runs without the person. On the hosted server your client asks
+before any tool that isn't read-only. The local server asks itself:
 
 1. The server previews the action: what it does, the most it reserves, and the credits left.
 2. If the client can ask, it asks in one sentence with Accept and Decline: `Launch search "Associate · Paul Weiss
@@ -138,9 +115,6 @@ Launch as many as you like; up to 3 run at once per workspace, and the rest queu
 `queue.eta_seconds`) and start in turn. Have one sub-agent per role, then merge: export tools save under
 `./revcenter-exports/`, as CSV for a spreadsheet or JSON Lines (`format: "jsonl"`) for an agent to read. See the
 [Exports reference](/guides/exports).
-
-For results to reach your own systems with no agent running, `create_webhook` adds an endpoint
-([Webhooks](/guides/webhooks)).
 
 ## Tools
 
@@ -186,13 +160,6 @@ fix and the `request_id`.
 | `list_companies` | The employers of everyone this workspace's searches found, as the Companies tab lists them: how many of your people work there, industry, size, location and recent job postings; filter by text, project, industry, place or hiring. | Does not use credits. |
 | `export_candidates` | The candidate database as CSV (up to 5,000 people, the same filters as list_candidates): every profile field as text and as numbered columns, and the profile as JSON in the last column; or as JSON Lines with format=jsonl. | Does not use credits. |
 | `create_top_up` | A Stripe checkout link to add credits to this workspace at its plan's rate; open it to pay. Nothing is charged until someone pays on that page. | Does not use credits. |
-| `list_webhooks` | The workspace's webhook endpoints, newest first: URL, the events each receives, whether it is on, and why it was turned off. Never the signing secret. | Does not use credits. |
-| `create_webhook` | Add an HTTPS endpoint that receives search and shortlist events as signed POSTs, so results reach your systems without an agent running. Returns the signing secret once. | Does not use credits. |
-| `update_webhook` | Change an endpoint's URL, events or description, or turn it off and on; turning it on again clears its failure count. | Does not use credits. |
-| `delete_webhook` | Remove an endpoint and its delivery history; nothing more is sent to it. | Does not use credits. |
-| `test_webhook` | Send a webhook.test event to one endpoint now, signed like any other, and return the delivery with the status code your endpoint answered. | Does not use credits. |
-| `list_webhook_deliveries` | What was sent to an endpoint, newest first: each event, its status (pending, delivered, failed, abandoned), attempts, the status code your endpoint answered, and when the next retry is. | Does not use credits. |
-| `redeliver_webhook` | Send a delivery's event to its endpoint again, now, with the same event id; retried on failure like any delivery. | Does not use credits. |
 | `set_candidate_verdict` | Record your team's verdict on someone a search found (accept, reject, maybe, or null to clear) with reason codes and private notes, e.g. "Ask about work authorization". | Does not use credits. |
 | `get_candidate_verdicts` | The latest verdict, reason codes and private notes for each person in a search, newest first: what your team (or the client, on the portal) decided. | Does not use credits. |
 | `list_decline_reasons` | Your workspace's decline reasons: the reason_codes a verdict takes. Ten defaults, then the ones your team added, most used first. | Does not use credits. |

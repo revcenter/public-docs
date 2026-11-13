@@ -37,11 +37,9 @@
         "group": "For developers",
         "pages": [
           "tools/mcp",
-          "tools/cli",
           "guides/api-essentials",
           "guides/criteria",
           "guides/exports",
-          "guides/webhooks",
           "recipes/backend-job"
         ]
       },
@@ -51,9 +49,6 @@
         "pages": [
           "api-reference/introduction",
           "GET /health",
-          "POST /auth/device",
-          "POST /auth/token",
-          "POST /auth/revoke",
           "GET /me",
           "GET /me/usage",
           "POST /billing/top-up",
@@ -111,14 +106,7 @@
           "GET /projects/{projectId}/client-feedback",
           "GET /candidates",
           "GET /companies",
-          "GET /candidates.csv",
-          "GET /webhooks",
-          "POST /webhooks",
-          "PATCH /webhooks/{webhookId}",
-          "DELETE /webhooks/{webhookId}",
-          "POST /webhooks/{webhookId}/test",
-          "GET /webhooks/{webhookId}/deliveries",
-          "POST /webhooks/deliveries/{deliveryId}/redeliver"
+          "GET /candidates.csv"
         ]
       }
     ]
@@ -152,10 +140,6 @@
     {
       "source": "/concepts/execution-model",
       "destination": "/guides/api-essentials"
-    },
-    {
-      "source": "/concepts/cli-basics",
-      "destination": "/tools/cli"
     },
     {
       "source": "/tools/agents",
@@ -204,6 +188,18 @@
     {
       "source": "/use-cases/agent-research",
       "destination": "/tools/mcp"
+    },
+    {
+      "source": "/concepts/cli-basics",
+      "destination": "/tools/mcp"
+    },
+    {
+      "source": "/tools/cli",
+      "destination": "/tools/mcp"
+    },
+    {
+      "source": "/guides/webhooks",
+      "destination": "/guides/api-essentials"
     }
   ]
 }

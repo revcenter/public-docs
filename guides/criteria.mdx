@@ -6,8 +6,8 @@ description: "Every field a search takes, which ones narrow who is listed and wh
 > Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
 
 A search runs the criteria you send. Each field either **filters** (narrows who is listed, before anyone is
-read) or **scores** (ranks people once their profiles are read). `GET /v1/reference/criteria` (CLI
-`revcenter reference`, MCP `get_criteria_reference`) returns every field with its allowed values; the launch's
+read) or **scores** (ranks people once their profiles are read). `GET /v1/reference/criteria`
+(MCP `get_criteria_reference`) returns every field with its allowed values; the launch's
 `review.changes` says what Revcenter corrected and `review.warnings` what to check. The easiest way to get
 criteria right is `POST /v1/criteria/draft` (`draft_criteria`): Revcenter's own reading of a job description, as
 the app drafts a search.

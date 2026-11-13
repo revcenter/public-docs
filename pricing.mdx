@@ -89,7 +89,7 @@ Credits left are under **Settings → Usage**. Credits held by searches still ru
 as they finish. A plan grants its credits each period; a top-up (**Settings → Plan & billing**) buys more at your
 plan's own rate.
 
-Developers: `GET /v1/me/usage` (CLI `revcenter usage`, MCP `get_usage`) returns `credits_remaining` and your
+Developers: `GET /v1/me/usage` (MCP `get_usage`) returns `credits_remaining` and your
 workspace's own limits and price in `credit_terms`. Each search's charge is in `credits_charged`,
 `profiles_delivered` and `credits_breakdown` on `GET /v1/searches/{id}`, and for a whole project in
 `GET /v1/projects/{id}/spend`.

@@ -10,13 +10,13 @@ is lossless.
 
 ## What you can export
 
-| You want | API | MCP | CLI |
-| --- | --- | --- | --- |
-| The project's shortlist | `/projects/{id}/shortlist.csv` | `export_shortlist` | `revcenter shortlist <project_id> --csv` |
-| Everyone one search returned, read or not | `/searches/{id}/records.csv` | `export_search_records` | `revcenter records <search_id> --csv` |
-| Everyone a project's searches returned | `/projects/{id}/records.csv` | `export_project_records` | `revcenter records --project <project_id> --csv` |
-| The workspace's candidate database | `/candidates.csv` | `export_candidates` | `revcenter candidates --csv` |
-| A version published to the client | `/projects/{id}/shortlist/versions/{versionId}.csv` | `export_shortlist_version` | `revcenter client version <project_id> <version_id> --csv` |
+| You want | API | MCP |
+| --- | --- | --- |
+| The project's shortlist | `/projects/{id}/shortlist.csv` | `export_shortlist` |
+| Everyone one search returned, read or not | `/searches/{id}/records.csv` | `export_search_records` |
+| Everyone a project's searches returned | `/projects/{id}/records.csv` | `export_project_records` |
+| The workspace's candidate database | `/candidates.csv` | `export_candidates` |
+| A version published to the client | `/projects/{id}/shortlist/versions/{versionId}.csv` | `export_shortlist_version` |
 
 The same lists page as JSON without `.csv`: `GET /searches/{id}/records`, `GET /projects/{id}/records`,
 `GET /candidates`, `GET /projects/{id}/shortlist`. Each record has a `status`:
@@ -36,11 +36,11 @@ which beats `not_read`, `score` is the best any gave, `first_search_id` is the s
 | Format | Ask for it | What you get |
 | --- | --- | --- |
 | CSV | the default (`format=csv`) | One row per person, UTF-8 with a byte order mark so Excel shows "·" and "–" as written. A cell a spreadsheet would run as a formula is written as text. `columns` picks the columns, in the order you list them. |
-| JSON Lines | `format=jsonl` (MCP `format: "jsonl"`, CLI `--jsonl`) | One JSON object per line: the list call's fields plus the groups below and the whole read `profile`. `fields` keeps only the groups you list. |
+| JSON Lines | `format=jsonl` (MCP `format: "jsonl"`) | One JSON object per line: the list call's fields plus the groups below and the whole read `profile`. `fields` keeps only the groups you list. |
 
 ## Columns
 
-`GET /v1/reference/export-columns` (MCP `get_export_columns`, CLI `revcenter columns`) lists them. Send keys as
+`GET /v1/reference/export-columns` (MCP `get_export_columns`) lists them. Send keys as
 `columns=name,title,company,roles,score`; a key that isn't a column is refused with `400 invalid_columns`, naming it.
 
 `roles` and `schools` stand for numbered columns, one block for every role (current role first) and every school

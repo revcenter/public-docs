@@ -12,14 +12,14 @@ Bodies are JSON. Results are wrapped in `data`, and every response has a `reques
 { "data": { "id": "6a1e…", "name": "Controller, Camden NJ" }, "meta": { "request_id": "6f1c2b7e-…" } }
 ```
 
-The [CLI](/tools/cli) and the [MCP server](/tools/mcp) call this same API with the same key, and do the waiting,
-paging and retrying below for you.
+The [MCP servers](/tools/mcp) call this same API with the same key, and do the waiting, paging and retrying
+below for you.
 
 ## Your first search
 
 <Steps>
   <Step title="Get a key">
-    **Settings → Integrations → API → Create key**, or `revcenter auth login`. It is shown once.
+    **Settings → Integrations → API → Create key**. It is shown once.
     ```bash
     export REVCENTER_API_KEY="rvc_live_..."
     curl -s https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"
@@ -71,7 +71,7 @@ A complete job that does this safely is in the [backend job recipe](/recipes/bac
 
 A launch or expansion answers `202` at once; the search runs in the background for a few minutes. Poll
 `GET /v1/searches/{id}?view=status` every 30 seconds until `status` is no longer `queued` or `running`
-(`revcenter status <id> --wait` and MCP `wait_for_search` do it for you). While `queued`,
+(MCP `wait_for_search` does it for you). While `queued`,
 `queue.eta_seconds` says about when it starts.
 
 | `status` | Meaning | Done? |
@@ -142,7 +142,7 @@ but is deprecated (`Sunset: Fri, 01 May 2027`). The shortlist (with no `limit`),
 | Requests per workspace | 3,000 a minute |
 | Launching a search or an expansion | Not counted |
 | Searches running at once | 3 per workspace; the rest queue |
-| Keys made in Settings | 5 per workspace (CLI sign-ins and connected apps don't count; see [Authentication](/authentication)) |
+| Keys made in Settings | 5 per workspace (connected apps don't count; see [Authentication](/authentication)) |
 
 Every response carries `x-ratelimit-limit`, `x-ratelimit-remaining` and `x-ratelimit-reset` (Unix seconds). A `429`
 has `Retry-After` and the same number in `error.details.retry_after_seconds`; nothing ran and nothing was
