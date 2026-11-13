@@ -2660,6 +2660,8 @@
                     "profiles_delivered": 81,
                     "shortlisted": 14,
                     "delivered": 14,
+                    "shortlist_count": 14,
+                    "status_note": null,
                     "database_only": false,
                     "expansion": false,
                     "criteria": {
@@ -12780,6 +12782,20 @@
             ],
             "deprecated": true,
             "description": "Deprecated: the same number as shortlisted, kept for older integrations. It is not the charged count; read profiles_delivered for that."
+          },
+          "shortlist_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "How many people are on the project's shortlist now: the number the app shows on the project, the Projects list and the agent page, and get_project's shortlisted. Null for a search with no project. In both views."
+          },
+          "status_note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "One sentence on why the search is not moving (waiting its turn, waiting for a free slot, gone quiet, interrupted) or why it ended with a short list (pages of people who don't fit, its credits used, everyone its criteria reach), and what to do next. The same sentence the app shows. Null when there is nothing to explain. In both views."
           },
           "database_only": {
             "type": "boolean"
