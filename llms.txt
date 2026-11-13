@@ -7,7 +7,7 @@ Every page is also available as Markdown: add `.md` to its address. All pages in
 ## For recruiters
 
 - [Overview](https://docs.revcenter.ai/introduction.md): What Revcenter does, what it costs, and where to start: in Claude or ChatGPT, or from your own code.
-- [Pricing and credits](https://docs.revcenter.ai/pricing.md): 3 credits per profile delivered. People you already have are free. How a search's cap works, what is free, and where to see your balance.
+- [Credits and pricing](https://docs.revcenter.ai/pricing.md): What a search is billed for, what a profile and a company cost, what is free, what a shortlist costs to build, and how a search's credit limit and refunds work.
 - [Writing a search](https://docs.revcenter.ai/guides/writing-a-search.md): How to ask for the people you want: what Must match, Ranks higher, Left out and Suggested mean, where the role is, ways to search, and tips that improve results.
 - [Results and your shortlist](https://docs.revcenter.ai/guides/searches.md): What a finished search tells you, why it stopped, what to check before sending the list, getting more people, and sending the shortlist to your client.
 - [Use Revcenter in Claude or ChatGPT](https://docs.revcenter.ai/tools/connectors.md): Connect Revcenter to Claude or ChatGPT in three steps, what you can ask it to do, what it asks you before doing, and how to disconnect.
