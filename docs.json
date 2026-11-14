@@ -45,6 +45,7 @@
           "guides/api-essentials",
           "guides/criteria",
           "guides/exports",
+          "guides/groups",
           "recipes/backend-job"
         ]
       },
@@ -114,7 +115,13 @@
           "GET /candidates.csv",
           "POST /research/plan",
           "POST /projects/{projectId}/research",
-          "GET /projects/{projectId}/research/{researchId}"
+          "GET /projects/{projectId}/research/{researchId}",
+          "GET /groups",
+          "GET /groups/{groupId}",
+          "GET /groups/{groupId}/changes",
+          "POST /groups/{groupId}/members",
+          "DELETE /groups/{groupId}/members/{memberId}",
+          "POST /groups/{groupId}/pause"
         ]
       }
     ]

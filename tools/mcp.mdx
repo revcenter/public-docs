@@ -119,7 +119,9 @@ before any tool that isn't read-only. The local server asks itself:
 Launches that arrive together (parallel sub-agents, or `launch_searches` with up to 25) are asked once, with
 every search and the total listed. `publish_shortlist` and `send_shortlist_email` are asked the same way, in their
 own words (who the client sees, where the email goes), and so are `add_dnc_from_search` and `add_dnc` with more
-than 25 people. Called directly, those are refused with `proposal_required`.
+than 25 people. Called directly, those are refused with `proposal_required`. `add_to_group` is asked too, because
+the people you add raise what the group's checks cost each month: the question names who is added and the group's
+new monthly estimate ([Groups](/guides/groups)).
 
 A launch without its own `idempotency_key` gets one from the project and the request, so repeating an identical
 launch (after a timeout, say) returns the first search and reserves nothing more. `max_credits` is any whole number
@@ -202,6 +204,12 @@ fix and the `request_id`.
 | `plan_company_request` | How Revcenter would answer a request for companies before anything is bought: what our data answers, what needs research on the web, the free first pass (companies whose own pages or job postings already show it), names matched to companies we hold, or one question with choices when the request is vague. | Does not use credits. |
 | `research_company_list` | Research the web for companies that match what our data can't check (who owns them, the software they run, a list or award, a lawsuit, a deal), keeping only companies a page names, with that page as the source. Runs only when plan_company_request says research is needed. | Holds 50 credits when it starts; charged only when it finds at least one company with a source, otherwise the credits come back. |
 | `get_company_research` | A research run's status and its companies, each with its source, the words quoted from it, the kind of evidence, its date where one is needed, and whether it matched a company we hold. | Does not use credits. |
+| `list_groups` | The groups you can see: yours and those shared with the workspace (an admin sees every group). Each with its kind, members, how often it is checked, what it watches for, whether it is paused, its credits this month and its new changes. | Does not use credits. |
+| `get_group` | One group with its settings and its members, newest first, a page at a time: who each member is, when they were last checked and the last change they set off. | Does not use credits. |
+| `get_group_changes` | What the group's checks found, newest first: each change with the member it is about, the rule that fired, what it was before and after, and when it was seen. since gives only the changes recorded after a time. | Does not use credits. |
+| `add_to_group` | Add people or companies to a group, each by a Revcenter candidate id, a firm id or a LinkedIn address. They are checked from the group's next check, which raises its monthly credits, so the MCP server asks the person first, showing who is added and the new estimate. | Nothing is charged now. From the group's next check, each member checked costs 1 credit a person or 2 a company (free if read in the last day), up to the group's monthly cap. |
+| `remove_from_group` | Take one member out of a group: they are not checked from its next check. Name them by the member id get_group lists, or by their candidate id or firm id. | Does not use credits. |
+| `pause_group` | Pause a group, or resume it with paused false. A paused group is not checked and not charged; a resumed one is checked at its next time, or at once if that has passed. | Does not use credits. |
 | `launch_searches` | Launch up to 25 searches side by side after one approval for all of them, each what launch_search takes; one failing doesn't stop the others. | Reserves up to max_credits credits (by default the workspace's limit per search, in get_usage); unused credits are refunded. |
 | `wait_for_search` | Wait until a search finishes (or the timeout passes), checking every 30 seconds (up to a minute while it waits far back in line), and return its final status. | Does not use credits. |
 | `wait_for_scoring` | Wait until a scoring job (a job_id from preview_scoring or apply_scoring) finishes, or the timeout passes, and return its status and result. | Does not use credits. |

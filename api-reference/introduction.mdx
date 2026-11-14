@@ -44,6 +44,9 @@ any other `4xx` first.
 | `400` | `candidate_ids_required` | Adding to a shortlist without `candidate_ids` | Send candidate_ids from list_people. |
 | `400` | `invalid_name` | Project name empty or over 120 characters | Name the project in 1 to 120 characters. |
 | `400` | `invalid_cursor` | A cursor this API didn't return | Start again without a cursor. |
+| `400` | `invalid_members` | `add_to_group`'s `members` isn't a list of 1 to 500 objects each with one of `candidate_id`, `firm_id` or `linkedin_url`, or names people for a company group (or companies for a people group) | Send members as a list of objects, each with one of candidate_id, firm_id or linkedin_url, of the group's kind. |
+| `400` | `invalid_paused` | `pause_group` without `paused` true or false | Send \{"paused": true\} to pause or \{"paused": false\} to resume. |
+| `400` | `invalid_since` | `get_group_changes`'s `since` isn't a date and time | Send since as an ISO 8601 date and time, such as a change's recorded_at. |
 | `400` | `invalid_fields` | A list's `fields` names a profile slice that doesn't exist, or a JSON Lines export's `fields` a group that doesn't exist | On a list, send fields as a comma-separated list of profile, about, experience, education, skills, certifications, languages, projects; on a JSON Lines export, as groups: person, current_role, career, education, skills, scoring, decisions. |
 | `400` | `invalid_view` | `get_search`'s `view` is not `full` or `status` | Leave view out for the whole search, or send view=status for the light read. |
 | `400` | `not_proposable` | This action can't be previewed | Call the action directly, or pick one marked proposable in list_actions. |
@@ -75,9 +78,12 @@ any other `4xx` first.
 | `403` | `insufficient_scope` | The key can't make this call | Use a key made in Settings → Integrations → API; it has every agent scope. |
 | `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key made in Settings → Integrations → API: this action is recorded as a person. |
 | `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (get_share_link) instead. |
+| `403` | `group_owner_required` | Only the group's owner or a workspace admin can add to, remove from or pause it | Ask the group's owner or a workspace admin, or use their key; groups shared with the workspace are read-only to everyone else. |
 | `403` | `research_not_enabled` | Web research isn't switched on for this workspace | Ask Revcenter support to switch web research on for this workspace; plan_company_request shows what our data answers meanwhile. |
 | `404` | `dnc_entry_not_found` | `remove_dnc` was given an id that isn't on this project's do-not-contact list or the workspace's | Use an id from list_dnc for this project; it may already be removed. |
 | `404` | `project_not_found` | No such project in this workspace | Check the id with list_projects; ids belong to one workspace. |
+| `404` | `group_not_found` | No such group that this key's person can see | Check the id with list_groups: it lists the groups this key's person can see. |
+| `404` | `group_member_not_found` | No such member in the group | Check the member id with get_group; a member already removed is not listed. |
 | `404` | `search_not_found` | No such search in this workspace | Check the id with list_searches; ids belong to one workspace. |
 | `404` | `candidate_not_found` | No such person in this workspace | Use an id from list_people for this project's searches. |
 | `404` | `scoring_job_not_found` | No such scoring job on this search | Use the job_id preview_scoring or apply_scoring returned for this search. |
@@ -93,6 +99,7 @@ any other `4xx` first.
 | `409` | `project_credit_limit` | The project's searches have used its credit limit (three searches' worth at the workspace's per-search limit) | The project has used its credit limit (three searches' worth): start a new project for a different role or place. |
 | `409` | `cannot_continue` | `expand_search` with `search_id` on a search that can't go on as it was (LinkedIn had no one left, or it failed on its criteria) | That search can't be continued as it was: call expand_search without search_id, or launch a new search with the criteria changed. |
 | `409` | `proposal_expired` | The proposal is over 30 minutes old | Preview the action again; proposals last 30 minutes. |
+| `409` | `group_full` | Adding these would take the group past its limit (500 members; 10 on a trial); no one was added (`details` has `members`, `limit` and `room`) | Remove members first (remove_from_group), or add fewer: details has room. |
 | `409` | `shortlist_changed` | The shortlist holds a different number of people than the person was shown (`details` has `expected` and `actual`); nothing was sent | Preview it again and show the person the new list; nothing was sent. |
 | `409` | `empty_shortlist` | Nothing on the shortlist to publish or send | Add people (add_shortlist_members) first. |
 | `409` | `shortlist_not_publishable` | No one on the shortlist came from a search in the project | Run a search in the project first: a version holds people its searches found. |

@@ -1,0 +1,91 @@
+---
+title: "Groups"
+description: "Watch people or companies and hear when something changes: read your groups, add and remove members, and pause a group from your own tools."
+---
+
+A group is a list of people or companies that Revcenter checks for you on a schedule. When a check finds a
+change, such as someone turning on Open to work, starting a new job or a company posting new roles, it is
+recorded as a change on the group, and the group's owner gets one email about it.
+
+You make a group in the Revcenter app: pick people or companies from your lists, name the group and choose how
+often it is checked. From your own tools, through the API or MCP, you can then read your groups, see what
+changed, add or remove members, and pause a group. Making, renaming and deleting a group stay in the app.
+
+## What you can do
+
+| You want to | API | MCP | Cost |
+| --- | --- | --- | --- |
+| See your groups | `GET /groups` | `list_groups` | Free |
+| See one group and its members | `GET /groups/{id}` | `get_group` | Free |
+| See what changed | `GET /groups/{id}/changes` | `get_group_changes` | Free |
+| Add people or companies | `POST /groups/{id}/members` | `add_to_group` | Free now; raises the group's monthly credits |
+| Take someone out | `DELETE /groups/{id}/members/{member}` | `remove_from_group` | Free |
+| Pause or resume a group | `POST /groups/{id}/pause` | `pause_group` | Free |
+
+You see the groups you made and the ones shared with your workspace. A workspace admin sees every group. Only a
+group's owner or an admin can add, remove or pause; a group someone else shared with you is read-only.
+
+## What a group costs
+
+Each check of each member costs 1 credit for a person and 2 credits for a company. A check is free when the
+profile was read in the last day, and when it fails or finds the profile gone or private. So the cost depends
+on how many members a group has and how often it is checked. The app shows it as one line, for example 50 people
+checked weekly is "About 217 credits a month · checks every Monday".
+
+Every group has a monthly cap (2,000 credits unless you change it in the app). When a group reaches its cap it
+stops until the 1st of the next month. A paused group is not checked and costs nothing.
+
+## Adding people or companies
+
+Name each one by its Revcenter candidate id, its firm id, or its LinkedIn address:
+
+```json
+{ "members": [{ "linkedin_url": "https://www.linkedin.com/in/example" }, { "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99" }] }
+```
+
+- A people group takes candidate ids and LinkedIn profile addresses. A company group takes firm ids and LinkedIn
+  company addresses.
+- Someone Revcenter has never read can be added by their LinkedIn address. They are read at the group's next
+  check.
+- Anyone already in the group stays as they are, so sending the same list twice changes nothing.
+- Anything that can't be added comes back in `not_found` with the reason. The rest are still added.
+- A group holds up to 500 members (10 on a trial). A request that would go past that adds no one and says how
+  much room is left.
+
+Adding members makes the group's next checks cost more, so the MCP server asks you first. It shows who would be
+added and the new monthly estimate, for example: "Add 1 person to Tax seniors to watch? About 221 credits a month,
+checks every Monday." Accept adds them; Decline changes nothing. If your tool can't ask you, it hands back a
+proposal to approve with `apply_proposal`. Through the API you can see the same preview first with
+`preview_action`.
+
+```json
+{ "group_id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60", "added": 1, "already_in": 0, "not_found": [], "members": 51, "member_limit": 500, "notice": null, "estimate": { "credits_per_month": 221, "credits_per_check": 51, "line": "About 221 credits a month · checks every Monday" }, "next_check_at": "2026-11-16T11:00:00.000Z" }
+```
+
+## Reading changes
+
+`get_group_changes` lists what the checks found, newest first. Each change says who it is about, which rule
+fired, what it was before and after, and when it was seen:
+
+```json
+{ "id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f", "rule": "open_to_work_on", "label": "Open to work turns on", "summary": "Turned on Open to work", "from": false, "to": true, "member": { "name": "Dana Mercer", "title": "Senior Tax Associate", "company": "Garden State Accounting" }, "observed_at": "2026-11-09T11:04:00.000Z", "recorded_at": "2026-11-09T11:04:02.000Z" }
+```
+
+To pick up only what is new, keep the `recorded_at` of the newest change you have and send it back as `since`.
+A group's first check only records where everyone is, so it finds no changes. The rules a group can watch are:
+
+| Rule | Fires when |
+| --- | --- |
+| `open_to_work_on` | A person turns on Open to work |
+| `job_change` | A person starts at a new employer or gets a new title |
+| `location_change` | A person's profile moves to another place |
+| `move_ready` | A person reaches the time in a role when people often move |
+| `posting_new` | A company posts a new job with one of the group's titles |
+| `hiring_surge` | A company posts 5 or more new jobs in 14 days |
+| `posting_repost` | A company posts the same role again |
+
+## Removing and pausing
+
+`remove_from_group` takes one member out, named by the member id `get_group` lists or by their candidate or firm
+id. They are not checked again, and their past changes stay on the group. `pause_group` with `paused: true`
+stops a group's checks and charges until you resume it with `paused: false`.

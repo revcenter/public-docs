@@ -44,6 +44,9 @@
       "name": "Research"
     },
     {
+      "name": "Groups"
+    },
+    {
       "name": "Health"
     }
   ],
@@ -10978,6 +10981,951 @@
           }
         }
       }
+    },
+    "/groups": {
+      "get": {
+        "operationId": "list_groups",
+        "summary": "List groups",
+        "description": "The groups you can see: yours and those shared with the workspace (an admin sees every group). Each with its kind, members, how often it is checked, what it watches for, whether it is paused, its credits this month and its new changes. A group watches people or companies and records a change when one of its rules fires: Open to work turning on, a new job or title, a move, new job postings. Groups are made, renamed and deleted in the app. kind narrows the list to people or company groups. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "description": "Only groups of people, or only groups of companies.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "people",
+                "companies"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Group"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60",
+                      "name": "Tax seniors to watch",
+                      "kind": "people",
+                      "cadence": "weekly",
+                      "schedule": "checks every Monday",
+                      "rules": [
+                        "open_to_work_on",
+                        "job_change"
+                      ],
+                      "rule_labels": [
+                        "Open to work turns on",
+                        "Job change"
+                      ],
+                      "posting_titles": [],
+                      "email_enabled": true,
+                      "monthly_cap_credits": 2000,
+                      "visibility": "owner",
+                      "status": "active",
+                      "state": "active",
+                      "owner": {
+                        "name": "Alex Rivera",
+                        "is_you": true
+                      },
+                      "can_edit": true,
+                      "members": 50,
+                      "new_changes": 2,
+                      "credits_this_month": 150,
+                      "estimate": {
+                        "credits_per_month": 217,
+                        "credits_per_check": 50,
+                        "line": "About 217 credits a month · checks every Monday"
+                      },
+                      "next_check_at": "2026-11-16T11:00:00.000Z",
+                      "last_check_at": "2026-11-09T11:04:00.000Z",
+                      "created_at": "2026-10-26T15:02:11.000Z",
+                      "updated_at": "2026-11-09T11:04:00.000Z"
+                    }
+                  ],
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}": {
+      "get": {
+        "operationId": "get_group",
+        "summary": "Get a group",
+        "description": "One group with its settings and its members, newest first, a page at a time: who each member is, when they were last checked and the last change they set off. members_cursor is null on the last page of members; pass it back as cursor for the next. A member the checks found gone or private three times in a row is listed with state removed_gone and is no longer checked. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "A group id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Members per page, up to 100 (default 50).",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "members_cursor from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/GroupDetail"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "group": {
+                      "id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60",
+                      "name": "Tax seniors to watch",
+                      "kind": "people",
+                      "cadence": "weekly",
+                      "schedule": "checks every Monday",
+                      "rules": [
+                        "open_to_work_on",
+                        "job_change"
+                      ],
+                      "rule_labels": [
+                        "Open to work turns on",
+                        "Job change"
+                      ],
+                      "posting_titles": [],
+                      "email_enabled": true,
+                      "monthly_cap_credits": 2000,
+                      "visibility": "owner",
+                      "status": "active",
+                      "state": "active",
+                      "owner": {
+                        "name": "Alex Rivera",
+                        "is_you": true
+                      },
+                      "can_edit": true,
+                      "members": 50,
+                      "new_changes": 2,
+                      "credits_this_month": 150,
+                      "estimate": {
+                        "credits_per_month": 217,
+                        "credits_per_check": 50,
+                        "line": "About 217 credits a month · checks every Monday"
+                      },
+                      "next_check_at": "2026-11-16T11:00:00.000Z",
+                      "last_check_at": "2026-11-09T11:04:00.000Z",
+                      "created_at": "2026-10-26T15:02:11.000Z",
+                      "updated_at": "2026-11-09T11:04:00.000Z"
+                    },
+                    "members": [
+                      {
+                        "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                        "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                        "firm_id": null,
+                        "name": "Dana Mercer",
+                        "title": "Senior Tax Associate",
+                        "company": "Garden State Accounting",
+                        "location": "Cherry Hill, NJ",
+                        "linkedin_url": "https://www.linkedin.com/in/example",
+                        "state": "checked",
+                        "added_at": "2026-10-26T15:02:11.000Z",
+                        "last_checked_at": "2026-11-09T11:04:00.000Z",
+                        "last_change": {
+                          "rule": "open_to_work_on",
+                          "label": "Open to work turns on",
+                          "at": "2026-11-09T11:04:00.000Z"
+                        }
+                      }
+                    ],
+                    "members_total": 50,
+                    "members_cursor": "eyJvIjo1MH0"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/changes": {
+      "get": {
+        "operationId": "get_group_changes",
+        "summary": "Get a group's changes",
+        "description": "What the group's checks found, newest first: each change with the member it is about, the rule that fired, what it was before and after, and when it was seen. since gives only the changes recorded after a time. The app calls these triggers. A group's first check records where everyone is and finds no changes. Reading changes here does not mark them seen in the app. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "A group id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "description": "An ISO 8601 date and time: only the changes recorded after it, for example the recorded_at of the newest change you already have.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Up to 100 per page (default 50).",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `cursor` from the previous page. Omit for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GroupChange"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Pass as ?cursor= for the next page; null on the last."
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+                      "rule": "open_to_work_on",
+                      "label": "Open to work turns on",
+                      "summary": "Turned on Open to work",
+                      "from": false,
+                      "to": true,
+                      "member": {
+                        "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                        "candidate_id": "3c2b1a09-8f7e-4d6c-9b5a-4e3d2c1b0a99",
+                        "firm_id": null,
+                        "name": "Dana Mercer",
+                        "title": "Senior Tax Associate",
+                        "company": "Garden State Accounting",
+                        "location": "Cherry Hill, NJ",
+                        "linkedin_url": "https://www.linkedin.com/in/example"
+                      },
+                      "observed_at": "2026-11-09T11:04:00.000Z",
+                      "recorded_at": "2026-11-09T11:04:02.000Z",
+                      "check_id": "6d7e8f9a-0b1c-4d2e-9f3a-4b5c6d7e8f9a"
+                    }
+                  ],
+                  "cursor": null,
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/members": {
+      "post": {
+        "operationId": "add_to_group",
+        "summary": "Add to a group",
+        "description": "Add people or companies to a group, each by a Revcenter candidate id, a firm id or a LinkedIn address. They are checked from the group's next check, which raises its monthly credits, so the MCP server asks the person first, showing who is added and the new estimate. Someone already in the group is left as they are; adding the same list again changes nothing. A person Revcenter has never read is added by their LinkedIn address and read at the next check. A company is added by its firm id, or by its LinkedIn address when Revcenter knows the company. An address or id that can't be added is listed in not_found with why, and the rest are added. A call that would take the group past its limit (500 members; 10 on a trial) adds no one and is refused with group_full. Only the group's owner or a workspace admin can add to it. Preview it with preview_action to see the new estimate first. Nothing is charged now. From the group's next check, each member checked costs 1 credit a person or 2 a company (free if read in the last day), up to the group's monthly cap. It raises a group's monthly credits, so the MCP server asks the person first, showing who is added and the new estimate. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "x-revcenter-confirm": "spend",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "A group id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "members"
+                ],
+                "properties": {
+                  "members": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 500,
+                    "description": "Who to add, each one of candidate_id, firm_id or linkedin_url. A people group takes candidate ids and LinkedIn profile addresses (linkedin.com/in/…); a company group takes firm ids and LinkedIn company addresses (linkedin.com/company/…).",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "candidate_id": {
+                          "type": "string",
+                          "description": "A Revcenter candidate id (list_candidates, list_people, get_shortlist)."
+                        },
+                        "firm_id": {
+                          "type": "string",
+                          "description": "A Revcenter firm id (list_companies)."
+                        },
+                        "linkedin_url": {
+                          "type": "string",
+                          "description": "A LinkedIn profile or company address."
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "members": [
+                  {
+                    "linkedin_url": "https://www.linkedin.com/in/example"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/GroupMembersAdded"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "group_id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60",
+                    "added": 1,
+                    "already_in": 0,
+                    "not_found": [],
+                    "members": 51,
+                    "member_limit": 500,
+                    "notice": null,
+                    "estimate": {
+                      "credits_per_month": 221,
+                      "credits_per_check": 51,
+                      "line": "About 221 credits a month · checks every Monday"
+                    },
+                    "next_check_at": "2026-11-16T11:00:00.000Z"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/members/{memberId}": {
+      "delete": {
+        "operationId": "remove_from_group",
+        "summary": "Remove from a group",
+        "description": "Take one member out of a group: they are not checked from its next check. Name them by the member id get_group lists, or by their candidate id or firm id. Their past changes stay in get_group_changes. Adding them again later puts them back. Only the group's owner or a workspace admin can remove members. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "A group id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "description": "A member id from get_group, or the member's candidate id or firm id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "group_id": {
+                          "type": "string"
+                        },
+                        "member_id": {
+                          "type": "string"
+                        },
+                        "removed": {
+                          "type": "boolean"
+                        },
+                        "members": {
+                          "type": "integer",
+                          "description": "Members left in the group."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "group_id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60",
+                    "member_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                    "removed": true,
+                    "members": 49
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/pause": {
+      "post": {
+        "operationId": "pause_group",
+        "summary": "Pause or resume a group",
+        "description": "Pause a group, or resume it with paused false. A paused group is not checked and not charged; a resumed one is checked at its next time, or at once if that has passed. Only the group's owner or a workspace admin can pause it. Answers the group as it is now. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `shortlists:write`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Groups"
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "A group id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "paused"
+                ],
+                "properties": {
+                  "paused": {
+                    "type": "boolean",
+                    "description": "true to pause, false to resume."
+                  }
+                }
+              },
+              "example": {
+                "paused": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Group"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "8f2c4a1e-6b3d-4c5e-9a7f-1b2c3d4e5f60",
+                    "name": "Tax seniors to watch",
+                    "kind": "people",
+                    "cadence": "weekly",
+                    "schedule": "checks every Monday",
+                    "rules": [
+                      "open_to_work_on",
+                      "job_change"
+                    ],
+                    "rule_labels": [
+                      "Open to work turns on",
+                      "Job change"
+                    ],
+                    "posting_titles": [],
+                    "email_enabled": true,
+                    "monthly_cap_credits": 2000,
+                    "visibility": "owner",
+                    "status": "paused",
+                    "state": "paused",
+                    "owner": {
+                      "name": "Alex Rivera",
+                      "is_you": true
+                    },
+                    "can_edit": true,
+                    "members": 50,
+                    "new_changes": 2,
+                    "credits_this_month": 150,
+                    "estimate": {
+                      "credits_per_month": 217,
+                      "credits_per_check": 50,
+                      "line": "About 217 credits a month · checks every Monday"
+                    },
+                    "next_check_at": null,
+                    "last_check_at": "2026-11-09T11:04:00.000Z",
+                    "created_at": "2026-10-26T15:02:11.000Z",
+                    "updated_at": "2026-11-09T11:04:00.000Z"
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11089,7 +12037,8 @@
               "reservation",
               "credits",
               "per_proposal",
-              "research"
+              "research",
+              "group_checks"
             ]
           },
           "cost_line": {
@@ -11107,7 +12056,8 @@
               "client",
               "destructive",
               "bulk",
-              "priced"
+              "priced",
+              "spend"
             ]
           },
           "retry": {
@@ -11975,7 +12925,8 @@
                   "rescore",
                   "reservation",
                   "credits",
-                  "research"
+                  "research",
+                  "group_checks"
                 ]
               },
               "line": {
@@ -12715,6 +13666,443 @@
             }
           }
         ]
+      },
+      "Group": {
+        "type": "object",
+        "description": "A group of people or companies Revcenter checks on a schedule, recording a change when one of its rules fires.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "people",
+              "companies"
+            ]
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semiannual",
+              "annual"
+            ]
+          },
+          "schedule": {
+            "type": "string",
+            "description": "When it is checked, in words: \"checks every Monday\"."
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "open_to_work_on",
+                "job_change",
+                "location_change",
+                "move_ready",
+                "posting_new",
+                "hiring_surge",
+                "posting_repost"
+              ]
+            },
+            "description": "What it watches for."
+          },
+          "rule_labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The rules as the app names them."
+          },
+          "posting_titles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A company group's job titles for New matching postings."
+          },
+          "email_enabled": {
+            "type": "boolean",
+            "description": "Whether the owner is emailed when a check finds changes."
+          },
+          "monthly_cap_credits": {
+            "type": "integer",
+            "description": "The most its checks are charged in a month; at the cap it stops until the 1st."
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "workspace"
+            ],
+            "description": "owner: its owner and the workspace's admins see it; workspace: everyone in the workspace."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused",
+              "first_check",
+              "at_cap",
+              "out_of_credits"
+            ],
+            "description": "first_check until its first check ends; at_cap while this month's charges are at the cap; out_of_credits while its latest check stopped for want of credits."
+          },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "is_you": {
+                "type": "boolean",
+                "description": "Whether the key's person owns it."
+              }
+            }
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "Whether this key may add, remove or pause: the owner and the workspace's admins may."
+          },
+          "members": {
+            "type": "integer"
+          },
+          "new_changes": {
+            "type": "integer",
+            "description": "Changes the key's person has not seen in the app yet."
+          },
+          "credits_this_month": {
+            "type": "integer",
+            "description": "Credits its checks were charged this month, or hold while one runs."
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/GroupEstimate"
+          },
+          "next_check_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Null while paused."
+          },
+          "last_check_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GroupEstimate": {
+        "type": "object",
+        "description": "About what a group's checks cost a month at its members, cadence and price (free checks not counted).",
+        "properties": {
+          "credits_per_month": {
+            "type": "integer"
+          },
+          "credits_per_check": {
+            "type": "integer",
+            "description": "What one check of every member costs."
+          },
+          "line": {
+            "type": "string",
+            "description": "The app's line: \"About 217 credits a month · checks every Monday\", with when it stops if that is over the cap."
+          }
+        }
+      },
+      "GroupMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The member id remove_from_group takes."
+          },
+          "candidate_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firm_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linkedin_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "waiting",
+              "checked",
+              "reused",
+              "failed",
+              "gone",
+              "no_postings",
+              "removed_gone"
+            ],
+            "description": "What its last check found: waiting (not checked yet), checked, reused (read in the last day, so free), failed (free, tried again next time), gone (the profile is gone or private), no_postings, removed_gone (gone three checks in a row, no longer checked)."
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_checked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_change": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "GroupDetail": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/Group"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupMember"
+            }
+          },
+          "members_total": {
+            "type": "integer",
+            "description": "Every member listed across the pages."
+          },
+          "members_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Pass as ?cursor= for the next page of members; null on the last."
+          }
+        }
+      },
+      "GroupChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string",
+            "enum": [
+              "open_to_work_on",
+              "job_change",
+              "location_change",
+              "move_ready",
+              "posting_new",
+              "hiring_surge",
+              "posting_repost"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "The rule as the app names it."
+          },
+          "summary": {
+            "type": "string",
+            "description": "What changed, in a line: \"Turned on Open to work\"."
+          },
+          "from": {
+            "description": "What it was before (a value, a role, a place, a posting), or null."
+          },
+          "to": {
+            "description": "What it is now."
+          },
+          "member": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "candidate_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "firm_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "company": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "location": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "linkedin_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the check saw it."
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it was recorded: what since compares."
+          },
+          "check_id": {
+            "type": "string",
+            "description": "The check that found it."
+          }
+        }
+      },
+      "GroupMembersAdded": {
+        "type": "object",
+        "properties": {
+          "group_id": {
+            "type": "string"
+          },
+          "added": {
+            "type": "integer",
+            "description": "New to the group (or back after being removed)."
+          },
+          "already_in": {
+            "type": "integer",
+            "description": "Already members: nothing changed for them."
+          },
+          "not_found": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "The id or address as sent."
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "What couldn't be added, and why."
+          },
+          "members": {
+            "type": "integer",
+            "description": "Members now."
+          },
+          "member_limit": {
+            "type": "integer"
+          },
+          "notice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Said when the group's limit cut the list (two adds at once)."
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/GroupEstimate"
+          },
+          "next_check_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
       },
       "Criteria": {
         "type": "object",
