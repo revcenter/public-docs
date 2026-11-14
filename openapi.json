@@ -11571,6 +11571,23 @@
             "type": "integer",
             "description": "Credits held for this search: its max_credits as held to the workspace's limit and balance (a database_only search reserves like any other), or 0 in a workspace whose credits aren't metered."
           },
+          "credits_state": {
+            "type": "string",
+            "enum": [
+              "held",
+              "charged",
+              "refunded",
+              "none"
+            ],
+            "description": "On a repeated launch (reused true): the search's credits as they stand now, as get_search reports them."
+          },
+          "credits_charged": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "On a repeated launch (reused true): what the search was charged once it closed; null while it runs."
+          },
           "credits_note": {
             "type": "string",
             "description": "Present when the cap asked for was held lower: to the workspace's limit per search, the project's credit limit, or the credits left."
