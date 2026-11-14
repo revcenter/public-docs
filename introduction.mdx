@@ -1,47 +1,48 @@
 ---
-title: "Overview"
-description: "What Revcenter does, what it costs, and where to start: in Claude or ChatGPT, or from your own code."
+title: "Welcome to Revcenter"
+description: "Revcenter finds candidates for your roles, explains why each one fits, and gives you a shortlist to send your client."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+Revcenter finds candidates for a role. Tell it who you need, in your own words. It looks across LinkedIn, reads
+each profile, scores every person against your brief, and puts the best on your **Shortlist**. You send your
+client one link that always shows the latest list.
 
-Revcenter finds candidates on LinkedIn for a role, scores each one against what you asked for, and keeps the
-people who fit on the project's shortlist. You send your client one link that always shows the live list.
+**3 credits for each new person a search finds for you. People you already have are free.** See
+[Credits and pricing](/pricing).
 
-**3 credits per profile delivered. People you already have are free.** See [Credits and pricing](/pricing).
+## What you can do
+
+- **Start a search in plain English.** "Plant Controller within 30 miles of Camden, NJ, CPA required." Revcenter
+  shows you its plan before anything starts.
+- **See why each person fits.** Every candidate gets a score and a short reason.
+- **Keep one Project per role.** The brief, the searches and the Shortlist stay together.
+- **Ask the AI chat.** "Why is the list short?", "Take Dana off the list", "Find more people like these." AI chat
+  is free.
+- **Share with your client.** One link, always up to date. Nothing reaches your client until you say yes.
 
 ## Start here
 
 <CardGroup cols={2}>
-  <Card title="Use it in Claude or ChatGPT" icon="comments" href="/tools/connectors">
-    Add Revcenter to your chat app and ask for the people you need. Nothing to install.
+  <Card title="Credits and pricing" icon="coins" href="/pricing">
+    What a search costs, what is free, and where to see your balance.
   </Card>
-  <Card title="Use it from your code" icon="code" href="/guides/api-essentials">
-    The API, and an MCP server for agents. One key, the same data.
+  <Card title="Writing a search" icon="pen" href="/guides/writing-a-search">
+    How to ask for the people you want.
+  </Card>
+  <Card title="Results and your Shortlist" icon="list-check" href="/guides/searches">
+    Reading results, finding more people, and sending the list to your client.
+  </Card>
+  <Card title="Use Revcenter in Claude or ChatGPT" icon="comments" href="/tools/connectors">
+    Connect your chat app in three steps. Nothing to install.
   </Card>
 </CardGroup>
-
-## For recruiters
-
-| Page | What it covers |
-| --- | --- |
-| [Credits and pricing](/pricing) | What a search and a shortlist cost, what is free, and where to see your balance |
-| [Writing a search](/guides/writing-a-search) | How to ask for the people you want: **Must match**, **Ranks higher**, **Left out** |
-| [Results and your shortlist](/guides/searches) | What a finished search tells you, getting more people, and sending the list to your client |
-| [Use Revcenter in Claude or ChatGPT](/tools/connectors) | Connect your chat app in three steps |
-| [Authentication and keys](/authentication) | Signing in, keys, and who can do what |
-
-## For developers
-
-| Page | What it covers |
-| --- | --- |
-| [Agents and MCP](/tools/mcp) | Claude Code, Codex, Cursor and other agents, and every tool |
-| [API essentials](/guides/api-essentials) | Your first search with curl, waiting, paging, limits, retries and common errors |
-| [Criteria reference](/guides/criteria) | Every field a search takes |
-| [Exports reference](/guides/exports) | CSV columns and JSON Lines groups |
-| [API reference](/api-reference/introduction) | Every endpoint, and every error code |
 
 ## What you need
 
 1. A Revcenter workspace, on a free trial or a plan.
-2. To sign in: connect your chat app, or make a key under **Settings → Integrations → API**.
+2. Sign in at [app.revcenter.ai](https://app.revcenter.ai), or connect Claude or ChatGPT.
+
+## For developers
+
+Building on Revcenter? Start with [API keys and access](/authentication), [Agents and MCP](/tools/mcp) and
+[API essentials](/guides/api-essentials). Every request is in the [API reference](/api-reference/introduction).

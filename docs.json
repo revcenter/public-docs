@@ -1,12 +1,16 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
-  "name": "Revcenter API",
-  "description": "Run candidate searches, read scored profiles and build shortlists from your own systems and AI tools.",
+  "name": "Revcenter",
+  "description": "Find the right candidates for a role, see why each one fits, and send your client a shortlist.",
   "colors": {
     "primary": "#1A1A1A",
     "light": "#E5E5E5",
     "dark": "#000000"
+  },
+  "appearance": {
+    "default": "light",
+    "strict": false
   },
   "api": {
     "playground": {
@@ -29,13 +33,13 @@
           "pricing",
           "guides/writing-a-search",
           "guides/searches",
-          "tools/connectors",
-          "authentication"
+          "tools/connectors"
         ]
       },
       {
         "group": "For developers",
         "pages": [
+          "authentication",
           "tools/mcp",
           "guides/api-essentials",
           "guides/criteria",
@@ -114,14 +118,14 @@
   "navbar": {
     "links": [
       {
-        "label": "App",
-        "href": "https://app.revcenter.ai"
+        "label": "For developers",
+        "href": "/tools/mcp"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Get an API key",
-      "href": "https://app.revcenter.ai/portal/settings/integrations"
+      "label": "Open Revcenter",
+      "href": "https://app.revcenter.ai"
     }
   },
   "footer": {

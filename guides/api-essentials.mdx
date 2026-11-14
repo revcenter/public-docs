@@ -3,8 +3,6 @@ title: "API essentials"
 description: "The Revcenter API on one page: your first search with curl, how it fits together, waiting for a search, stop reasons and advice, paging, limits, retries and the common errors."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
-
 **Base URL:** `https://api.revcenter.ai/v1`. Send `Authorization: Bearer <key>` ([Authentication](/authentication)).
 Bodies are JSON. Results are wrapped in `data`, and every response has a `request_id`:
 
@@ -104,7 +102,13 @@ Treat an unknown status as done.
   (3 credits each). `shortlisted`: the whole project's shortlist when it closed, including earlier searches'
   people. `delivered` is deprecated: the same number as `shortlisted`.
 - `outcome` is `Shortlist ready` (6 or more on the shortlist), `Poor yield` (1 to 5) or `No results` (0).
-- `credits_charged` is `null` while it runs; `credits_breakdown` shows the arithmetic ("98 profiles × 3 = 294 credits").
+- `credits_charged` is `null` while it runs; `credits_breakdown` shows the arithmetic ("98 profiles × 3 = 294 credits"),
+  with `credits_breakdown.actions` naming each action it was charged for and, for a company search,
+  `credits_breakdown.companies` splitting finding, hiring signals and decision makers.
+- `GET /v1/me/usage` (MCP `get_usage`) returns `credits_remaining` and your workspace's own limits and prices in
+  `credit_terms`: `credit_terms.actions` is the [pricing](/pricing) table with your plan's dollars, and
+  `credit_terms.dollars_per_credit` what one credit costs on your plan (null on a trial). A whole project's spend
+  is `GET /v1/projects/{id}/spend`.
 
 ### Stop reasons and advice
 
@@ -120,7 +124,8 @@ Treat an unknown status as done.
 
 `advice` is a list of sentences to read before the list goes to a client: few people read, a search stopped
 early, a query that matched more people than one search can list, a place wider than a city. It is empty when
-there is nothing to check. Show it to the person; don't parse it.
+there is nothing to check. Show it to the person; don't parse it. The plan's warnings are in `review.warnings` at
+launch.
 
 Many at once: launch as many as you like, from as many agents as you like. Up to 3 run at once per workspace; the
 rest queue and start in turn, and none is refused for being busy. While a search on a project runs, expanding it or

@@ -3,8 +3,6 @@ title: "Run a search from a backend job"
 description: "A Node.js job that launches a search safely with a 1,000-credit cap, waits for it, pages through the people and saves the shortlist CSV."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
-
 This job is what a scheduled task or a queue worker would run: it is safe to retry, honors rate limits, and
 pages through results. It sends `max_credits: 1000`, so it reserves up to **1,000 credits** for the search (unused credits are refunded;
 left out, it would reserve your workspace's limit per search) and nothing more on a retry. It needs Node.js 20

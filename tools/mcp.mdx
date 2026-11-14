@@ -3,8 +3,6 @@ title: "Agents and MCP"
 description: "Use Revcenter as tools in Claude Code, Codex, Cursor, Gemini CLI, your own LLM or agent: setup, approvals, a starter prompt, and every tool with its cost."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
-
 Your agent does the reasoning; Revcenter searches, scores and keeps the shortlist. There are two servers:
 
 | Server | Where | Signs in with | Tools |
@@ -37,6 +35,24 @@ Integrations → API** ([Authentication](/authentication)) in `REVCENTER_API_KEY
 
 Keep the key out of prompts and shared files: where your client can read it from the environment or a secret
 store, put it there. Restart the client and ask it to "list my Revcenter projects".
+
+## The hosted server's tools
+
+Claude, ChatGPT and other clients on `https://api.revcenter.ai/mcp` get these tools. File exports and
+published-version history are on the local server and the [API](/guides/api-essentials).
+
+| For | Tools |
+| --- | --- |
+| Account | `get_account`, `get_credits` |
+| Criteria | `draft_search_criteria`, `list_criteria_fields`, `find_industries` |
+| Projects | `list_projects`, `create_project`, `get_project` |
+| Searches | `launch_search`, `launch_searches`, `wait_for_search`, `get_search`, `list_searches`, `find_more_candidates`, `cancel_search` |
+| Results | `list_search_candidates`, `preview_scoring_change`, `apply_scoring_change`, `wait_for_scoring_change`, `get_shortlist_summary` |
+| Shortlist | `get_shortlist`, `add_to_shortlist`, `remove_from_shortlist` |
+| Decisions | `record_candidate_decision`, `get_candidate_decisions`, `list_decision_reasons` |
+| Do not contact | `list_do_not_contact`, `add_to_do_not_contact` |
+| Client | `get_client_share_link`, `preview_client_email`, `send_client_email`, `list_client_feedback` |
+| Candidate database | `search_candidate_database` |
 
 ## Your own LLM or agent
 

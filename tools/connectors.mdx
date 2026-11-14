@@ -1,14 +1,12 @@
 ---
 title: "Use Revcenter in Claude or ChatGPT"
-description: "Connect Revcenter to Claude or ChatGPT in three steps, what you can ask it to do, what it asks you before doing, and how to disconnect."
+description: "Connect Revcenter to Claude or ChatGPT in three steps, what you can ask, what it checks with you first, and how to disconnect."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+Add Revcenter to Claude or ChatGPT and ask for the people you need in your own words. It drafts the search, shows
+it to you, runs it when you say yes, and reads you the Shortlist. Nothing to install.
 
-Add Revcenter to your chat app and ask for the people you need in your own words. The app drafts the search,
-shows it to you, runs it when you say yes, and reads you the shortlist. Nothing to install.
-
-You'll need this address:
+You'll paste this address when you connect:
 
 ```text
 https://api.revcenter.ai/mcp
@@ -28,69 +26,53 @@ https://api.revcenter.ai/mcp
   </Tab>
   <Tab title="ChatGPT">
     1. In ChatGPT on the web, open **Plugins**, click **+** and choose **Add custom MCP server**. On Business,
-       Enterprise and Edu, a workspace admin turns on developer mode first (**Workspace settings → Permissions &
-       roles**).
-    2. Name it Revcenter, paste the address under **Connection** and choose **OAuth**.
+       Enterprise and Edu, a workspace admin first turns on developer mode under **Workspace settings →
+       Permissions & roles**.
+    2. Name it Revcenter and paste the address under **Connection**. For sign-in, pick the **OAuth** option: it
+       means you sign in with your Revcenter account.
     3. Accept the warning, choose **Create as a plugin**, sign in to Revcenter and pick your workspace.
   </Tab>
 </Tabs>
 
-Any member of the workspace, Admin or Editor, can connect, on a trial or a plan. The app acts as you: an Editor's
-connection sees only their own projects. Connecting never counts toward your workspace's key limit.
+Anyone in your workspace can connect, Admin or Editor, on a trial or a plan. Claude or ChatGPT then works as you:
+an Editor sees only their own projects, just as in the app.
 
 ## What you can ask
 
-- "Find me a Plant Controller within 30 miles of Camden, NJ, CPA required." The app drafts the search and shows
-  you the plan, including anything to check.
+- "Find me a Plant Controller within 30 miles of Camden, NJ, CPA required." It drafts the search and shows you
+  the plan, including anything to check.
 - "Run it, and use up to 2,500 credits." It asks you first, then waits for the search to finish.
-- "Who's on the shortlist?", "Why is the list short?", "Shortlist anyone 75 or above."
+- "Who's on the Shortlist?", "Why is the list short?", "Shortlist anyone 75 or above."
 - "Take Dana off the list", "Don't contact Dana again."
 - "Give me the client link", "Email the list to the client."
 - "Find more people for this role", "Who do we already have for this in our candidates?"
 - "How many credits do I have?"
 
-## The tools it uses
+Searches take a few minutes. Ask it to wait for the search, then to list everyone scoring 80 or more.
 
-You don't need these names to use it; they help when you read what the app did. File exports and
-published-version history stay in the [API](/guides/api-essentials) and the [local MCP server](/tools/mcp).
+## What it checks with you first
 
-| For | Tools |
-| --- | --- |
-| Account | `get_account`, `get_credits` |
-| Criteria | `draft_search_criteria`, `list_criteria_fields`, `find_industries` |
-| Projects | `list_projects`, `create_project`, `get_project` |
-| Searches | `launch_search`, `launch_searches`, `wait_for_search`, `get_search`, `list_searches`, `find_more_candidates`, `cancel_search` |
-| Results | `list_search_candidates`, `preview_scoring_change`, `apply_scoring_change`, `wait_for_scoring_change`, `get_shortlist_summary` |
-| Shortlist | `get_shortlist`, `add_to_shortlist`, `remove_from_shortlist` |
-| Decisions | `record_candidate_decision`, `get_candidate_decisions`, `list_decision_reasons` |
-| Do not contact | `list_do_not_contact`, `add_to_do_not_contact` |
-| Client | `get_client_share_link`, `preview_client_email`, `send_client_email`, `list_client_feedback` |
-| Candidate database | `search_candidate_database` |
+Claude or ChatGPT always asks you before it:
 
-## What it asks you first
-
-The app always asks before it:
-
-- starts a search or finds more people (it uses credits, and says how many it may use),
-- changes the shortlist your client sees,
+- starts a search or looks for more people (it uses credits, and says how many it may use),
+- changes the Shortlist your client sees,
 - emails your client (it shows who gets what).
 
-Reading, drafting and answering questions run without asking. Repeating a launch returns the same search and
-never charges twice. Decisions and notes you record on a person are private to your team. Projects are
-archived from a chat, never deleted.
+Reading, drafting and answering questions happen without asking. Asking twice for the same search never charges
+twice. Notes and decisions you record on a person stay private to your team. Projects can be archived from a
+chat, never deleted.
 
-Searches take a few minutes. Ask the app to wait for the search, then to list everyone scoring 80 or more.
+To download a spreadsheet, use the Revcenter app.
 
 ## Disconnect
 
-**Settings → Integrations → Connectors** lists your connected apps; **Revoke** stops one at once. Connecting the
-same app again replaces its earlier connection.
+Go to **Settings → Integrations → Connectors** to see your connected apps. **Revoke** disconnects one at once.
+Connecting the same app again replaces the earlier connection.
 
-## Security
+## Keeping your account safe
 
-- You sign in on Revcenter's own page. The app never sees your password.
-- The connection works only for the one workspace you picked, and only at `https://api.revcenter.ai/mcp`. It
-  renews itself every hour; revoking it stops it at once.
-- Everything the app does goes through Revcenter as you: the same permissions, credits and limits as in the app.
+- You sign in on Revcenter's own page. Claude and ChatGPT never see your password.
+- The connection only works for the one workspace you picked. Revoking it stops it at once.
+- Everything it does goes through Revcenter as you, with the same permissions and credits as in the app.
 
 Building your own agent or using another AI tool? See [Agents and MCP](/tools/mcp).

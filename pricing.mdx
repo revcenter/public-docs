@@ -1,17 +1,14 @@
 ---
 title: "Credits and pricing"
-description: "What a search is billed for, what a profile and a company cost, what is free, what a shortlist costs to build, and how a search's credit limit and refunds work."
+description: "What you pay for, what is free, what a shortlist costs, and how a search's credit limit and refunds work."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+**3 credits per profile delivered. People you already have are free.** Results pages are free too.
 
-**3 credits per profile delivered. People you already have are free.**
+You pay for one thing: new people. Each time a search brings a person into your workspace for the first time, it
+costs 3 credits, whatever their score. After that, every later search can use that person again for free.
 
-You pay for one thing: new people. A search is charged for each person it delivers to your workspace for the
-first time, whatever their score. Once your workspace has someone, every later search and the candidate database
-use them again for free.
-
-## Credits per action
+## What things cost
 
 {/* generated:credit-prices (node scripts/docs/build-tables.mjs; do not edit by hand) */}
 | Action | Credits | In dollars, by plan | When it is charged |
@@ -40,70 +37,66 @@ For example, a search that reads 400 new profiles costs 1,200 credits: $24 to $9
 | Credits a search holds but doesn't use: they come back when it finishes | 0 |
 {/* end generated */}
 
-The app shows the same prices under **What you pay for**, in **Settings → Usage** and **Settings → Plan & billing**.
+You can see the same prices in the app under **What you pay for**, in **Settings → Usage** and
+**Settings → Plan & billing**.
 
 ## What a shortlist costs
 
-A shortlist costs the new people its searches delivered, not the people on it. A search reads everyone who might
-fit and scores them, and the best of them make your shortlist; you pay for each new person read, whether they
-made the list or not. People listed but cut before they are read cost nothing.
+You pay for the new people a search looked at, not for the people who made the Shortlist. A search reads
+everyone who might fit and scores them. The best make your Shortlist. Each new person read costs 3 credits,
+whether they made the list or not. People a search skips before reading cost nothing.
 
-For example, a search that delivers 81 new people is charged 243 credits (81 × 3), whether 20 or 60 of them
-reach the shortlist. Searching the same role again later costs less: people the first search delivered are free
-the second time.
+For example, a search that delivers 81 new people is charged 243 credits (81 × 3), whether 20 or 60 of them make the
+Shortlist. Searching the same role again later costs less, because the people you already have are free.
 
-Before a search starts, the review shows the most it can use and what that covers: 1,000 credits covers
-up to 333 profiles. When it finishes, the project page shows what it was charged and why, for example
+Before a search starts, Revcenter shows the most it can use and what that covers, for example "1,000 credits
+covers up to 333 profiles". When it finishes, the project shows what it cost and why, for example
 "81 profiles × 3 = 243 credits".
 
 ## How a search's credit limit works
 
-1. **Held.** When a search starts, its credit limit is held from your credits. The limit is your workspace's limit
-   per search unless you name less ("only use 2,500 credits"). On a plan the limit is 5,000 unless your admins set
-   another under **Settings → Workspace → Credits per search**; on a trial it is 1,000.
-2. **Charged.** When it finishes, it is charged for each new person it delivered, never more than the limit.
-3. **Refunded.** The rest of the limit comes back. A search that fails or never starts is refunded in full.
+1. **Set aside.** When a search starts, its credit limit is set aside from your balance. On a plan the limit is
+   5,000 credits, unless your admins choose another under **Settings → Workspace → Credits per search**. On a
+   trial it is 1,000. You can always ask for less: "only use 2,500 credits".
+2. **Charged.** When the search finishes, it is charged 3 credits for each new person, never more than the limit.
+3. **Returned.** Whatever it didn't use comes back to your balance. A search that fails or never starts gives
+   everything back.
 
-A bigger limit lets a search read further. It never costs more than the limit, and it stops early when few people
-match. "Search my database again" on a search (the database pass) is charged the same way, from that search's
-own limit, while the search still holds it; once a search has finished, expand it instead.
+A bigger limit lets a search look further. It never costs more than the limit, and it stops early when few
+people match. **Search my database again** uses the same search's limit while the search still holds it. Once a
+search has finished, use **Expand** instead.
 
-A project's searches share a limit of three searches' worth. For a different role or place, start a new project.
+A project's searches can hold up to three searches' worth of credits at once. For a different role or place,
+start a new project.
 
 ## Company searches
 
-A search for companies that are hiring is priced per company, for the data you choose on the review (the prices
-are in the table above):
+You can also search for companies that are hiring. You pay per company, for the information you choose:
 
-- **Companies hiring now:** every company on the list, with its open roles, size, industry and hiring score.
-- **Hiring signals:** senior leaders who left or joined, title moves and a new top leader, with dates.
-- **Decision makers:** who to call, up to 6 named people.
+- **Companies hiring now:** 2 credits per company. Each comes with its open roles, size, industry and a hiring
+  score.
+- **Hiring signals:** 5 more credits per company. Senior leaders who left or joined, title changes and a new top
+  leader, with dates.
+- **Decision makers:** 3 more credits per company. Who to call: up to 6 named people.
 
-Companies are scored on their open roles first; hiring signals and decision makers are bought for the top
-companies your credits cover, and charged only for a company where some turn up. Companies already in your
-results, and staffing agencies left out, are free. The same prices apply on a trial.
+A company list that finds anything costs at least 100 credits. Hiring signals and decision makers are only
+charged for companies where something turns up. Companies already in your results, and staffing agencies left
+out, are free. Trials pay the same prices.
 
-The review shows what your credits cover before you start, for example:
+Before you start, Revcenter shows what your credits cover, for example:
 
 > Up to 1,000 credits: up to 100 companies, the top 50 with hiring signals and decision makers.
 
-When the search finishes, the project page shows where the credits went, for example "Finding 60 · Hiring signals 150 · Decision makers 90". The same numbers are
-in `credits_breakdown.companies` on `GET /v1/searches/{id}`.
+When the search finishes, the project shows where the credits went, for example
+"Finding 60 · Hiring signals 150 · Decision makers 90".
 
 ## Free trial
 
-A free trial pays plan prices: the same credits per new person as on a plan. Each search can reserve up to what
-you have left. When the trial is used up, choose a plan to keep searching.
+A free trial gives you 500 credits at plan prices: the same 3 credits per new person. When the trial credits are
+used up, choose a plan to keep searching.
 
 ## Your balance
 
-Credits left are under **Settings → Usage**. Credits held by searches still running come back into your balance
-as they finish. A plan grants its credits each period; a top-up (**Settings → Plan & billing**) buys more at your
-plan's own rate.
-
-Developers: `GET /v1/me/usage` (MCP `get_usage`) returns `credits_remaining` and your workspace's own limits and
-price in `credit_terms`: `credit_terms.actions` is the table above with your plan's dollars, and
-`credit_terms.dollars_per_credit` what one credit costs on your plan (null on a trial). Each search's charge is in
-`credits_charged`, `profiles_delivered` and `credits_breakdown` on `GET /v1/searches/{id}`, with
-`credits_breakdown.actions` naming each action it was charged for, and for a whole project in
-`GET /v1/projects/{id}/spend`.
+Your credits are under **Settings → Usage**. Credits set aside by searches still running come back as they
+finish. A plan adds its credits each period. If you need more before then, buy a top-up under
+**Settings → Plan & billing**, at your plan's own rate.

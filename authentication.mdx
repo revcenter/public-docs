@@ -1,14 +1,13 @@
 ---
-title: "Authentication and keys"
-description: "Connecting a chat app, API keys and the workspace's key limit, what a key can do, limits for members, and how to give an agent access safely."
+title: "API keys and access"
+description: "For developers: API keys and the workspace's key limit, what a key can do, limits for members, and how to give an agent access safely."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+This page is for developers. To use Revcenter in Claude or ChatGPT, you don't need a key: see
+[Use Revcenter in Claude or ChatGPT](/tools/connectors).
 
-You reach Revcenter's API one of two ways: connect Claude or ChatGPT, or make a key in **Settings**. Either acts for
-one workspace, as you, with your role there.
-
-For developers: every request sends an API key as a bearer token:
+You reach Revcenter's API one of two ways: connect an app that signs in (OAuth), or make a key in **Settings**.
+Either acts for one workspace, as you, with your role there. Every request sends an API key as a bearer token:
 
 ```bash
 curl https://api.revcenter.ai/v1/me -H "Authorization: Bearer $REVCENTER_API_KEY"

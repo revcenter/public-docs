@@ -1,13 +1,13 @@
 ---
 title: "Writing a search"
-description: "How to ask for the people you want: what Must match, Ranks higher, Left out and Suggested mean, where the role is, ways to search, and tips that improve results."
+description: "How to ask for the people you want: Must match, Ranks higher, Left out and Suggested, where the role is, ways to search, and tips for better results."
 ---
 
-> Agents: the full documentation index is at [/llms.txt](https://docs.revcenter.ai/llms.txt).
+Write your request the way you would brief a sourcer: the role, where it is, and what matters. You can type it
+in the app, paste a job description, or ask in the AI chat.
 
-Write your request the way you would brief a sourcer: the role, where it is, and what matters. Revcenter reads
-it and shows you the plan before anything starts. Change anything in the plan, then start the search. The same
-request always gives the same plan.
+Revcenter reads it and shows you a plan before anything starts. Change anything you like, then start the
+search. Nothing is spent until you do. The same request always gives the same plan.
 
 ## Must match, Ranks higher, Left out
 
@@ -16,30 +16,30 @@ Every rule in the plan is tagged with how it counts:
 | Tag | What happens | Use it for |
 | --- | --- | --- |
 | **Must match** | Only people who match are searched. | What the job can't do without: the title, the place, a licence, a level |
-| **Ranks higher** | Everyone is searched; people who match come first. Nobody is removed for missing it. | Nice to have: a preferred employer, a skill, a range of years |
+| **Ranks higher** | Everyone is searched, and people who match come first. Nobody is removed for missing it. | Nice to have: a preferred employer, a skill, a range of years |
 | **Left out** | People who match are removed. | Titles, employers or places you don't want |
 
 **Suggested** marks something Revcenter added that your request didn't say, such as a level it read from the
-title or an industry it guessed. A filter only narrows the search when your own words ask for it ("CPA required",
-"at least 8 years", "currently at a bank"), so a Suggested one only ranks until you make it Must match. Keep it,
-change it, or remove it; once you edit it, it's yours and the tag goes.
+title or an industry it guessed. Only your own words can narrow a search ("CPA required", "at least 8 years",
+"currently at a bank"). So a Suggested rule only ranks people until you make it Must match. Keep it, change it,
+or remove it. Once you edit it, it's yours and the tag goes away.
 
 Must match narrows who is searched, so a good Must match saves credits. Ranks higher only moves people up or down
 the list.
 
 ## Where the role is
 
-The place is the one rule every search has. Shortlists are people who can commute to the job: the job's city
-and the towns around it, about 25 to 40 miles. Say the city ("Lancaster, PA"), and a distance if you want a
-different one ("within 30 miles"). For a remote role, say it's remote. "Open to relocating" doesn't widen the
-search, because a profile doesn't say it.
+Every search needs a place, or needs to be marked remote. Shortlists are people who can commute to the job: the
+job's city and the towns around it, about 25 to 40 miles. Say the city ("Lancaster, PA"), and a distance if you
+want a different one ("within 30 miles"). For a remote role, say it's remote. "Open to relocating" doesn't widen
+the search, because profiles don't say it.
 
 ## What you can ask for
 
 | What | Say it like this | Good to know |
 | --- | --- | --- |
 | Titles | "Titles: Construction Project Manager, Data Center PM, Site PM" | Name 3 to 10 titles people really hold. If you name none, Revcenter uses the role's title and its closest synonyms. A bare title like "Project Manager" isn't searched on its own next to a specific one: it would match every project manager anywhere. |
-| Title rule | `("Project Manager" OR "Construction Manager") AND "Data Center" NOT Assistant` | Type it on its own line or after "Titles:" and it is kept exactly as written. AND, OR, NOT in capitals, brackets and "quoted phrases". Anyone whose current title doesn't fit is dropped before their profile is read. |
+| Boolean title search | `("Project Manager" OR "Construction Manager") AND "Data Center" NOT Assistant` | Type it on its own line or after "Titles:" and it is kept exactly as written. Use AND, OR, NOT in capitals, brackets and "quoted phrases". Anyone whose current title doesn't fit is skipped, at no cost. |
 | Profile keywords | `Keywords: "data center" AND (construction OR "mission critical")` | Searches the whole profile, not only titles, so it reaches people whose titles don't name the specialty. Use OR, not commas. |
 | Left-out titles | "Not assistant PMs or project coordinators" | People whose current title matches are left out. |
 | Past titles | "Previously a superintendent" | People who held the title before their current job. |
@@ -54,16 +54,16 @@ search, because a profile doesn't say it.
 | Skills | "Skills: scheduling, MEP coordination, Procore" | Ranks people whose profiles show them. |
 | Schools | "Went to Purdue or UIUC" | |
 | Profile language | "Profile in Spanish" | The language the profile is written in. For a language someone speaks, say "speaks Spanish". |
-| Cut-off | "Shortlist anyone 70 or above" | Say it once results are in. From 50 to 85; the default is 80. |
-| Credit cap | "Use up to 2,500 credits" | The most this search may use. 3 credits per profile delivered. People you already have are free. See [Credits and pricing](/pricing). |
+| Cut-off score | "Shortlist anyone 70 or above" | Say it once results are in. From 50 to 85; the default is 80. |
+| Credit limit | "Use up to 2,500 credits" | The most this search may use. 3 credits per profile delivered. People you already have are free. See [Credits and pricing](/pricing). |
 
 ## Ways to search
 
 | Approach | Example | Use it when |
 | --- | --- | --- |
 | Titles in a place | "Construction Project Managers in Chicago, 5 to 10 years" | The title says what the job is. The default, and it finds the most people. |
-| A title rule in a place | `"Project Manager" AND ("Data Center" OR "Mission Critical")` in Chicago | The specialty is in people's titles. Precise: one such search found 24 people, 23 of them right, where a plain title list matched about 14,000. |
-| Profile keywords | Project Manager, with `Keywords: "data center"` | The specialty is in people's experience, not their titles. Combine with a title rule for niche roles. |
+| A Boolean title search in a place | `"Project Manager" AND ("Data Center" OR "Mission Critical")` in Chicago | The specialty is in people's titles. Precise: one such search found 24 people, 23 of them right, where a plain title list matched about 14,000. |
+| Profile keywords | Project Manager, with `Keywords: "data center"` | The specialty is in people's experience, not their titles. Combine with a Boolean title search for niche roles. |
 | Titles at named employers | "Engagement managers in Boston, only McKinsey, BCG and Bain" | The client wants people from specific firms. The plan shows which company each name matched; a name that matches none is shown as not found. |
 | Everyone at named firms | "Everyone at Bain & Company in Boston, director level" | You want a team, not one role. Add a level or function to keep it focused. |
 
@@ -77,6 +77,5 @@ search, because a profile doesn't say it.
   `NOT (Revenue OR Marketing OR IT OR Legal)`.
 - **Read the plan before you start.** Check every Suggested rule and every Must match.
 
-Developers: in criteria, Must match is `flag: "must"` (or `enforcement: "hard"` on years), Ranks higher is
-`flag: "prefer"` (or `enforcement: "preferred"`), and Left out is `flag: "exclude"` or an `exclude_*` field. See
-the [Criteria reference](/guides/criteria).
+When the plan looks right, start the search. [Results and your Shortlist](/guides/searches) explains what comes
+back.
