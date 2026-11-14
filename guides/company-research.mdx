@@ -1,0 +1,70 @@
+---
+title: "Research a company list"
+description: "How Revcenter answers a request for companies: what our data answers for free, the one question it asks when a request is vague, names it matches for you, and web research with a source for every company, priced and started only by you."
+---
+
+Some requests for companies are about things a company filter can't see: who owns a company, the software it
+runs, an award list it is on, a lawsuit, a deal. Revcenter splits the request first. What our data answers is
+free. Web research covers the rest, only when it's needed, and only after you press Start.
+
+## What the chat says
+
+Ask for companies in the project chat, in a people thread or a company thread. The reply depends on the request.
+
+| You ask | The chat answers | Cost |
+| --- | --- | --- |
+| Companies our filters cover ("accounting firms in Denver hiring a tax senior") | A company search, as always. | As a company search. |
+| A list of names ("Acme Corp, Globex, Initech") | The names matched to companies we hold: "Matched 2 of 3; Initech not found. Add its website to match it." Nothing is guessed. | Free. |
+| Something vague ("fast-growing companies in Denver") | One question, with choices to tap. Each choice says whether it comes from our data or needs research. | Free. |
+| Something our data can't fully check ("PE-backed accounting firms in Nashville") | What our data answers and what needs research, the companies whose own page or job postings already say it, then a research card. | The free part is free. Research is priced on its card. |
+
+A reply to the last kind reads like this:
+
+> From our data: Nashville. Needs research: PE-backed. 12 companies say so on their own page or job postings, at
+> no charge. A fuller list needs research on the web, which keeps a source for every company it adds.
+
+## The research card
+
+The card shows, before anything runs:
+
+- **What it looks for**, in your words.
+- **The place.**
+- **Its budget**: 15 web searches and 10 pages read at most. It stops at the first limit and keeps what it found.
+- **Its credits**: 50, held when you press Start.
+- **When they come back**: if it finds no company with a source, every credit comes back.
+
+Nothing runs until you press Start, and the chat never presses it for you. Not now leaves it.
+
+## What a run gives you
+
+Each company comes with the page that names it, the words on that page that show it, and the kind of evidence
+(the company's own page, an investor's portfolio page, a news report, a list, a court or agency record). News,
+lawsuits and notices always carry a date, and old ones are left out. Each company is matched to a company we
+hold, or marked **Not found**: a company that isn't matched is never guessed.
+
+Companies that our pages and postings already show are listed first, free.
+
+## Scan these for hiring
+
+Tick the companies you want and press **Scan these for hiring**. Only ticked companies that matched go to the
+company hiring search, as its usual card, so you can add roles before you start it. That search is priced as
+any company search.
+
+## Who can use it
+
+Web research is part of a paid plan. On a trial, the chat still splits the request, matches names and asks its
+question, and says that research needs a paid plan. Research is being switched on workspace by workspace; ask
+support if you don't see the card. Each workspace can run up to 20 research runs, or 1,000 credits of research,
+a month.
+
+## From an agent
+
+Agents use the same three steps through the API and MCP:
+
+| Tool | What it does | Cost |
+| --- | --- | --- |
+| `plan_company_request` | The split, the free first pass, the name matches or the question, and whether research may run, with its card. | Does not use credits. |
+| `research_company_list` | Starts a run. MCP asks the person first, showing the card; an agent that can't ask gets the proposal to show them. | Holds 50 credits; charged only when it finds at least one company with a source. |
+| `get_company_research` | The run's status and its companies, each with its source and whether it matched. | Does not use credits. |
+
+See [Connect an agent](/tools/mcp) for setup.

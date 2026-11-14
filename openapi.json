@@ -41,6 +41,9 @@
       "name": "Candidates"
     },
     {
+      "name": "Research"
+    },
+    {
       "name": "Health"
     }
   ],
@@ -10424,6 +10427,557 @@
           }
         }
       }
+    },
+    "/research/plan": {
+      "post": {
+        "operationId": "plan_company_request",
+        "summary": "Plan a company request",
+        "description": "How Revcenter would answer a request for companies before anything is bought: what our data answers, what needs research on the web, the free first pass (companies whose own pages or job postings already show it), names matched to companies we hold, or one question with choices when the request is vague. route is our_data (the company filters answer it), our_data_first_then_research (pages and postings we hold answer part of it; research fills in the rest), research (only the web can answer it), name_lookup (the request names companies: they are matched, free, and never guessed) or clarify (one question with tappable choices: send a choice's `ask` back as the next request). reply is what the app's chat says, word for word. research says whether research_company_list may run for this request now, its card (what it looks for, the place, its budget in searches, its credits and the refund rule), or why not in one sentence. Answers only where web research is switched on for the workspace. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Research"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "request"
+                ],
+                "properties": {
+                  "request": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 4000,
+                    "description": "The request in the person's own words, e.g. \"PE-backed accounting firms in Nashville\", or a list of company names."
+                  },
+                  "place": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "description": "The place, when the request doesn't say it: the free check and the research card use it."
+                  }
+                }
+              },
+              "example": {
+                "request": "PE-backed accounting firms in Nashville"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyRequestPlan"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "route": "our_data_first_then_research",
+                    "needed": true,
+                    "reason": "Who owns a company isn't a filter, but company pages we hold often say it; research fills in the rest.",
+                    "our_data": [
+                      "Nashville"
+                    ],
+                    "needs_research": [
+                      "PE-backed"
+                    ],
+                    "attributes": [
+                      {
+                        "key": "pe_backed",
+                        "route": "our_data_first_then_research",
+                        "matched": "PE-backed",
+                        "family": "ownership_funding",
+                        "dated_source": false,
+                        "free_check": "firm_description"
+                      },
+                      {
+                        "key": "place",
+                        "route": "our_data",
+                        "matched": "in Nashville",
+                        "family": null,
+                        "dated_source": false,
+                        "free_check": null
+                      }
+                    ],
+                    "clarify": null,
+                    "names": {
+                      "matched": [],
+                      "not_found": []
+                    },
+                    "similar": [],
+                    "free_evidence": [
+                      {
+                        "company_id": "2f6c1d0e-8b7a-4c3d-9e2f-1a0b9c8d7e6f",
+                        "name": "Harpeth Tax Partners",
+                        "evidence": "Harpeth Tax Partners is a portfolio company of Lakeview Capital.",
+                        "source_url": "https://www.linkedin.com/company/harpeth-tax-partners/",
+                        "evidence_type": "company_own_page"
+                      }
+                    ],
+                    "order": [
+                      "our_data_filters",
+                      "free_evidence",
+                      "research_builds_list",
+                      "filters_applied_after"
+                    ],
+                    "reply": "From our data: Nashville. Needs research: PE-backed. 1 company says so on its own page or job postings, at no charge. A fuller list needs research on the web, which keeps a source for every company it adds.",
+                    "research": {
+                      "needed": true,
+                      "available": true,
+                      "message": null,
+                      "card": {
+                        "looks_for": [
+                          "PE-backed"
+                        ],
+                        "place": "Nashville",
+                        "budget": {
+                          "searches": 15,
+                          "pages": 10
+                        },
+                        "credits": 50,
+                        "refund_rule": "Credits come back if no company with a source is found."
+                      }
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/research": {
+      "post": {
+        "operationId": "research_company_list",
+        "summary": "Research a company list",
+        "description": "Research the web for companies that match what our data can't check (who owns them, the software they run, a list or award, a lawsuit, a deal), keeping only companies a page names, with that page as the source. Runs only when plan_company_request says research is needed. Paying plans only: a trial is refused with research_needs_paid_plan. The request is planned again here; a request our data answers is refused with research_not_needed, and a vague one with research_needs_answer (answer plan_company_request's question first). It returns at once with research_id; the run takes a few minutes: read it with get_company_research. It searches at most the card's budget and keeps what it found when it stops. Companies our pages and postings already show are listed too, free. The same Idempotency-Key (or, without one, the same request and place in the same project) returns the same run and is never charged twice. Holds 50 credits when it starts; charged only when it finds at least one company with a source, otherwise the credits come back. It spends credits, so the MCP server asks the person first, showing what it looks for, the place, its budget in searches, its credits and when they come back. Let it run up to 30 seconds. Safe to retry with the same Idempotency-Key, which returns the first result; without one a retry can run it twice.\n\nNeeds scope `searches:write`.",
+        "x-revcenter-retry": "idempotency_key",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Research"
+        ],
+        "x-revcenter-confirm": "priced",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "request"
+                ],
+                "properties": {
+                  "request": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 4000,
+                    "description": "The request in the person's own words, as plan_company_request read it."
+                  },
+                  "place": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "description": "The place, as the card showed it."
+                  }
+                }
+              },
+              "example": {
+                "request": "PE-backed accounting firms in Nashville",
+                "place": "Nashville, TN"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK: a repeat, answered with the first result",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyResearchStart"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "research_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+                    "status": "queued",
+                    "existing": false,
+                    "credits_reserved": 50,
+                    "card": {
+                      "looks_for": [
+                        "PE-backed"
+                      ],
+                      "place": "Nashville, TN",
+                      "budget": {
+                        "searches": 15,
+                        "pages": 10
+                      },
+                      "credits": 50,
+                      "refund_rule": "Credits come back if no company with a source is found."
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyResearchStart"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "research_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+                    "status": "queued",
+                    "existing": false,
+                    "credits_reserved": 50,
+                    "card": {
+                      "looks_for": [
+                        "PE-backed"
+                      ],
+                      "place": "Nashville, TN",
+                      "budget": {
+                        "searches": 15,
+                        "pages": 10
+                      },
+                      "credits": 50,
+                      "refund_rule": "Credits come back if no company with a source is found."
+                    }
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/research/{researchId}": {
+      "get": {
+        "operationId": "get_company_research",
+        "summary": "Get company research",
+        "description": "A research run's status and its companies, each with its source, the words quoted from it, the kind of evidence, its date where one is needed, and whether it matched a company we hold. status is queued or running while it works (call again in a few seconds), then done, partial (it stopped at its budget and kept what it found) or failed. credits_charged is what it cost once it finished: 0 when it kept no company with a source. match is matched (a company we hold, with company_id) or not_found (never guessed); from_our_data marks companies a page or posting we already hold showed, free. ticked is the starting choice for a hiring scan: unsure results start unticked. Does not use credits. Let it run up to 30 seconds. Safe to retry: repeating it changes nothing more.\n\nNeeds scope `searches:read`.",
+        "x-revcenter-retry": "safe",
+        "x-revcenter-timeout-seconds": 30,
+        "tags": [
+          "Research"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "A project id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "researchId",
+            "in": "path",
+            "required": true,
+            "description": "A research run id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Requests allowed this minute (the tighter of the key's and the workspace's).",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests left this minute.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "When the minute resets, in Unix seconds.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyResearch"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+                    "status": "done",
+                    "request": "PE-backed accounting firms in Nashville",
+                    "place": "Nashville, TN",
+                    "credits_reserved": 50,
+                    "credits_charged": 50,
+                    "searches": 9,
+                    "pages_read": 4,
+                    "stop_reason": "finished",
+                    "results": [
+                      {
+                        "name": "Harpeth Tax Partners",
+                        "company_id": "2f6c1d0e-8b7a-4c3d-9e2f-1a0b9c8d7e6f",
+                        "website": null,
+                        "source_url": "https://www.linkedin.com/company/harpeth-tax-partners/",
+                        "source_title": null,
+                        "cited_text": "Harpeth Tax Partners is a portfolio company of Lakeview Capital.",
+                        "evidence_type": "company_own_page",
+                        "source_date": null,
+                        "why": "Its own page names its private equity owner",
+                        "confidence": "possible",
+                        "ticked": true,
+                        "from_our_data": true,
+                        "match": "matched"
+                      },
+                      {
+                        "name": "Cumberland Partners CPAs",
+                        "company_id": null,
+                        "website": "https://cumberlandcpas.example",
+                        "source_url": "https://lakeviewcapital.example/portfolio",
+                        "source_title": "Portfolio",
+                        "cited_text": "Cumberland Partners CPAs (2024)",
+                        "evidence_type": "investor_or_deal_page",
+                        "source_date": null,
+                        "why": "On the fund's portfolio page",
+                        "confidence": "likely",
+                        "ticked": true,
+                        "from_our_data": false,
+                        "match": "not_found"
+                      }
+                    ]
+                  },
+                  "meta": {
+                    "request_id": "req_01JABCDEF"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10534,7 +11088,8 @@
               "rescore",
               "reservation",
               "credits",
-              "per_proposal"
+              "per_proposal",
+              "research"
             ]
           },
           "cost_line": {
@@ -10551,7 +11106,8 @@
             "enum": [
               "client",
               "destructive",
-              "bulk"
+              "bulk",
+              "priced"
             ]
           },
           "retry": {
@@ -11418,7 +11974,8 @@
                   "free",
                   "rescore",
                   "reservation",
-                  "credits"
+                  "credits",
+                  "research"
                 ]
               },
               "line": {
@@ -11426,7 +11983,7 @@
               },
               "credits_reserved": {
                 "type": "integer",
-                "description": "What applying it reserves; unused credits are refunded when the search finishes."
+                "description": "What applying it reserves: a search's unused credits are refunded when it finishes, and a research run's come back when it keeps no company with a source."
               },
               "shortlist_credits": {
                 "type": "integer",
@@ -12701,6 +13258,418 @@
               "countries"
             ],
             "description": "Scored after a profile is read: where a degree is from, by the school's LinkedIn id, only when asked: countries (ISO codes), level, flag must or prefer. Unknown is not verified, never a match or a failure. See GET /reference/criteria."
+          }
+        }
+      },
+      "ResearchCard": {
+        "type": "object",
+        "description": "What a research run would do, as the person is asked to approve it.",
+        "properties": {
+          "looks_for": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What it looks for, one short line each."
+          },
+          "place": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "budget": {
+            "type": "object",
+            "properties": {
+              "searches": {
+                "type": "integer",
+                "description": "Web searches at most."
+              },
+              "pages": {
+                "type": "integer",
+                "description": "Pages read at most."
+              }
+            }
+          },
+          "credits": {
+            "type": "integer",
+            "description": "Held when it starts."
+          },
+          "refund_rule": {
+            "type": "string",
+            "description": "When the credits come back."
+          }
+        }
+      },
+      "CompanyRequestPlan": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string",
+            "enum": [
+              "our_data",
+              "our_data_first_then_research",
+              "research",
+              "name_lookup",
+              "clarify"
+            ]
+          },
+          "needed": {
+            "type": "boolean",
+            "description": "Whether anything in the request needs research, now or after the free check."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "our_data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What our data answers, one phrase each."
+          },
+          "needs_research": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What needs research, one phrase each."
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "route": {
+                  "type": "string"
+                },
+                "matched": {
+                  "type": "string",
+                  "description": "The request's own words."
+                },
+                "family": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "dated_source": {
+                  "type": "boolean",
+                  "description": "Every result needs a dated source (news, lawsuits, notices)."
+                },
+                "free_check": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "clarify": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "On a clarify route: one question, and choices to answer it with. Send a choice's ask as the next request.",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "tag": {
+                      "type": "string",
+                      "enum": [
+                        "From our data",
+                        "Needs research"
+                      ]
+                    },
+                    "ask": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "names": {
+            "type": "object",
+            "description": "Companies the request names, matched to companies we hold. Free; a name with no match is listed, never guessed.",
+            "properties": {
+              "matched": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MatchedCompany"
+                }
+              },
+              "not_found": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "similar": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchedCompany"
+            },
+            "description": "For \"companies like X\": the companies X's page lists as similar that we hold."
+          },
+          "free_evidence": {
+            "type": "array",
+            "description": "Companies a page or job posting we already hold shows it for. Free.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "company_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "string"
+                },
+                "source_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "evidence_type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What runs first in a request that is part ours, part research."
+          },
+          "reply": {
+            "type": "string",
+            "description": "What the app's chat says to this request."
+          },
+          "research": {
+            "type": "object",
+            "properties": {
+              "needed": {
+                "type": "boolean"
+              },
+              "available": {
+                "type": "boolean",
+                "description": "Whether research_company_list may run for it now."
+              },
+              "message": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Why not, in one sentence."
+              },
+              "card": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ResearchCard"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "MatchedCompany": {
+        "type": "object",
+        "properties": {
+          "asked": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "linkedin_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CompanyResearchStart": {
+        "type": "object",
+        "properties": {
+          "research_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "partial",
+              "failed"
+            ]
+          },
+          "existing": {
+            "type": "boolean",
+            "description": "The same request was started before: this is that run, not charged again."
+          },
+          "credits_reserved": {
+            "type": "integer"
+          },
+          "card": {
+            "$ref": "#/components/schemas/ResearchCard"
+          }
+        }
+      },
+      "CompanyResearch": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "partial",
+              "failed"
+            ]
+          },
+          "request": {
+            "type": "string"
+          },
+          "place": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "credits_reserved": {
+            "type": "integer"
+          },
+          "credits_charged": {
+            "type": "integer"
+          },
+          "searches": {
+            "type": "integer"
+          },
+          "pages_read": {
+            "type": "integer"
+          },
+          "stop_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "company_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "website": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_url": {
+                  "type": "string"
+                },
+                "source_title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cited_text": {
+                  "type": "string",
+                  "description": "The words on the source that show it."
+                },
+                "evidence_type": {
+                  "type": "string"
+                },
+                "source_date": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "why": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "likely",
+                    "possible",
+                    "unsure"
+                  ]
+                },
+                "ticked": {
+                  "type": "boolean"
+                },
+                "from_our_data": {
+                  "type": "boolean"
+                },
+                "match": {
+                  "type": "string",
+                  "enum": [
+                    "matched",
+                    "not_found"
+                  ]
+                }
+              }
+            }
           }
         }
       }

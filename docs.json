@@ -33,6 +33,7 @@
           "pricing",
           "guides/writing-a-search",
           "guides/searches",
+          "guides/company-research",
           "tools/connectors"
         ]
       },
@@ -110,7 +111,10 @@
           "GET /projects/{projectId}/client-feedback",
           "GET /candidates",
           "GET /companies",
-          "GET /candidates.csv"
+          "GET /candidates.csv",
+          "POST /research/plan",
+          "POST /projects/{projectId}/research",
+          "GET /projects/{projectId}/research/{researchId}"
         ]
       }
     ]

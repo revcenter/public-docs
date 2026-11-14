@@ -57,6 +57,7 @@ any other `4xx` first.
 | `400` | `client_workspace_required` | No client workspace to email: `client_workspace_id` isn't a workspace id, or the project isn't assigned to a client portal | Send client_workspace_id, the client workspace to email. |
 | `400` | `top_up_amount_out_of_range` | A top-up outside $1,500 to $30,000 | Pick an amount from $1,500 to $30,000. |
 | `400` | `member_api_search_cap` | `max_credits` is above the most your workspace's admins allow you per search through the API | Send max_credits at or under your API max per search, or ask a workspace admin to raise it in Settings. |
+| `400` | `invalid_research_request` | `request` is missing or not 3 to 4,000 characters, or `place` is over 120 | Send request as the person's own words (3 to 4,000 characters), and place as text of up to 120. |
 | `401` | `missing_api_key` | No `Authorization: Bearer` header | Send an API key from Settings → Integrations → API as Authorization: Bearer, or set REVCENTER_API_KEY. |
 | `401` | `invalid_api_key` | The key is invalid, expired or revoked | Make a new key in Settings → Integrations → API; this one is wrong, expired or revoked. |
 | `402` | `plan_required` | No active plan | Choose a plan in Settings → Plan & billing. |
@@ -65,6 +66,8 @@ any other `4xx` first.
 | `402` | `trial_used_up` | The free trial is used up; `details` has `billing_url` | The free trial is used up: choose a plan in Settings → Plan & billing to keep searching. |
 | `402` | `database_pass_needs_credits` | A database pass on a search that has finished and settled its credits: it has no reservation left to charge new profiles to | This search has finished and settled its credits: expand the search instead (people the workspace already has are free). |
 | `402` | `member_api_budget_reached` | Your monthly API budget, set by your workspace's admins, doesn't cover this search | Lower max_credits to what is left this month, wait for the 1st (UTC), or ask a workspace admin to raise your monthly API budget in Settings. |
+| `402` | `research_needs_paid_plan` | Web research needs a paid plan; a trial can't run it. Nothing was held | Web research needs a paid plan: choose one in Settings → Plan & billing. The free plan (plan_company_request) still works. |
+| `402` | `research_needs_credits` | Not enough credits left for a research run. Nothing was held | Top up in Settings → Plan & billing, then start it again. |
 | `403` | `admin_required` | Only a workspace admin can do this, and your key acts as you, an Editor | Only a workspace admin can do this: ask one, or use an admin's key. |
 | `403` | `api_access_disabled` | API access is off for this workspace | Contact Revcenter support to turn API access back on for this workspace. |
 | `403` | `member_keys_disabled` | Your workspace's admins turned off keys for your seat | Ask a workspace admin to turn on API keys for your seat in Settings. |
@@ -72,6 +75,7 @@ any other `4xx` first.
 | `403` | `insufficient_scope` | The key can't make this call | Use a key made in Settings → Integrations → API; it has every agent scope. |
 | `403` | `key_has_no_owner` | The action is recorded as a person, and this key has none behind it | Use a key made in Settings → Integrations → API: this action is recorded as a person. |
 | `403` | `shortlist_email_in_testing` | Emailing shortlists is in testing for developer accounts | Send the client the share link (get_share_link) instead. |
+| `403` | `research_not_enabled` | Web research isn't switched on for this workspace | Ask Revcenter support to switch web research on for this workspace; plan_company_request shows what our data answers meanwhile. |
 | `404` | `dnc_entry_not_found` | `remove_dnc` was given an id that isn't on this project's do-not-contact list or the workspace's | Use an id from list_dnc for this project; it may already be removed. |
 | `404` | `project_not_found` | No such project in this workspace | Check the id with list_projects; ids belong to one workspace. |
 | `404` | `search_not_found` | No such search in this workspace | Check the id with list_searches; ids belong to one workspace. |
@@ -79,6 +83,7 @@ any other `4xx` first.
 | `404` | `scoring_job_not_found` | No such scoring job on this search | Use the job_id preview_scoring or apply_scoring returned for this search. |
 | `404` | `shortlist_version_not_found` | No such published shortlist version on the project | Check the id with list_shortlist_versions. |
 | `404` | `client_workspace_not_found` | No such client workspace | Check client_workspace_id; preview_shortlist_email shows the workspace a project defaults to. |
+| `404` | `research_not_found` | No such research run in this project | Use a research_id research_company_list returned for this project. |
 | `409` | `candidate_do_not_contact` | `add_shortlist_members` was given only people on the do-not-contact list, so nobody was added | Leave this person out: people on the do-not-contact list can't go on a shortlist. |
 | `409` | `key_limit` | Making a key in **Settings** past the workspace's limit on Settings keys (5 by default). Sign-ins and connected apps never count and are never refused | Revoke a key you no longer use in Settings → Integrations → API, or ask Revcenter support to raise the workspace's key limit. Connecting Claude or ChatGPT never counts toward it. |
 | `409` | `idempotency_key_reused` | The `Idempotency-Key` was used for a different request | Use a new Idempotency-Key for a different request. |
@@ -92,6 +97,10 @@ any other `4xx` first.
 | `409` | `empty_shortlist` | Nothing on the shortlist to publish or send | Add people (add_shortlist_members) first. |
 | `409` | `shortlist_not_publishable` | No one on the shortlist came from a search in the project | Run a search in the project first: a version holds people its searches found. |
 | `409` | `workspace_name_mismatch` | `confirm_workspace_name` isn't the client workspace's name; nothing was sent | Preview it again (preview_shortlist_email) and send the client workspace's name it shows. |
+| `409` | `research_not_needed` | Our data answers this request, so there is nothing to research; nothing was held | Run it as a company search instead: plan_company_request shows what our data answers. |
+| `409` | `research_needs_answer` | The request is vague: answer `plan_company_request`'s clarify question first. Nothing was held | Call plan_company_request, ask the person its clarify question, and send the choice's ask as the request. |
+| `409` | `research_monthly_cap` | The workspace has used its web research for this month | Wait for next month, or ask Revcenter support to raise the workspace's research limit. |
+| `409` | `research_daily_limit` | Web research has reached today's limit across Revcenter; try again tomorrow | Try again tomorrow. |
 | `413` | `document_too_large` | `draft_criteria`'s document is over 10 MB, over 100 pages, or gives over 200,000 characters of text | Send a file of 10 MB at most, or paste its text as jd_text. |
 | `413` | `response_too_large` | `get_shortlist` with `fields` would be more than one answer holds (about 100 KB); nothing was cut | Ask for fewer fields, or page through list_people (min_score 80) with fields; exports carry every profile. |
 | `422` | `document_unreadable` | `draft_criteria`'s document could not be read as the `document_type` sent | Paste the description as jd_text instead, or send the file as another type. |
