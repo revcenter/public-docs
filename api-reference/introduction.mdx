@@ -82,6 +82,7 @@ any other `4xx` first.
 | `403` | `research_not_enabled` | Web research isn't switched on for this workspace | Ask Revcenter support to switch web research on for this workspace; plan_company_request shows what our data answers meanwhile. |
 | `404` | `dnc_entry_not_found` | `remove_dnc` was given an id that isn't on this project's do-not-contact list or the workspace's | Use an id from list_dnc for this project; it may already be removed. |
 | `404` | `project_not_found` | No such project in this workspace | Check the id with list_projects; ids belong to one workspace. |
+| `404` | `groups_unavailable` | Groups isn't open to this workspace yet | Groups isn't open to this workspace yet: leave the Groups actions out. |
 | `404` | `group_not_found` | No such group that this key's person can see | Check the id with list_groups: it lists the groups this key's person can see. |
 | `404` | `group_member_not_found` | No such member in the group | Check the member id with get_group; a member already removed is not listed. |
 | `404` | `search_not_found` | No such search in this workspace | Check the id with list_searches; ids belong to one workspace. |
