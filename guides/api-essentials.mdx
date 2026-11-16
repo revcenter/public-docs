@@ -175,6 +175,7 @@ Errors have one shape: `{"error": {"code", "message", "details", "request_id"}}`
 | --- | --- | --- |
 | `400` | `invalid_criteria` | Fix the fields named; see `GET /reference/criteria` |
 | `400` | `location_required` | Add a place (`metro` with `geo_radius_mi`, or `allowed_metros`), or `remote_ok: true` |
+| `400` | `employers_not_found` | Fix each required employer in `details.employers` (its LinkedIn name or `url`), make it `prefer`, or remove it |
 | `400` | `idempotency_key_required` | Add an `Idempotency-Key` header to the launch |
 | `400` | `max_credits_too_low` | Send 250 or more, or leave `max_credits` out |
 | `400` | `weights_in_settings` | Weights are a workspace setting; an admin changes them in Settings |
