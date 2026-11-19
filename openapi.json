@@ -14962,10 +14962,12 @@
             "enum": [
               "queued",
               "running",
+              "paused",
               "done",
               "partial",
               "failed"
-            ]
+            ],
+            "description": "paused: it reached the credits approved for it with more companies likely, and waits for the person to add credits or use what it found (stop_reason budget_reached)."
           },
           "request": {
             "type": "string"

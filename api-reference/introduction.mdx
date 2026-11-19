@@ -123,5 +123,6 @@ any other `4xx` first.
 | `503` | `access_check_unavailable` | Access couldn't be checked; nothing ran | Retry after the Retry-After seconds; nothing ran. |
 | `503` | `plan_check_unavailable` | The plan couldn't be checked; nothing ran | Retry after the Retry-After seconds; nothing ran. |
 | `503` | `busy` | Revcenter is busy. A read or preview changed nothing; `details` has `retry_after_seconds` | Nothing changed: retry after retry_after_seconds (the Retry-After header). |
+| `503` | `screening_unavailable` | AI screening is unavailable, so a requirement change can't be scored; nothing changed. `details` has `retry_after_seconds` | AI screening is down, so nothing was changed. Don't retry in a loop: tell the person the change can't be scored right now and try again later (retry_after_seconds). |
 | `503` | `top_up_unavailable` | Top-ups can't be started here | Buy credits in Settings → Plan & billing instead. |
 {/* end generated */}
