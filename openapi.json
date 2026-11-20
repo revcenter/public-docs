@@ -14110,7 +14110,7 @@
       },
       "Criteria": {
         "type": "object",
-        "description": "The search's criteria: title_variants (or an employer with flag must) and a metro, allowed_metros or remote_ok at least. draft_criteria writes them from a job description; get_criteria_reference explains every field. Keep must_have to short literal terms (at most 5, each at most 6 words); prose goes in must_have_context. A single string where a list is taken is read as a one-item list. A field that isn't listed here is refused with 400 invalid_criteria, naming it. Deprecated fields are accepted from older clients; current tools don't write them.",
+        "description": "The search's criteria: title_variants (or an employer with flag must) and a metro, allowed_metros, remote_ok or worldwide at least. draft_criteria writes them from a job description; get_criteria_reference explains every field. Keep must_have to short literal terms (at most 5, each at most 6 words); prose goes in must_have_context. A single string where a list is taken is read as a one-item list. A field that isn't listed here is refused with 400 invalid_criteria, naming it. Deprecated fields are accepted from older clients; current tools don't write them.",
         "additionalProperties": false,
         "properties": {
           "family": {
@@ -14245,6 +14245,10 @@
           "remote_ok": {
             "type": "boolean",
             "description": "Scored after a profile is read: true when the role is remote: location then doesn't gate."
+          },
+          "worldwide": {
+            "type": "boolean",
+            "description": "Filter, sent before any profile is bought: true searches every location, with no location filter and no location penalty in scoring (\"every partner at Bain worldwide\"). Use it instead of a place for \"worldwide\", \"global\" or \"anywhere\", never one search per city; leave metro, allowed_metros and geo_radius_mi out. A named place wins over it."
           },
           "exclude_titles": {
             "type": "array",
